@@ -1,0 +1,59 @@
+.parallax {
+    position: relative;
+}
+
+.parallax__group {
+    /* height: 100vh;
+    width: 100vw; */
+    height: fit-content;
+    display: grid;
+    grid-template-areas: "stack";
+    position: relative;
+    overflow: hidden;
+}
+
+.parallax-layer {
+    grid-area: stack;
+    margin-left: min(0vw, calc(-50 * var(--index) + 100vw));
+}
+
+img.parallax-layer {
+    width: max(100vw, 100vh);
+    height: auto;
+    overflow: hidden;
+}
+
+.parallax-layer--back-0 {
+    z-index: 0;
+}
+
+.parallax-layer--back-1 {
+    z-index: -1;
+}
+
+.parallax-layer--back-2 {
+    z-index: -2;
+}
+
+.parallax-layer--back-3 {
+    z-index: -3;
+}
+
+#group1 {
+    z-index: 0;
+}
+
+/* #group1 .parallax-layer--back-0 {
+    background-image: url("/img/whale-1.png");
+}
+
+#group1 .parallax-layer--back-1 {
+}
+
+#group1 .parallax-layer--back-2 {
+    background-image: url("/img/whale-2.png");
+}
+
+#group1 .parallax-layer--back-3 {
+    background-image: url("/img/whale-3.png");
+} */
