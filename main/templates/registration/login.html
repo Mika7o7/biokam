@@ -1,0 +1,23 @@
+{% block title %}Вход{% endblock %}
+{% block content%}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header text-center">
+          <h3>Вход в магазин</h3>
+        </div>
+        <div class="card-body">
+          <form method="post">
+            {% csrf_token %} {{ form.as_p }}
+            <button type="submit" class="btn btn-primary w-100">Войти</button>
+          </form>
+          <div class="text-center mt-3">
+            Нет аккаунта? <a href="{% url 'register' %}">Зарегистрироваться</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

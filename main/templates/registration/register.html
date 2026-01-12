@@ -1,0 +1,60 @@
+{% load static %}
+{% block title%}Регистрация{% endblock %}
+{% block content %}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header text-center">
+          <h3>Регистрация в магазине</h3>
+        </div>
+        <div class="card-body">
+          <form method="post">
+            {% csrf_token %} {% if form.non_field_errors %}
+            <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+            {% endif %}
+
+            <div class="mb-3">
+              <label class="form-label">Имя пользователя</label>
+              {{ form.username }}
+              <small class="text-muted">{{ form.username.help_text }}</small>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Email</label>
+              {{ form.email }}
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Пароль</label>
+              {{ form.password1 }}
+              <small class="text-muted">{{ form.password1.help_text }}</small>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Повторите пароль</label>
+              {{ form.password2 }}
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Реферальный код (необязательно)</label>
+              {{ form.referral_code }}
+              <small class="text-muted"
+                >Если у вас есть код друга — введите его</small
+              >
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">
+              Зарегистрироваться
+            </button>
+          </form>
+
+          <div class="text-center mt-3">
+            Уже есть аккаунт? <a href="{% url 'login' %}">Войти</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
