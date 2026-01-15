@@ -262,8 +262,30 @@
         }
       })();
     </script>
+    <script>
+      // Показывать/прятать кнопку при скролле
+      window.addEventListener('scroll', function () {
+        const button = document.getElementById('floating-login');
+        const scrollPosition = window.scrollY;
+
+        // Показываем после 300px скролла (можно изменить)
+        if (scrollPosition > 300) {
+          button.classList.add('visible');
+        } else {
+          button.classList.remove('visible');
+        }
+      });
+    </script>
   </head>
   <body class="t-body" style="margin: 0">
+
+    <!-- Плавающая кнопка Log In -->
+    <a href="accounts/login/">
+    <button id="floating-login" class="floating-login hidden">
+      Log In
+    </button>
+    </a>
+
     <!--allrecords-->
     <div
       id="allrecords"

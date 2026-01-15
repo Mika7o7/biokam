@@ -1,0 +1,106 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+
+{% block content %}
+<div class="content-top-breadcum"></div>
+<div class="container">
+    <ul class="breadcrumb">
+        <li><a href="http://31.128.43.100/index.php?route=common/home"><i class="fa fa-home"></i></a></li>
+        <li><a href="http://31.128.43.100/index.php?route=account/account">Личный кабинет</a></li>
+    </ul>
+</div>
+</div>
+<div id="account-account" class="container">
+
+    <div class="row">
+
+        <aside id="column-left" class="col-sm-3 hidden-xs">
+            <div class="box">
+                <div class="box-heading">Личный кабинет</div>
+                <div class="list-group">
+
+                    <a href="{% url 'account' %}" class="list-group-item">Личный
+                        кабинет </a>
+
+                    <a href="{% url 'account_edit' %}" class="list-group-item">Изменить
+                        профиль</a> <a href="{% url 'account_change_password' %}">Пароль</a>
+
+                    <a href="{% url 'account_change_address' %}" class="list-group-item">Список адресов</a>
+                    <a href="{% url 'account_change_bookmarks' %}" class="list-group-item">Закладки </a>
+                    <a href="{% url 'account_order_history' %}" class="list-group-item">История покупок </a>
+                    <a href="{% url 'account_recurring' %}" class="list-group-item">Регулярные платежи </a>
+                    <a href="{% url 'account_bonus_points' %}" class="list-group-item">Бонусные баллы </a>
+                    <a href="{% url 'account_return' %}" class="list-group-item">Возвраты </a>
+                    <a href="{% url 'account_transaction' %} " class="list-group-item">Транзакции </a>
+                    <a href="{% url 'account_newsletter' %}" class="list-group-item">Новостная рассылка </a>
+
+                    <form method="post" action="{% url 'logout' %}">
+                        {% csrf_token %}
+                        <button class="list-group-item" type="submit" style="background: transparent;">Выйти</button>
+                    </form>
+
+                </div>
+            </div>
+
+            <div class="swiper-viewport">
+                <div id="banner" class="swiper-container single-banner">
+                    <div class="swiper-wrapper">
+                        <div class="swiper-slide">
+                            <a href="#">
+                                <img src="{% static 'img/product_oe-removebg-preview.png' %}"
+                                    alt="Get 15% OFF on Bedside Desk" class="img-responsive">
+                                <div class="left-banner">
+                                    <div class="left-title">Get 15% OFF on Bedside Desk</div>
+                                </div>
+                            </a>
+
+                        </div>
+                    </div>
+                    <!-- If we need pagination -->
+                    <div class="swiper-pagination"></div>
+                </div>
+            </div>
+            <script type="text/javascript">
+$('#banner0').swiper({
+autoplay: 4000,
+pagination: '.swiper-pagination',  // If we need pagination
+autoplayDisableOnInteraction: false
+});
+</script>
+            
+        </aside>
+        <div id="content" class="col-sm-9">
+            <h2>Личный кабинет</h2>
+            <ul class="list-unstyled">
+                <li><a href="{% url 'account_edit' %}">Редактировать контактную информацию</a>
+                </li>
+                <li><a href="{% url 'account_change_password' %}">Изменить пароль</a></li>
+                <li><a href="{% url 'account_change_address' %}">Изменить адреса</a></li>
+                <li><a href="{% url 'account_change_bookmarks' %}">Изменить закладки</a></li>
+            </ul>
+            <h2>Мои заказы</h2>
+            <ul class="list-unstyled">
+                <li><a href="{% url 'account_order_history' %}">История заказов</a></li>
+                <li><a href="{% url 'account_bonus_points' %}">Бонусные баллы</a></li>
+                <li><a href="{% url 'account_return' %}">Запросы на возврат</a></li>
+                <li><a href="{% url 'account_transaction' %}">Транзакции</a></li>
+                <li><a href="{% url 'account_recurring' %}">Регулярные платежи</a></li>
+            </ul>
+            <h2>Кабинет партнера</h2>
+            <ul class="list-unstyled">
+                <li><a href="{% url 'account_affiliate_add' %}">Регистрация в партнерской
+                        программе</a></li>
+            </ul>
+            <h2>Рассылка</h2>
+            <ul class="list-unstyled">
+                <li><a href="{% url 'account_newsletter' %}">Управление подпиской на
+                        рассылку</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+
+
+{% endblock %}

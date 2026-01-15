@@ -1,0 +1,85 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+
+{% block content %}
+<div class="content-top-breadcum">
+    <div class="container">
+        <ul class="breadcrumb">
+            <li><a href="{% url 'home' %}"><i class="fa fa-home"></i></a></li>
+            <li><a href="{% url 'account' %}">Личный кабинет</a></li>
+            <li><a href="{% url 'account_recurring' %}">Регулярные платежи</a></li>
+        </ul>
+    </div>
+</div>
+<div id="account-recurring" class="container">
+
+    <div class="row">
+
+        <aside id="column-left" class="col-sm-3 hidden-xs">
+            <div class="box">
+                <div class="box-heading">Личный кабинет</div>
+                <div class="list-group">
+        
+                    <a href="{% url 'account' %}" class="list-group-item">Личный
+                        кабинет </a>
+        
+                    <a href="{% url 'account_edit' %}" class="list-group-item">Изменить
+                        профиль</a> <a href="{% url 'account_change_password' %}"
+                        class="list-group-item">Пароль</a>
+        
+                    <a href="{% url 'account_change_address' %}" class="list-group-item">Список адресов</a>
+                    <a href="{% url 'account_change_bookmarks' %}" class="list-group-item">Закладки </a>
+                    <a href="{% url 'account_order_history' %}" class="list-group-item">История покупок </a>
+                    <a href="{% url 'account_recurring' %}" class="list-group-item">Регулярные платежи </a>
+                    <a href="{% url 'account_bonus_points' %}" class="list-group-item">Бонусные баллы </a>
+                    <a href="{% url 'account_return' %}" class="list-group-item">Возвраты </a>
+                    <a href="{% url 'account_transaction' %} " class="list-group-item">Транзакции </a>
+                    <a href="{% url 'account_newsletter' %}" class="list-group-item">Новостная рассылка </a>
+        
+                    <form method="post" action="{% url 'logout' %}">
+                        {% csrf_token %}
+                        <button class="list-group-item" type="submit" style="background: transparent;">Выйти</button>
+                    </form>
+        
+                </div>
+            </div>
+        
+            <div class="swiper-viewport">
+                <div id="banner" class="swiper-container single-banner">
+                    <div class="swiper-wrapper">
+                        <div class="swiper-slide">
+                            <a href="#">
+                                <img src="{% static 'img/product_oe-removebg-preview.png' %}" alt="Get 15% OFF on Bedside Desk"
+                                    class="img-responsive">
+                                <div class="left-banner">
+                                    <div class="left-title">Get 15% OFF on Bedside Desk</div>
+                                </div>
+                            </a>
+        
+                        </div>
+                    </div>
+                    <!-- If we need pagination -->
+                    <div class="swiper-pagination"></div>
+                </div>
+            </div>
+            <script type="text/javascript">
+                $('#banner0').swiper({
+                    autoplay: 4000,
+                    pagination: '.swiper-pagination',  // If we need pagination
+                    autoplayDisableOnInteraction: false
+                });
+            </script>
+        
+        </aside>
+        <div id="content" class="col-sm-9">
+            <h1>Регулярные платежи</h1>
+            <p>Регулярные платежи не найдены!</p>
+            <div class="buttons clearfix">
+                <div class="pull-right"><a href="{% url 'account' %}"
+                        class="btn btn-primary">Продолжить</a></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

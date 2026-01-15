@@ -1,0 +1,33 @@
+{% load static %}
+
+{% block title %}Товары{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">Наши товары</h1>
+    
+    <div class="row">
+        {% for product in products %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                {% if product.image %}
+                <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}" style="height: 200px; object-fit: cover;">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ product.name }}</h5>
+                    <p class="card-text">{{ product.description|truncatewords:20 }}</p>
+                    <p class="card-text fw-bold">{{ product.price }} ₽</p>
+                    {% if product.stock > 0 %}
+                    <a href="{% url 'add_to_cart' product.id %}" class="btn btn-primary">В корзину</a>
+                    {% else %}
+                    <button class="btn btn-secondary" disabled>Нет в наличии</button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p>Товаров пока нет :(</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

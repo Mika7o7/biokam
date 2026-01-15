@@ -55,13 +55,14 @@ ROOT_URLCONF = 'biocam.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'main' / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'main.context_processors.categories_processor',
             ],
         },
     },
@@ -99,6 +100,10 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+]
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
@@ -120,3 +125,25 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     BASE_DIR / "static",          # создай папку static позже
 ]
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+# AUTH_USER_MODEL = 'main.User'
+AUTH_USER_MODEL = 'main.User'
+
+SESSION_COOKIE_SECURE = False   # ← обязательно для http
+CSRF_COOKIE_SECURE = False
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
+SESSION_COOKIE_SAMESITE = 'Lax'
+
+
+# for login templates
+LOGIN_URL = '/accounts/login/'
+
+# Login redirects
+LOGIN_REDIRECT_URL = '/account/'
+LOGOUT_REDIRECT_URL = '/accounts/login/'

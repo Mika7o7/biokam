@@ -1,0 +1,285 @@
+{% load static %}
+    <nav class="header_nav">
+        <div class="container">
+            <div class="row">
+                <div class="left-nav">
+                    <aside id="header-nav-left">
+                        <div id="wdnavcmsheader">
+                            <!-- <div class="wdheader-service">Free shipping on all orders over $100</div> -->
+                        </div>
+
+                    </aside>
+
+                </div>
+                <div class="right-nav">
+                    <li class="lang-curr-wrapper">
+                        <div class="pull-left wd-language">
+                            <form action="http://31.128.43.100/index.php?route=common/language/language" method="post"
+                                enctype="multipart/form-data" id="form-language">
+                                <!-- <div class="btn-group">
+                                    <button class="btn btn-link dropdown-toggle" data-toggle="dropdown">
+                                        <span class="hidden-xs hidden-sm hidden-md">
+
+                                            <img src="{% static 'catalog/language/en-gb/en-gb.png' %}" alt="English"
+                                                title="English">English
+                                            <i class="fa fa-angle-down" aria-hidden="true"></i></span></button>
+                                    <ul class="dropdoen-menu language-menu">
+                                        <li>
+                                            <button class="btn btn-link btn-block language-select" type="button"
+                                                name="en-gb"><img src="{% static 'catalog/language/en-gb/en-gb.png' %}"
+                                                    alt="English" title="English" /> English</button>
+                                        </li>
+                                        <li>
+                                            <button class="btn btn-link btn-block language-select" type="button"
+                                                name="ru-ru"><img src="{% static 'catalog/language/ru-ru/ru-ru.png' %}"
+                                                    alt="Russian" title="Russian" /> Russian</button>
+                                        </li>
+                                    </ul>
+                                </div> -->
+                                <input type="hidden" name="code" value="" />
+                                <input type="hidden" name="redirect"
+                                    value="http://31.128.43.100/index.php?route=account/login" />
+                            </form>
+                        </div>
+
+                        <!-- <div class="pull-left wd-currency">
+                            <form action="http://31.128.43.100/index.php?route=common/currency/currency" method="post"
+                                enctype="multipart/form-data" id="form-currency">
+                                <div class="btn-group">
+                                    <button class="btn btn-link dropdown-toggle" data-toggle="dropdown">
+                                        <span class="hidden-xs hidden-sm hidden-md">
+                                            <strong>$</strong>
+                                            Currency<i class="fa fa-angle-down" aria-hidden="true"></i></span></button>
+                                    <ul class="currency-menu">
+                                        <li>
+                                            <button class="currency-select btn btn-link btn-block" type="button"
+                                                name="EUR">€ Euro</button>
+                                        </li>
+                                        <li>
+                                            <button class="currency-select btn btn-link btn-block" type="button"
+                                                name="GBP">£ Pound Sterling</button>
+                                        </li>
+                                        <li>
+                                            <button class="currency-select btn btn-link btn-block" type="button"
+                                                name="USD">$ US Dollar</button>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <input type="hidden" name="code" value="" />
+                                <input type="hidden" name="redirect"
+                                    value="http://31.128.43.100/index.php?route=account/login" />
+                            </form>
+                        </div> -->
+
+                    </li>
+
+                    <aside id="header-nav-right">
+                        <div class="social-block">
+                            <h5 class="">Follow Us</h5>
+                            <ul>
+                                <li class="facebook"><a href="index.html#"><i class="fa fa-facebook"
+                                            aria-hidden="true"></i></a></li>
+                                <li class="twitter"><a href="index.html#"><i class="fa fa-twitter"
+                                            aria-hidden="true"></i></a></li>
+                                <li class="youtube"><a href="index.html#"><i class="fa fa-youtube"
+                                            aria-hidden="true"></i></a></li>
+                                <li class="rss"><a href="index.html#"><i class="fa fa-rss" aria-hidden="true"></i></a>
+                                </li>
+                            </ul>
+                        </div>
+
+                    </aside>
+
+                </div>
+            </div>
+        </div>
+    </nav>
+    <div id="header_top" class="header_top">
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-4 header-logo">
+                    <div id="logo"><a href="index.php%3Froute=common%252Fhome.html"><img
+                                src="{% static 'img/favicon.svg'%}"
+                                style="width: 40px; height: 40px;"
+                                title="BIOKAM - Биокомплексы Камчатки" alt="BIOKAM - Биокомплексы Камчатки"
+                                class="img-responsive" /></a> </div>
+                </div>
+
+
+                <div class="headertop">
+                    <aside id="header-top">
+                        <div class="main-category-list left-menu">
+                            <div class="cat-menu">
+                                <div class="WD-panel-heading">
+                                    <!--<i class='material-icons close-icon'>close</i>-->
+                                </div>
+                                <div class="wd-menu horizontal-menu wd-menu-bar" id="wd-menu-4167">
+                                    <ul class="ul-top-items">
+                                        {% for category in categories %}
+                                        <li class="li-top-item">
+                                            <a class="a-top-link" href="{% url 'category_detail' category.slug %}">
+                                                <span>{{ category.name }}</span>
+                                            </a>
+                                        </li>
+                                        {% empty %}
+                                        <li>Категории не найдены</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+
+                    </aside>
+
+                </div>
+                <!-- <div id="_desktop_contact_link"></div> -->
+
+                <div class="nav2">
+
+                    <div class="col-sm-3 header_cart">
+                        <div id="cart" class="btn-group btn-block">
+                            <button type="button" data-toggle="dropdown" data-loading-text="Загрузка..."
+                                class="btn btn-inverse btn-block btn-lg dropdown-toggle">
+                                <div class="cart_detail">
+                                    <div class="cart_image">
+                                        <i class="material-icons-outlined shopping-cart"></i>
+                                    </div>
+                                    <span id="cart-total">
+                                        <span class="cart_heading">Корзина : </span>
+                                        {% if user.is_authenticated and user.cart %}
+                                        <span class="item-count">{{ user.cart.items.count|default:0 }}</span>
+                                        <span class="mycart">Предметы</span>
+                                        <span class="price">{{ user.cart.total_price|floatformat:2 }} ₽</span>
+                                        {% else %}
+                                        <span class="item-count">0</span>
+                                        <span class="mycart">Предметы</span>
+                                        <span class="price">0.00 ₽</span>
+                                        {% endif %}
+                                    </span>
+                                </div>
+                            </button>
+                    
+                            <ul class="dropdown-menu pull-right cart-menu">
+                                {% if user.is_authenticated and user.cart and user.cart.items.exists %}
+                                <li>
+                                    <table class="table table-striped">
+                                        <tbody>
+                                            {% for item in user.cart.items.all %}
+                                            <tr>
+                                                <td class="text-center">
+                                                    {% if item.product.image %}
+                                                    <a href="{% url 'product_detail' item.product.id %}">
+                                                        <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}"
+                                                            title="{{ item.product.name }}" width="40">
+                                                    </a>
+                                                    {% else %}
+                                                    <img src="{% static 'images/no-image.jpg' %}" alt="Нет изображения"
+                                                         width="40">
+                                                    {% endif %}
+                                                </td>
+                                                <td class="text-left">
+                                                    <a href="{% url 'product_detail' item.product.id %}">
+                                                        {{ item.product.name }}
+                                                    </a>
+                                                </td>
+                                                <td class="text-right">x {{ item.quantity }}</td>
+                                                <td class="text-right">{{ item.product.price|floatformat:2 }} ₽</td>
+                                                <td class="text-center">
+                                                    <button type="button" onclick="removeFromCart({{ item.id }});" title="Удалить"
+                                                        class="btn btn-danger btn-xs">
+                                                        <i class="fa fa-times"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </li>
+                    
+                                <li>
+                                    <div class="text-right">
+                                        <table class="table table-bordered">
+                                            <tbody>
+                                                <tr>
+                                                    <td class="text-right"><strong>Промежуточный итог</strong></td>
+                                                    <td class="text-right">{{ user.cart.total_price|floatformat:2 }} ₽</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="text-right"><strong>Итого</strong></td>
+                                                    <td class="text-right"><strong>{{ user.cart.total_price|floatformat:2 }} ₽</strong></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                    
+                                        <div class="text-right button-container">
+                                            <div class="cart-button offer-btn">
+                                                <a href="{% url 'cart_detail' %}" class="btn btn-primary">
+                                                    <strong>Просмотр корзины</strong>
+                                                </a>
+                                            </div>
+                                            &nbsp;&nbsp;
+                                            <div class="cart-button offer-btn">
+                                                <a href="{% url 'checkout' %}" class="btn btn-success">
+                                                    <strong>Оформить заказ</strong>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                                {% else %}
+                                <li>
+                                    <p class="text-center">Ваша корзина пуста!</p>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+                    <!-- <div class="header_wishlist"><a href="index.php%3Froute=account%252Fwishlist.html"
+                            id="wishlist-total"><span class="wishlist">Wishlist</span><span
+                                class="wishlist_count">0</span></a></div> -->
+                    <div class="account">
+                        <div class="dropdown myaccount"><a href="index.php%3Froute=account%252Faccount.html"
+                                title="Account" class="dropdown-toggle" data-toggle="dropdown"></a><span
+                                class="account-title">Account</span>
+                            <ul class="dropdown-menu dropdown-menu-right myaccount-menu">
+                                <span class="drop_account">
+                                    <div class="login_acc">
+                                        <li><a class="login"
+                                                href="index.php%3Froute=account%252Fpassword.html">Login</a></li>
+                                        <li><a class="reg"
+                                                href="index.php%3Froute=account%252Fregister.html">Register</a></li>
+                                        <li><a href="index.php%3Froute=checkout%252Fcheckout.html"
+                                                title="Checkout"><span class="checkout">Checkout</span></a></li>
+                                        <div class="compare"><a href="index.php%3Froute=product%252Fcompare.html"
+                                                id="compare-total" title="Compare">Compare</a></div>
+                                    </div>
+
+                                </span>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-sm-5 header_search">
+                        <div id="search" class="input-group">
+                            <span class="search_button"></span><span class="search-title">Search</span>
+                            <div class="search_toggle">
+                                <div class="search-overlay">
+                                    <div id="searchbox">
+                                        <input type="text" name="search" value="" placeholder="Search Product Here..."
+                                            class="form-control input-lg" />
+                                        <span class="input-group-btn">
+                                            <button type="button" class="btn btn-default btn-lg"><i
+                                                    class="fa fa-search"></i>Search</button>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>

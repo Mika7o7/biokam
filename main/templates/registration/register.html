@@ -1,60 +1,242 @@
 {% load static %}
-{% block title%}Регистрация{% endblock %}
+
+{% block extra_head %}
+<!-- Подключаем InputMask (CDN) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.9/jquery.inputmask.min.js"></script>
+{% endblock %}
 {% block content %}
-<div class="container mt-5">
-  <div class="row justify-content-center">
-    <div class="col-md-6">
-      <div class="card">
-        <div class="card-header text-center">
-          <h3>Регистрация в магазине</h3>
-        </div>
-        <div class="card-body">
-          <form method="post">
-            {% csrf_token %} {% if form.non_field_errors %}
-            <div class="alert alert-danger">{{ form.non_field_errors }}</div>
-            {% endif %}
 
-            <div class="mb-3">
-              <label class="form-label">Имя пользователя</label>
-              {{ form.username }}
-              <small class="text-muted">{{ form.username.help_text }}</small>
-            </div>
+<div class="video-background">
+  <video autoplay muted loop playsinline class="video-bg">
+    <source src="{% static 'videos/background3.mp4' %}" type="video/mp4">
+  </video>
+  <div class="overlay"></div>
+</div>
 
-            <div class="mb-3">
-              <label class="form-label">Email</label>
-              {{ form.email }}
-            </div>
+<div class="login-form-container">
+  <div class="login-form">
+    <h2 class="form-title">Создать аккаунт</h2>
 
-            <div class="mb-3">
-              <label class="form-label">Пароль</label>
-              {{ form.password1 }}
-              <small class="text-muted">{{ form.password1.help_text }}</small>
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label">Повторите пароль</label>
-              {{ form.password2 }}
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label">Реферальный код (необязательно)</label>
-              {{ form.referral_code }}
-              <small class="text-muted"
-                >Если у вас есть код друга — введите его</small
-              >
-            </div>
-
-            <button type="submit" class="btn btn-primary w-100">
-              Зарегистрироваться
-            </button>
-          </form>
-
-          <div class="text-center mt-3">
-            Уже есть аккаунт? <a href="{% url 'login' %}">Войти</a>
-          </div>
-        </div>
-      </div>
+    {% if form.errors %}
+    <div class="alert alert-danger">
+      Пожалуйста, исправьте ошибки в форме.
     </div>
+    {% endif %}
+
+    <form method="post" action="{% url 'register' %}">
+      {% csrf_token %}
+
+      <div class="form-group">
+        <label for="{{ form.username.id_for_label }}">Имя пользователя</label>
+        {{ form.username }}
+      </div>
+
+      <div class="form-group">
+        <label for="{{ form.email.id_for_label }}">Email</label>
+        {{ form.email }}
+      </div>
+
+      <div class="form-group">
+        <label for="{{ form.phone.id_for_label }}">Номер телефона</label>
+        {{ form.phone }}
+      </div>
+
+      <div class="form-group">
+        <label for="{{ form.password1.id_for_label }}">Пароль</label>
+        {{ form.password1 }}
+      </div>
+
+      <div class="form-group">
+        <label for="{{ form.password2.id_for_label }}">Повторите пароль</label>
+        {{ form.password2 }}
+      </div>
+
+      <!-- Скрытое поле для реферального кода из URL -->
+      {{ form.referral_code }}
+
+      <!-- Кодовое слово — показываем только если НЕТ реферального кода -->
+      <div class="form-group" id="codeword-group" {% if form.referral_code.value %}style="display:none;" {% endif %}>
+        <label for="{{ form.code_word.id_for_label }}">Кодовое слово (необязательно)</label>
+        {{ form.code_word }}
+      </div>
+
+      <button type="submit" class="btn-login">Зарегистрироваться</button>
+
+      <div class="form-footer">
+        <a href="{% url 'login' %}">Уже есть аккаунт? Войти</a>
+      </div>
+    </form>
   </div>
 </div>
+
+
+
+
+<style>
+  /* Всё то же самое, что и в login — копируем полностью */
+  .video-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: -2;
+  }
+
+  .video-bg {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    min-width: 106%;
+    min-height: 106%;
+    width: auto;
+    height: auto;
+    transform: translate(-50%, -50%);
+    object-fit: cover;
+  }
+
+  .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.65);
+    z-index: -1;
+  }
+
+  .login-form-container {
+    position: fixed;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    width: 100%;
+    max-width: 420px;
+    padding: 0 20px;
+    margin-top: 40px;    /* ← отступ сверху */
+    margin-bottom: 40px; /* ← отступ снизу (если форма большая) */
+  }
+
+  .login-form {
+    background: rgba(40, 40, 60, 0.75);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 10px 30px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+  }
+
+  .form-title {
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 28px;
+    font-weight: 600;
+  }
+
+  .form-group {
+    margin-bottom: 20px;
+  }
+
+  .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: #ddd;
+  }
+
+  .form-group input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    font-size: 16px;
+  }
+
+  .form-group input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+  }
+
+  .btn-login {
+    width: 100%;
+    padding: 14px;
+    background: #007bff;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .btn-login:hover {
+    background: #0056b3;
+    transform: translateY(-2px);
+  }
+
+  .form-footer {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 14px;
+  }
+
+  .form-footer a {
+    color: #4da6ff;
+    text-decoration: none;
+  }
+
+  .form-footer a:hover {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 480px) {
+    .login-form {
+      padding: 30px 20px;
+    }
+  }
+.login-form,
+.login-form * {
+  font-family: 'Roboto', sans-serif !important;
+}
+
+.form-title {
+  font-weight: 700;
+}
+
+.form-group label {
+  font-weight: 500;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Если реферальный код уже подставлен — скрываем поле кодового слова
+  document.addEventListener('DOMContentLoaded', function () {
+    const referralInput = document.querySelector('input[name="referral_code"]');
+    const codewordGroup = document.getElementById('codeword-group');
+
+    if (referralInput && referralInput.value.trim() !== '') {
+      codewordGroup.style.display = 'none';
+    }
+  });
+  
+  $(document).ready(function () {
+    // Маска для телефона: +7 (XXX) XXX-XX-XX
+    $('#phone-input').inputmask({
+      "mask": "+7 (999) 999-99-99",
+      "placeholder": "_",
+      "showMaskOnHover": false,
+      "showMaskOnFocus": true
+    });
+  });
+</script>
 {% endblock %}

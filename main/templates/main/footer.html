@@ -1,0 +1,165 @@
+{% load static %}
+<footer>
+
+    <div class="footer-container">
+        <div id="footer" class="bottom-to-top hb-animate-element">
+            <div class="container">
+                <div class="row">
+
+                    <div class="footer-blocks">
+                        <aside id="footer-left">
+                            <div class="col-sm-3 column footerleft">
+                                <div class="contact-block">
+                                    <h5>Contact Us</h5>
+                                    <ul>
+                                        <li class="item address"><i class="fa fa-map-marker"></i><span>502 New design
+                                                str, melbourne, san francisco, CA 94110, united states of
+                                                america​.</span></li>
+                                        <li class="item phone">
+                                            <span class="contact-inner">
+                                                <a href="tel:%phone%">(+00) 123-456-789</a>
+                                            </span>
+                                        </li>
+                                        <li class="item email"><i
+                                                class="fa fa-envelope-o"></i><span>demo@company.com</span></li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                        </aside>
+
+
+                        <div id="account_link" class="col-sm-3 column">
+                            <h5>My Account</h5>
+                            <ul class="list-unstyled">
+                                <li><a href="index.php%3Froute=account%252Faccount.html">My Account</a></li>
+                                <li><a href="index.php%3Froute=account%252Forder.html">Order History</a></li>
+                                <li><a href="index.php%3Froute=account%252Fwishlist.html">Wish List</a></li>
+                                <li><a href="index.php%3Froute=affiliate%252Flogin.html">Affiliates</a></li>
+                                <li><a href="index.php%3Froute=information%252Fcontact.html">Contact Us</a></li>
+                            </ul>
+                        </div>
+
+                        <div id="info" class="col-sm-3 column">
+                            <h5>Information</h5>
+                            <ul class="list-unstyled">
+                                <li><a href="index.php%3Froute=information%252Finformation&amp;information_id=4.html">About
+                                        Us</a></li>
+                                <li><a href="index.php%3Froute=information%252Finformation&amp;information_id=6.html">Delivery
+                                        Information</a></li>
+                                <li><a href="index.php%3Froute=information%252Finformation&amp;information_id=3.html">Privacy
+                                        Policy</a></li>
+                                <li><a href="index.php%3Froute=information%252Finformation&amp;information_id=5.html">Terms
+                                        &amp; Conditions</a></li>
+                                <li><a href="index.php%3Froute=information%252Fblogger.html">Blogs </a></li>
+                            </ul>
+                        </div>
+
+
+
+                        <aside id="footer-right">
+                            <script>
+                                function subscribe() {
+                                    var emailpattern = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+                                    var email = $('#txtemail').val();
+                                    if (email != "") {
+                                        if (!emailpattern.test(email)) {
+                                            $('.text-danger').remove();
+                                            var str = '<span class="error">Invalid Email</span>';
+                                            $('#txtemail').after('<div class="text-danger">Invalid Email</div>');
+
+                                            return false;
+                                        }
+                                        else {
+                                            $.ajax({
+                                                url: 'index.php?route=extension/module/newsletters/news',
+                                                type: 'post',
+                                                data: 'email=' + $('#txtemail').val(),
+                                                dataType: 'json',
+
+
+                                                success: function (json) {
+
+                                                    $('.text-danger').remove();
+                                                    $('#txtemail').after('<div class="text-danger">' + json.message + '</div>');
+
+                                                }
+
+                                            });
+                                            return false;
+                                        }
+                                    }
+                                    else {
+                                        $('.text-danger').remove();
+                                        $('#txtemail').after('<div class="text-danger">Email Is Require</div>');
+                                        $(email).focus();
+
+                                        return false;
+                                    }
+
+
+                                }
+                            </script>
+
+                            <div class="newsletter">
+                                <div class="news-left">
+                                    <div class="news-title">Get Latest Update</div>
+                                    <div class="news-des">You may unsubscribe at any moment. please find our contact
+                                        info.</div>
+                                </div>
+                                <div class="news-right">
+                                    <form method="post">
+                                        <div class="form-group required">
+                                            <label class="col-sm-2 control-label">Enter Your Email</label>
+                                            <div class="input-news">
+                                                <input type="email" name="txtemail" id="txtemail" value=""
+                                                    placeholder="Enter Your Email" class="form-control input-lg" />
+                                                <button type="submit" class="btn btn-default btn-lg"
+                                                    onclick="return subscribe();">Subscribe</button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+
+
+                        </aside>
+
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+    </div>
+    <div class="bottomfooter">
+        <div class="container">
+            <div class="row">
+                <div class="bottomfooter-inner">
+
+                    <p class="powered">Powered By <a href="http://www.opencart.com">OpenCart</a> My Decor - Furniture
+                        Store &copy; 2026</p>
+                    <div id="paymentcmsblock" class="paymentcmsblock">
+                        <p></p>
+                        <div class="payment-block">
+                            <ul>
+                                <img src="{% static 'image/catalog/maestro.png' %}" alt="">
+                                <img src="{% static 'image/catalog/mastercard.png' %}" alt="">
+                                <img src="{% static 'image/catalog/paypal.png' %}" alt="">
+                                <img src="{% static 'image/catalog/visa.png' %}" alt="">
+                            </ul>
+                        </div>
+                        <p></p>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</footer>

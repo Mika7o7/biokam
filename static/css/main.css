@@ -440,3 +440,58 @@ h2.content-layer__header {
     grid-template-areas: "stack";
     position: relative;
 }
+
+
+
+
+
+/* Плавающая кнопка в правом верхнем углу */
+.floating-login {
+	position: fixed;
+	top: 20px;
+	right: 20px;
+	z-index: 1000;
+	/* поверх всего */
+
+	padding: 10px 20px;
+	background: #8a8a8a85;
+	/* твой основной цвет, например синий */
+	color: white;
+	font-weight: 600;
+	border: none;
+	border-radius: 50px;
+	/* скруглённая, современно */
+	cursor: pointer;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+	transition: all 0.4s ease;
+	/* плавность */
+
+	opacity: 0;
+	transform: translateY(-20px);
+	pointer-events: none;
+	/* не кликабельна, пока не появилась */
+}
+
+/* Когда видна */
+.floating-login.visible {
+	opacity: 1;
+	transform: translateY(0);
+	pointer-events: auto;
+}
+
+/* Маленький hover-эффект */
+.floating-login:hover {
+	background: #0056b3;
+	transform: translateY(-3px);
+	box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* На мобильных можно сделать чуть меньше/ниже */
+@media (max-width: 768px) {
+	.floating-login {
+		top: 12px;
+		right: 12px;
+		padding: 8px 16px;
+		font-size: 14px;
+	}
+}

@@ -1,0 +1,599 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+
+{% block content %}
+<!-- <div class="content-top-breadcum">
+    <div class="container">
+        <ul class="breadcrumb">
+            <li><a href="http://31.128.43.100/index.php?route=common/home"><i class="fa fa-home"></i></a></li>
+            <li><a href="http://31.128.43.100/index.php?route=product/category&amp;path=20">Мойки</a></li>
+            <li><a href="http://31.128.43.100/index.php?route=product/category&amp;path=20_61">Односекционные</a></li>
+        </ul>
+    </div>
+</div> -->
+
+<div id="product-special" class="container">
+    <div class="row">
+
+        <aside id="column-left" class="col-sm-3 hidden-xs">
+            <div class="box">
+                <div class="box-heading">Категории</div>
+                <div class="box-content">
+                    <ul class="box-category treeview-list treeview">
+                        {% for category in categories %}
+                        <li class="li-top-item">
+                            <a class="a-top-link" href="{% url 'product_list' %}">
+                                <span>{{ category.name }}</span>
+                            </a>
+                        </li>
+                        {% empty %}
+                        <li>Категории не найдены</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+            <div class="box">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="box-heading">Новинки</div>
+                        <div class="box-content">
+
+                            <div class="box-product  productbox-grid" id=" latest-grid">
+                                <div class="product-items">
+                                    <div class="product-block product-thumb transition">
+                                        <div class="product-block-inner">
+                                            <div class="image">
+                                                <a
+                                                    href="http://31.128.43.100/index.php?route=product/product&amp;product_id=49">
+                                                    <img src="http://31.128.43.100/image/cache/catalog/rest_kitchen%20(1)-80x80.jpg"
+                                                        title="Living Room Lounge chair slice wool orange color "
+                                                        alt="Living Room Lounge chair slice wool orange color "
+                                                        class="img-responsive"></a>
+
+                                                <div class="product_hover_block">
+                                                    <div class="action">
+                                                        <button type="button" class="cart_button"
+                                                            onclick="cart.add('49 ');" title="Купить"><i
+                                                                class="fa fa-shopping-cart" area-hidden="true"></i>
+                                                        </button>
+                                                        <div class="quickview-button">
+                                                            <a class="quickbox" title="" href=""><i
+                                                                    class="fa fa-eye"></i></a>
+                                                        </div>
+                                                        <button class="wishlist" type="button"
+                                                            title="Добавить в закладки "
+                                                            onclick="wishlist.add('49 ');"><i
+                                                                class="fa fa-heart"></i></button>
+                                                        <button class="compare_button" type="button"
+                                                            title="Добавить к сравнению "
+                                                            onclick="compare.add('49 ');"><i
+                                                                class="fa fa-exchange"></i></button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="product-details">
+                                                <div class="caption">
+                                                    <div class="rating">
+                                                        <span class="fa fa-stack"><i
+                                                                class="fa fa-star fa-stack-2x"></i><i
+                                                                class="fa fa-star-o fa-stack-2x"></i></span>
+                                                        <span class="fa fa-stack"><i
+                                                                class="fa fa-star fa-stack-2x"></i><i
+                                                                class="fa fa-star-o fa-stack-2x"></i></span>
+                                                        <span class="fa fa-stack"><i
+                                                                class="fa fa-star fa-stack-2x"></i><i
+                                                                class="fa fa-star-o fa-stack-2x"></i></span>
+                                                        <span class="fa fa-stack"><i
+                                                                class="fa fa-star fa-stack-2x"></i><i
+                                                                class="fa fa-star-o fa-stack-2x"></i></span>
+                                                        <span class="fa fa-stack"><i
+                                                                class="fa fa-star fa-stack-2x"></i><i
+                                                                class="fa fa-star-o fa-stack-2x"></i></span>
+                                                    </div>
+
+                                                    <h4><a
+                                                            href="http://31.128.43.100/index.php?route=product/product&amp;product_id=49 ">Living
+                                                            Room Lounge chair slice wool orange color </a></h4>
+
+                                                    <p class="price">
+                                                        $241.99
+                                                        <span class="price-tax">Без налога: $199.99</span>
+                                                    </p>
+                                                </div>
+
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="product-items">
+                                    <div class="product-block product-thumb transition">
+                                        <div class="product-block-inner">
+                                            <div class="image">
+                                                <a
+                                                    href="http://31.128.43.100/index.php?route=product/product&amp;product_id=48">
+                                                    <img src="http://31.128.43.100/image/cache/catalog/03-80x80.jpg"
+                                                        title="Modern Shell Circle Dining Chair without Armrest "
+                                                        alt="Modern Shell Circle Dining Chair without Armrest "
+                                                        class="img-responsive reg-image">
+                                                    <div class="image_content"><img class="img-responsive hover-image"
+                                                            src="http://31.128.43.100/image/cache/catalog/17-80x80.jpg"
+                                                            title="Modern Shell Circle Dining Chair without Armrest "
+                                                            alt="Modern Shell Circle Dining Chair without Armrest ">
+                                                    </div>
+                                                </a>
+
+                                                <div class="product_hover_block">
+                                                    <div class="action">
+                                                        <button type="button" class="cart_button"
+                                                            onclick="cart.add('48 ');" title="Купить"><i
+                                                                class="fa fa-shopping-cart" area-hidden="true"></i>
+                                                        </button>
+                                                        <div class="quickview-button">
+                                                            <a class="quickbox" title="" href=""><i
+                                                                    class="fa fa-eye"></i></a>
+                                                        </div>
+                                                        <button class="wishlist" type="button"
+                                                            title="Добавить в закладки "
+                                                            onclick="wishlist.add('48 ');"><i
+                                                                class="fa fa-heart"></i></button>
+                                                        <button class="compare_button" type="button"
+                                                            title="Добавить к сравнению "
+                                                            onclick="compare.add('48 ');"><i
+                                                                class="fa fa-exchange"></i></button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="product-details">
+                                                <div class="caption">
+                                                    <div class="rating">
+                                                        <span class="fa fa-stack"><i
+                                                                class="fa fa-star off fa-stack-2x"></i></span>
+                                                        <span class="fa fa-stack"><i
+                                                                class="fa fa-star off fa-stack-2x"></i></span>
+                                                        <span class="fa fa-stack"><i
+                                                                class="fa fa-star off fa-stack-2x"></i></span>
+                                                        <span class="fa fa-stack"><i
+                                                                class="fa fa-star off fa-stack-2x"></i></span>
+                                                        <span class="fa fa-stack"><i
+                                                                class="fa fa-star off fa-stack-2x"></i></span>
+                                                    </div>
+
+                                                    <h4><a
+                                                            href="http://31.128.43.100/index.php?route=product/product&amp;product_id=48 ">Modern
+                                                            Shell Circle Dining Chair without Armrest </a></h4>
+
+                                                    <p class="price">
+                                                        $122.00
+                                                        <span class="price-tax">Без налога: $100.00</span>
+                                                    </p>
+                                                </div>
+
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="product-items">
+                                    <div class="product-block product-thumb transition">
+                                        <div class="product-block-inner">
+                                            <div class="image">
+                                                <a
+                                                    href="http://31.128.43.100/index.php?route=product/product&amp;product_id=47">
+                                                    <img src="http://31.128.43.100/image/cache/catalog/tr-80x80.jpg"
+                                                        title="Black Wooden Aluminium shade Pendant Light "
+                                                        alt="Black Wooden Aluminium shade Pendant Light "
+                                                        class="img-responsive"></a>
+
+                                                <div class="product_hover_block">
+                                                    <div class="action">
+                                                        <button type="button" class="cart_button"
+                                                            onclick="cart.add('47 ');" title="Купить"><i
+                                                                class="fa fa-shopping-cart" area-hidden="true"></i>
+                                                        </button>
+                                                        <div class="quickview-button">
+                                                            <a class="quickbox" title="" href=""><i
+                                                                    class="fa fa-eye"></i></a>
+                                                        </div>
+                                                        <button class="wishlist" type="button"
+                                                            title="Добавить в закладки "
+                                                            onclick="wishlist.add('47 ');"><i
+                                                                class="fa fa-heart"></i></button>
+                                                        <button class="compare_button" type="button"
+                                                            title="Добавить к сравнению "
+                                                            onclick="compare.add('47 ');"><i
+                                                                class="fa fa-exchange"></i></button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="product-details">
+                                                <div class="caption">
+                                                    <div class="rating">
+                                                        <span class="fa fa-stack"><i
+                                                                class="fa fa-star fa-stack-2x"></i><i
+                                                                class="fa fa-star-o fa-stack-2x"></i></span>
+                                                        <span class="fa fa-stack"><i
+                                                                class="fa fa-star fa-stack-2x"></i><i
+                                                                class="fa fa-star-o fa-stack-2x"></i></span>
+                                                        <span class="fa fa-stack"><i
+                                                                class="fa fa-star fa-stack-2x"></i><i
+                                                                class="fa fa-star-o fa-stack-2x"></i></span>
+                                                        <span class="fa fa-stack"><i
+                                                                class="fa fa-star fa-stack-2x"></i><i
+                                                                class="fa fa-star-o fa-stack-2x"></i></span>
+                                                        <span class="fa fa-stack"><i
+                                                                class="fa fa-star fa-stack-2x"></i><i
+                                                                class="fa fa-star-o fa-stack-2x"></i></span>
+                                                    </div>
+
+                                                    <h4><a
+                                                            href="http://31.128.43.100/index.php?route=product/product&amp;product_id=47 ">Black
+                                                            Wooden Aluminium shade Pendant Light </a></h4>
+
+                                                    <p class="price">
+                                                        $122.00
+                                                        <span class="price-tax">Без налога: $100.00</span>
+                                                    </p>
+                                                </div>
+
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <span class="latest_default_width" style="display:none; visibility:hidden"></span>
+
+            <div class="swiper-viewport">
+                <div id="banner" class="swiper-container single-banner">
+                    <div class="swiper-wrapper">
+                        <div class="swiper-slide">
+                            <a href="#">
+                                <img src="http://31.128.43.100/image/cache/catalog/left-banner-326x420.jpg"
+                                    alt="Get 15% OFF on Bedside Desk" class="img-responsive">
+                                <div class="left-banner">
+                                    <div class="left-title">Get 15% OFF on Bedside Desk</div>
+                                </div>
+                            </a>
+
+                        </div>
+                    </div>
+                    <!-- If we need pagination -->
+                    <div class="swiper-pagination"></div>
+                </div>
+            </div>
+            <script type="text/javascript"><!-
+$('#banner0').swiper({
+autoplay: 4000,
+pagination: '.swiper-pagination',  // If we need pagination
+autoplayDisableOnInteraction: false
+});
+-></script>
+        </aside>
+        <div id="content" class="col-sm-9">
+
+
+
+
+
+            <!-- <div class="row category_thumb">
+                <div class="col-sm-3 category_img"><img
+                        src="http://31.128.43.100/image/cache/catalog/cat-02-140x140.jpg" alt="Односекционные"
+                        title="Односекционные" class="img-thumbnail"></div>
+
+
+                <div class="col-sm-9 category_details">
+                    <h2 class="page-title">Односекционные</h2>
+
+                </div>
+
+            </div> -->
+
+            <div class="category_filter">
+                <div class="col-md-4 btn-list-grid">
+                    <div class="btn-group">
+                        <button type="button" id="grid-view" class="btn btn-default grid active" title="Сетка"><i
+                                class="fa fa-th"></i></button>
+                        <button type="button" id="list-view" class="btn btn-default list" title="Список"><i
+                                class="fa fa-th-list"></i></button>
+
+                    </div>
+                </div>
+                <div class="compare-total"><a href="http://31.128.43.100/index.php?route=product/compare"
+                        id="compare-total">Сравнение (0)</a></div>
+                <div class="pagination-right">
+                    <div class="sort-by-wrapper">
+                        <div class="col-md-2 text-right sort-by">
+                            <label class="control-label" for="input-sort">Сортировать по</label>
+                        </div>
+                        <div class="col-md-3 text-right sort">
+                            <select id="input-sort" class="form-control hasCustomSelect"
+                                onchange="location = this.value;"
+                                style="appearance: menulist-button; width: 150px; position: absolute; opacity: 0; height: 33px; font-size: 12px;">
+
+                                <option
+                                    value="http://31.128.43.100/index.php?route=product/category&amp;path=20_61&amp;sort=p.sort_order&amp;order=ASC "
+                                    selected="selected">По умолчанию</option>
+
+                                <option
+                                    value="http://31.128.43.100/index.php?route=product/category&amp;path=20_61&amp;sort=pd.name&amp;order=ASC ">
+                                    Имя (А - Я) </option>
+
+                                <option
+                                    value="http://31.128.43.100/index.php?route=product/category&amp;path=20_61&amp;sort=pd.name&amp;order=DESC ">
+                                    Имя (Я - А) </option>
+
+                                <option
+                                    value="http://31.128.43.100/index.php?route=product/category&amp;path=20_61&amp;sort=p.price&amp;order=ASC ">
+                                    Цена (по возрастанию) </option>
+
+                                <option
+                                    value="http://31.128.43.100/index.php?route=product/category&amp;path=20_61&amp;sort=p.price&amp;order=DESC ">
+                                    Цена (по убыванию) </option>
+
+                                <option
+                                    value="http://31.128.43.100/index.php?route=product/category&amp;path=20_61&amp;sort=rating&amp;order=DESC ">
+                                    Рейтинг (от наивысшего) </option>
+
+                                <option
+                                    value="http://31.128.43.100/index.php?route=product/category&amp;path=20_61&amp;sort=rating&amp;order=ASC ">
+                                    Рейтинг (от наименьшего) </option>
+
+                                <option
+                                    value="http://31.128.43.100/index.php?route=product/category&amp;path=20_61&amp;sort=p.model&amp;order=ASC ">
+                                    Модель (А - Я) </option>
+
+                                <option
+                                    value="http://31.128.43.100/index.php?route=product/category&amp;path=20_61&amp;sort=p.model&amp;order=DESC ">
+                                    Модель (Я - А) </option>
+                            </select><span class="customSelect form-control" style="display: inline-block;"><span
+                                    class="customSelectInner" style="width: 124px; display: inline-block;">По
+                                    умолчанию</span></span>
+                        </div>
+                    </div>
+                    <div class="show-wrapper">
+                        <div class="col-md-1 text-right show">
+                            <label class="control-label" for="input-limit">Показать по</label>
+                        </div>
+                        <div class="col-md-2 text-right limit">
+                            <select id="input-limit" class="form-control hasCustomSelect"
+                                onchange="location = this.value;"
+                                style="appearance: menulist-button; width: 100px; position: absolute; opacity: 0; height: 33px; font-size: 12px;">
+                                <option
+                                    value="http://31.128.43.100/index.php?route=product/category&amp;path=20_61&amp;limit=12 "
+                                    selected="selected">12</option>
+                                <option
+                                    value="http://31.128.43.100/index.php?route=product/category&amp;path=20_61&amp;limit=25 ">
+                                    25 </option>
+                                <option
+                                    value="http://31.128.43.100/index.php?route=product/category&amp;path=20_61&amp;limit=50 ">
+                                    50 </option>
+                                <option
+                                    value="http://31.128.43.100/index.php?route=product/category&amp;path=20_61&amp;limit=75 ">
+                                    75 </option>
+                                <option
+                                    value="http://31.128.43.100/index.php?route=product/category&amp;path=20_61&amp;limit=100 ">
+                                    100 </option>
+                            </select><span class="customSelect form-control" style="display: inline-block;"><span
+                                    class="customSelectInner"
+                                    style="width: 74px; display: inline-block;">12</span></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row cat_prod">
+                {% for product in products %}
+                <div class="product-layout product-grid col-lg-3 col-md-4 col-sm-4 col-xs-6">
+                    <div class="product-block product-thumb">
+                        <div class="product-block-inner">
+                            <div class="image">
+                                <a href="{% url 'product_detail' product.id %}">
+                                    {% if product.image %}
+                                    <img src="{{ product.image.url }}" title="{{ product.name }}" alt="{{ product.name }}"
+                                        class="img-responsive">
+                                    {% else %}
+                                    <img src="{% static 'images/no-image.jpg' %}"
+                                    alt="Нет изображения"
+                                    class="img-responsive">
+                                    {% endif %}
+                                </a>
+                
+                                <!-- <div class="product_hover_block">
+                                    <div class="compare-button offer-btn">
+                                        <button class="compare_button" type="button" title="Добавить к сравнению"
+                                            onclick="compare.add('{{ product.id }}');"></button>
+                                    </div>
+                                    <div class="quickview-button offer-btn">
+                                        <a class="quickbox" title="" href="{% url 'quick_view' product.id %}"></a>
+                                    </div>
+                                    <div class="wishlist-button offer-btn">
+                                        <button class="wishlist" type="button" title="Добавить в закладки"
+                                            onclick="wishlist.add('{{ product.id }}');"></button>
+                                    </div>
+                                </div> -->
+                                
+                                <!-- Если есть таймер акции — добавь позже -->
+                                <div class="countdown"></div>
+                            </div>
+                
+                            <div class="product-details">
+                                <div class="caption">
+                                    <!-- Категория (можно убрать, если не нужно) -->
+                                    <span class="product-cat">{{ product.category.name|default:"Без категории" }}</span>
+                
+                                    <!-- Рейтинг (пока заглушка, потом подключи через Review) -->
+                                    <div class="rating">
+                                        <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i></span>
+                                        <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i></span>
+                                        <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i></span>
+                                        <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i></span>
+                                        <span class="fa fa-stack"><i class="fa fa-star-o fa-stack-2x"></i></span>
+                                    </div>
+                
+                                    <h4>
+                                        <a href="{% url 'product_detail' product.id %}">
+                                            {{ product.name }}
+                                        </a>
+                                    </h4>
+                
+                                    <p class="description">
+                                        {{ product.description|truncatewords:20 }}
+                                    </p>
+                
+                                    <p class="price">
+                                        {{ product.price }} ₽
+                                    </p>
+                
+                                    <div class="action">
+                                        <button type="button" class="cart_button" onclick="cart.add('{{ product.id }}');"
+                                            title="Купить">Купить</button>
+                                    </div>
+                
+                                    <!-- Дублируем hover-блок для совместимости со старым JS -->
+                                    <div class="product_hover_block">
+                                        <div class="compare-button offer-btn">
+                                            <button class="compare_button" type="button" title="Добавить к сравнению"
+                                                onclick="compare.add('{{ product.id }}');"></button>
+                                        </div>
+                                        <div class="quickview-button offer-btn">
+                                            <a class="quickbox" title="" href="{% url 'quick_view' product.id %}"></a>
+                                        </div>
+                                        <div class="wishlist-button offer-btn">
+                                            <button class="wishlist" type="button" title="Добавить в закладки"
+                                                onclick="wishlist.add('{{ product.id }}');"></button>
+                                        </div>
+                                        <div class="action">
+                                            <button type="button" class="cart_button" onclick="cart.add('{{ product.id }}');"
+                                                title="Купить">Купить</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12 text-center">
+                    <p class="lead">В этой категории пока нет товаров.</p>
+                </div>
+                {% endfor %}
+                <!-- <div class="product-layout product-grid col-lg-3 col-md-4 col-sm-4 col-xs-6">
+                    <div class="product-block product-thumb">
+                        <div class="product-block-inner">
+                            <div class="image ">
+                                <a
+                                    href="http://31.128.43.100/index.php?route=product/product&amp;path=20_61&amp;product_id=44">
+                                    <img src="http://31.128.43.100/image/cache/catalog/table-328x328.jpg"
+                                        title="Andres Upholstered Arm Chair in Dark Grey Colour"
+                                        alt="Andres Upholstered Arm Chair in Dark Grey Colour"
+                                        class="img-responsive"></a>
+
+
+
+                                <div class="product_hover_block">
+                                    <div class="compare-button offer-btn">
+                                        <button class="compare_button" type="button" title="Добавить к сравнению "
+                                            onclick="compare.add('44 ');"></button>
+                                    </div>
+                                    <div class="quickview-button offer-btn">
+                                        <a class="quickbox" title=""
+                                            href="http://31.128.43.100/index.php?route=product/quick_view&amp;path=20_61&amp;product_id=44"></a>
+                                    </div>
+                                    <div class="wishlist-button offer-btn">
+                                        <button class="wishlist" type="button" title="Добавить в закладки "
+                                            onclick="wishlist.add('44 ');"></button>
+                                    </div>
+                                </div>
+
+                                <div class="countdown">
+                                </div>
+
+                            </div>
+                            <div class="product-details">
+                                <div class="caption">
+
+                                    <span class="product-cat">Cabinets</span>
+
+                                    <div class="rating">
+                                        <span class="fa fa-stack"><i class="fa fa-star off fa-stack-2x"></i></span>
+                                        <span class="fa fa-stack"><i class="fa fa-star off fa-stack-2x"></i></span>
+                                        <span class="fa fa-stack"><i class="fa fa-star off fa-stack-2x"></i></span>
+                                        <span class="fa fa-stack"><i class="fa fa-star off fa-stack-2x"></i></span>
+                                        <span class="fa fa-stack"><i class="fa fa-star off fa-stack-2x"></i></span>
+                                    </div>
+
+
+                                    <h4><a
+                                            href="http://31.128.43.100/index.php?route=product/product&amp;path=20_61&amp;product_id=44">Andres
+                                            Upholstered Arm Chair in Dark Grey Colour</a></h4>
+
+                                    <p class="description">MacBook Air is ultrathin, ultraportable, and ultra unlike
+                                        anything else. But you don’t lose inches and pounds overnight. It’s the result
+                                        of rethinking conventions. Of m..</p>
+
+                                    <p class="price">
+                                        $1 202.00
+                                    </p>
+
+
+
+                                    <div class="action">
+                                        <button type="button" class="cart_button" onclick="cart.add('44');"
+                                            title="Купить">Купить</button>
+                                    </div>
+
+                                    <div class="product_hover_block">
+                                        <div class="compare-button offer-btn">
+                                            <button class="compare_button" type="button" title="Добавить к сравнению "
+                                                onclick="compare.add('44 ');"></button>
+                                        </div>
+                                        <div class="quickview-button offer-btn">
+                                            <a class="quickbox" title=""
+                                                href="http://31.128.43.100/index.php?route=product/quick_view&amp;path=20_61&amp;product_id=44"></a>
+                                        </div>
+                                        <div class="wishlist-button offer-btn">
+                                            <button class="wishlist" type="button" title="Добавить в закладки "
+                                                onclick="wishlist.add('44 ');"></button>
+                                        </div>
+                                        <div class="action">
+                                            <button type="button" class="cart_button" onclick="cart.add('44');"
+                                                title="Купить">Купить</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <script>
+                    $('.total-review44').on('click', function () {
+                        var t = 'http://31.128.43.100/index.php?route=product/product&amp;path=20_61&amp;product_id=44';
+                        const parseResult = new DOMParser().parseFromString(t, "text/html");
+                        const parsedUrl = parseResult.documentElement.textContent;
+                        window.location.href = parsedUrl + '&review';
+                        return false;
+                    });
+                </script> -->
+            </div>
+            <div class="pagination-wrapper">
+                <div class="col-sm-6 text-right page-result">Показано с 1 по 6 из 6 (всего страниц: 1)</div>
+                <div class="col-sm-6 text-left page-link"></div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+{% endblock %}

@@ -1,0 +1,44 @@
+{% load static %}
+
+{% block title %}Корзина{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>Ваша корзина</h1>
+    
+    {% if items %}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Товар</th>
+                <th>Цена</th>
+                <th>Количество</th>
+                <th>Сумма</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr>
+                <td>{{ item.product.name }}</td>
+                <td>{{ item.product.price }} ₽</td>
+                <td>{{ item.quantity }}</td>
+                <td>{{ item.get_subtotal }} ₽</td>
+                <td>
+                    <a href="{% url 'remove_from_cart' item.id %}" class="btn btn-danger btn-sm">Удалить</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <h3 class="text-end">Итого: {{ total }} ₽</h3>
+    
+    <div class="text-end mt-4">
+        <a href="{% url 'checkout' %}" class="btn btn-success btn-lg">Оформить заказ</a>
+    </div>
+    {% else %}
+    <p class="alert alert-info">Ваша корзина пуста. Добавьте товары!</p>
+    {% endif %}
+</div>
+{% endblock %}
