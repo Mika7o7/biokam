@@ -1,0 +1,322 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+
+{% block content %}
+<div class="content-top-breadcum">
+    <div class="container">
+        <ul class="breadcrumb">
+            <li><a href="{% url 'home' %}"><i class="fa fa-home"></i></a></li>
+            <li><a href="{% url 'account' %}">Личный кабинет</a></li>
+            <li><a href="{% url 'account_order_history' %}">История заказов</a></li>
+        </ul>
+    </div>
+</div>
+<div id="account-order" class="container">
+
+    <div class="row">
+        <!-- Вставляем сайдбар -->
+        {% include 'main/account_sidebar.html' %}
+        <div class="col-md-9">
+            <!-- Хлебные крошки -->
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'account' %}">Личный кабинет</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'account_order_history' %}">История заказов</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Заказ №{{ order.id }}</li>
+                </ol>
+            </nav>
+        
+            <div class="card">
+                <!-- Шапка заказа -->
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4 class="mb-0">Заказ №{{ order.id }}</h4>
+                            <small class="text-muted">от {{ order.created_at|date:"d.m.Y H:i" }}</small>
+                        </div>
+                        <div>
+                            <span class="badge 
+                                        {% if order.status == 'paid' %}bg-success
+                                        {% elif order.status == 'new' %}bg-warning
+                                        {% elif order.status == 'pending_payment' %}bg-info
+                                        {% elif order.status == 'shipped' %}bg-primary
+                                        {% elif order.status == 'completed' %}bg-success
+                                        {% elif order.status == 'canceled' %}bg-danger
+                                        {% else %}bg-secondary{% endif %} fs-6">
+                                {{ order.get_status_display }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="card-body">
+                    <!-- Информация о заказе -->
+                    <div class="row mb-4">
+                        <div class="col-md-6 mb-3">
+                            <h5><i class="bi bi-geo-alt me-2"></i> Информация о доставке</h5>
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <p class="mb-1"><strong>Адрес:</strong> {{ order.address }}</p>
+                                    {% if order.phone %}
+                                    <p class="mb-1"><strong>Телефон:</strong> {{ order.phone }}</p>
+                                    {% endif %}
+                                    {% if order.user.email %}
+                                    <p class="mb-1"><strong>Email:</strong> {{ order.user.email }}</p>
+                                    {% endif %}
+                                    {% if order.user.get_full_name %}
+                                    <p class="mb-0"><strong>Получатель:</strong> {{ order.user.get_full_name }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+        
+                        <div class="col-md-6 mb-3">
+                            <h5><i class="bi bi-receipt me-2"></i> Детали оплаты</h5>
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <p class="mb-1"><strong>Сумма заказа:</strong> {{ order.total_price }} ₽</p>
+                                    {% if order.discount_amount %}
+                                    <p class="mb-1"><strong>Скидка:</strong> -{{ order.discount_amount }} ₽</p>
+                                    {% endif %}
+                                    <p class="mb-1"><strong>Статус оплаты:</strong>
+                                        {% if order.status == 'paid' or order.status == 'completed' %}
+                                        <span class="text-success">Оплачено</span>
+                                        {% elif order.status == 'pending_payment' %}
+                                        <span class="text-warning">Ожидает оплаты</span>
+                                        {% else %}
+                                        <span class="text-muted">Не оплачено</span>
+                                        {% endif %}
+                                    </p>
+                                    <p class="mb-0"><strong>Дата создания:</strong> {{ order.created_at|date:"d.m.Y H:i" }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+        
+                    <!-- Товары в заказе -->
+                    <h5 class="mb-3"><i class="bi bi-cart me-2"></i> Состав заказа</h5>
+        
+                    {% if order_items %}
+                    <!-- Для мобильных: карточки вместо таблицы -->
+                    <div class="d-md-none">
+                        {% for item in order_items %}
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <h6 class="mb-1">{{ item.product.name }}</h6>
+                                        {% if item.product.sku %}
+                                        <small class="text-muted">Артикул: {{ item.product.sku }}</small>
+                                        {% endif %}
+                                    </div>
+                                    <span class="badge bg-primary">{{ item.quantity }} шт.</span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <small class="text-muted">Цена:</small>
+                                        <div>{{ item.price }} ₽</div>
+                                    </div>
+                                    <div class="text-end">
+                                        <small class="text-muted">Сумма:</small>
+                                        <div class="fw-bold">{{ item.get_total_price }} ₽</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+        
+                        <!-- Итоговая сумма для мобильных -->
+                        <div class="card mt-3">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Сумма товаров:</span>
+                                    <span>{{ order.total_price|add:order.discount_amount }} ₽</span>
+                                </div>
+                                {% if order.discount_amount %}
+                                <div class="d-flex justify-content-between mb-2 text-success">
+                                    <span>Скидка:</span>
+                                    <span>-{{ order.discount_amount }} ₽</span>
+                                </div>
+                                {% endif %}
+                                <hr>
+                                <div class="d-flex justify-content-between fw-bold fs-5">
+                                    <span>Итого:</span>
+                                    <span>{{ order.total_price }} ₽</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+        
+                    <!-- Для десктопов: таблица -->
+                    <div class="d-none d-md-block">
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th width="50">#</th>
+                                        <th>Товар</th>
+                                        <th class="text-center" width="100">Кол-во</th>
+                                        <th class="text-end" width="120">Цена</th>
+                                        <th class="text-end" width="120">Сумма</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in order_items %}
+                                    <tr>
+                                        <td>{{ forloop.counter }}</td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                {% if item.product.image %}
+                                                <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}"
+                                                    class="img-thumbnail me-3"
+                                                    style="width: 60px; height: 60px; object-fit: cover;">
+                                                {% endif %}
+                                                <div>
+                                                    <strong>{{ item.product.name }}</strong>
+                                                    {% if item.product.sku %}
+                                                    <br><small class="text-muted">Артикул: {{ item.product.sku }}</small>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="text-center">{{ item.quantity }}</td>
+                                        <td class="text-end">{{ item.price }} ₽</td>
+                                        <td class="text-end fw-bold">{{ item.get_total_price }} ₽</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                                <tfoot class="table-light">
+                                    <tr>
+                                        <td colspan="4" class="text-end"><strong>Сумма товаров:</strong></td>
+                                        <td class="text-end">{{ order.total_price|add:order.discount_amount }} ₽</td>
+                                    </tr>
+                                    {% if order.discount_amount %}
+                                    <tr class="text-success">
+                                        <td colspan="4" class="text-end"><strong>Скидка по купону:</strong></td>
+                                        <td class="text-end">-{{ order.discount_amount }} ₽</td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if order.coupon %}
+                                    <tr>
+                                        <td colspan="4" class="text-end"><small>Купон: {{ order.coupon.code }}</small></td>
+                                        <td class="text-end"><small>-{{ order.coupon.discount_percent }}%</small></td>
+                                    </tr>
+                                    {% endif %}
+                                    <tr class="table-active">
+                                        <td colspan="4" class="text-end">
+                                            <h5 class="mb-0">Итого к оплате:</h5>
+                                        </td>
+                                        <td class="text-end">
+                                            <h5 class="mb-0">{{ order.total_price }} ₽</h5>
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        Информация о товарах в заказе недоступна.
+                    </div>
+                    {% endif %}
+                </div>
+        
+                <!-- Футер с кнопками -->
+                <div class="card-footer">
+                    <div class="d-flex flex-column flex-md-row justify-content-between gap-2">
+                        <div>
+                            <a href="{% url 'account_order_history' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-1"></i> Вернуться к заказам
+                            </a>
+                        </div>
+                        <div class="d-flex flex-wrap gap-2">
+                            <button onclick="window.print()" class="btn btn-outline-primary">
+                                <i class="bi bi-printer me-1"></i> Печать
+                            </button>
+                            {% if order.status == 'new' or order.status == 'pending_payment' %}
+                            <button type="button" class="btn btn-outline-warning" id="cancel-order-btn"
+                                data-order-id="{{ order.id }}">
+                                <i class="bi bi-x-circle me-1"></i> Отменить
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+        </div>
+        
+        <style>
+            /* Улучшения для мобильных */
+            @media (max-width: 768px) {
+                .card-header .d-flex {
+                    flex-direction: column;
+                    align-items: flex-start !important;
+                }
+        
+                .card-header .badge {
+                    margin-top: 10px;
+                    align-self: flex-start;
+                }
+        
+                .breadcrumb {
+                    font-size: 0.9rem;
+                }
+        
+                .btn {
+                    width: 100%;
+                    margin-bottom: 5px;
+                }
+        
+                .card-footer .d-flex {
+                    flex-direction: column;
+                }
+            }
+        
+            /* Фиксированная высота для карточек товаров на мобильных */
+            .d-md-none .card {
+                max-height: none;
+                overflow: visible;
+            }
+        </style>
+        
+        <script>
+            // Отмена заказа
+            document.addEventListener('DOMContentLoaded', function () {
+                const cancelBtn = document.getElementById('cancel-order-btn');
+                if (cancelBtn) {
+                    cancelBtn.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        const orderId = this.getAttribute('data-order-id');
+
+                        if (confirm('Вы уверены, что хотите отменить этот заказ?')) {
+                            fetch(`/account/order/${orderId}/cancel/`, {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRFToken': '{{ csrf_token }}',
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({})
+                            })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.success) {
+                                        alert('Заказ отменен');
+                                        location.reload();
+                                    } else {
+                                        alert('Ошибка: ' + data.message);
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Error:', error);
+                                    alert('Ошибка сети');
+                                });
+                        }
+                    });
+                }
+            });
+        </script>
+        {% endblock %}

@@ -6,8 +6,8 @@
 <div class="content-top-breadcum"></div>
 <div class="container">
     <ul class="breadcrumb">
-        <li><a href="http://31.128.43.100/index.php?route=common/home"><i class="fa fa-home"></i></a></li>
-        <li><a href="http://31.128.43.100/index.php?route=account/account">Личный кабинет</a></li>
+        <li><a href="{% url 'account' %}"><i class="fa fa-home"></i></a></li>
+        <li><a href="{% url 'account' %}">Личный кабинет</a></li>
     </ul>
 </div>
 </div>
@@ -15,103 +15,48 @@
 
     <div class="row">
 
-        <aside id="column-left" class="col-sm-3 hidden-xs">
-            <div class="box">
-                <div class="box-heading">Личный кабинет</div>
-                <div class="list-group">
-        
-                    <a href="{% url 'account' %}" class="list-group-item">Личный
-                        кабинет </a>
-        
-                    <a href="{% url 'account_edit' %}" class="list-group-item">Изменить
-                        профиль</a> <a href="{% url 'account_change_password' %}"
-                        class="list-group-item">Пароль</a>
-        
-                    <a href="{% url 'account_change_address' %}" class="list-group-item">Список адресов</a>
-                    <a href="{% url 'account_change_bookmarks' %}" class="list-group-item">Закладки </a>
-                    <a href="{% url 'account_order_history' %}" class="list-group-item">История покупок </a>
-                    <a href="{% url 'account_recurring' %}" class="list-group-item">Регулярные платежи </a>
-                    <a href="{% url 'account_bonus_points' %}" class="list-group-item">Бонусные баллы </a>
-                    <a href="{% url 'account_return' %}" class="list-group-item">Возвраты </a>
-                    <a href="{% url 'account_transaction' %} " class="list-group-item">Транзакции </a>
-                    <a href="{% url 'account_newsletter' %}" class="list-group-item">Новостная рассылка </a>
-        
-                    <form method="post" action="{% url 'logout' %}">
-                        {% csrf_token %}
-                        <button class="list-group-item" type="submit" style="background: transparent;">Выйти</button>
-                    </form>
-        
-                </div>
-            </div>
-        
-            <div class="swiper-viewport">
-                <div id="banner" class="swiper-container single-banner">
-                    <div class="swiper-wrapper">
-                        <div class="swiper-slide">
-                            <a href="#">
-                                <img src="{% static 'img/product_oe-removebg-preview.png' %}" alt="Get 15% OFF on Bedside Desk"
-                                    class="img-responsive">
-                                <div class="left-banner">
-                                    <div class="left-title">Get 15% OFF on Bedside Desk</div>
-                                </div>
-                            </a>
-        
-                        </div>
-                    </div>
-                    <!-- If we need pagination -->
-                    <div class="swiper-pagination"></div>
-                </div>
-            </div>
-            <script type="text/javascript">
-                $('#banner0').swiper({
-                    autoplay: 4000,
-                    pagination: '.swiper-pagination',  // If we need pagination
-                    autoplayDisableOnInteraction: false
-                });
-            </script>
-        
-        </aside>
+        <!-- Вставляем сайдбар -->
+        {% include 'main/account_sidebar.html' %}
         <div id="content" class="col-sm-9">
             <h1>Данные учетной записи</h1>
-            <form action="http://31.128.43.100/index.php?route=account/edit" method="post" enctype="multipart/form-data"
-                class="form-horizontal">
-                <fieldset>
-                    <legend>Ваши персональные данные</legend>
-                    <div class="form-group required">
-                        <label class="col-sm-2 control-label" for="input-firstname">Имя </label>
-                        <div class="col-sm-10">
-                            <input type="text" name="firstname" value="mika" placeholder="Имя" id="input-firstname"
-                                class="form-control">
-                        </div>
+            <form id="profile-form" method="post">
+                {% csrf_token %}
+            
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="first_name" class="form-label">Имя *</label>
+                        <input type="text" class="form-control" id="first_name" name="first_name" value="{{ user.first_name }}"
+                            required>
                     </div>
-                    <div class="form-group required">
-                        <label class="col-sm-2 control-label" for="input-lastname">Фамилия</label>
-                        <div class="col-sm-10">
-                            <input type="text" name="lastname" value="ohanyan" placeholder="Фамилия" id="input-lastname"
-                                class="form-control">
-                        </div>
+                    <div class="col-md-6">
+                        <label for="last_name" class="form-label">Фамилия</label>
+                        <input type="text" class="form-control" id="last_name" name="last_name" value="{{ user.last_name }}">
                     </div>
-                    <div class="form-group required">
-                        <label class="col-sm-2 control-label" for="input-email">Эл. почта</label>
-                        <div class="col-sm-10">
-                            <input type="email" name="email" value="mikaohanyan881@gmail.com" placeholder="Эл. почта"
-                                id="input-email" class="form-control">
-                        </div>
+            
+                    <div class="col-md-6">
+                    <label for="email" class="form-label">Эл. почта</label>
+                    <input type="email" class="form-control bg-light" id="email" value="{{ user.email }}">
                     </div>
-                    <div class="form-group required">
-                        <label class="col-sm-2 control-label" for="input-telephone">Телефон</label>
-                        <div class="col-sm-10">
-                            <input type="tel" name="telephone" value="+79582088421" placeholder="Телефон"
-                                id="input-telephone" class="form-control">
-                        </div>
+                
+                    <div class="col-md-6">
+                    <label for="phone" class="form-label">Телефон *</label>
+                    <input type="tel" class="form-control" id="phone" name="phone" value="{{ user.phone }}"
+                        placeholder="+7 (999) 999-99-99" required>
                     </div>
-                </fieldset>
-                <div class="buttons clearfix">
-                    <div class="pull-left"><a href="{% url 'account' %}"
-                            class="btn btn-default">Назад</a></div>
-                    <div class="pull-right">
-                        <input type="submit" value="Продолжить" class="btn btn-primary">
+            
+                    <div class="col-md-6">
+                    <label for="address" class="form-label">Адрес доставки *</label>
+                    <textarea class="form-control" id="address" name="address" rows="3" required>{{ user.address }}</textarea>
                     </div>
+                </div>
+                <br>
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary" id="save-profile-btn">
+                        Сохранить изменения
+                    </button>
+                    <a href="{% url 'account' %}" class="btn btn-outline-secondary ms-2">
+                        Отмена
+                    </a>
                 </div>
             </form>
         </div>

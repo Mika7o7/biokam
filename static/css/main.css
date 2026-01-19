@@ -489,9 +489,19 @@ h2.content-layer__header {
 /* На мобильных можно сделать чуть меньше/ниже */
 @media (max-width: 768px) {
 	.floating-login {
-		top: 12px;
-		right: 12px;
+		top: 25px;
+		right: 22px;
 		padding: 8px 16px;
 		font-size: 14px;
 	}
+}
+
+.glass-modal {
+	background: rgba(40, 40, 60, 0.95) !important;
+	backdrop-filter: blur(12px) !important;
+	-webkit-backdrop-filter: blur(12px) !important;
+	border: 1px solid rgba(255, 255, 255, 0.15) !important;
+	border-radius: 16px !important;
+	color: white !important;
+	box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6) !important;
 }

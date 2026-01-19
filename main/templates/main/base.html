@@ -6,7 +6,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Account Login</title>
+    <title>{% block title %}BIOKAM – Биокомплексы Камчатки{% endblock %}</title>
+
+    <link rel="icon" type="image/svg+xml" href="{% static 'img/favicon.svg' %}">
+
     <base href="" />
     <script src="{% static 'catalog/view/javascript/jquery/jquery-2.1.1.min.js' %}"></script>
     <script src="{% static 'catalog/view/javascript/bootstrap/js/bootstrap.min.js' %}"></script>
@@ -54,6 +57,16 @@
     <script src="{% static 'catalog/view/javascript/lightbox/lightbox-2.6.min.js' %}"></script>
     <script src="{% static 'catalog/view/javascript/webdigify/inview.js' %}"></script>
     <script src="{% static 'catalog/view/javascript/webdigify/megamenu.js' %}"></script>
+
+    <!-- Bootstrap Notify -->
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-notify/0.2.0/css/bootstrap-notify.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-notify/0.2.0/bootstrap-notify.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Подключи jQuery -->
+
     <!-- ======= Quick view JS ========= -->
     <script>
 
@@ -124,32 +137,7 @@
 <script type="text/javascript">
 
 </script>
-<script>
-    function addToCart(productId, quantity = 1) {
-        $.ajax({
-            url: `/cart/add/${productId}/`,  // ← твой Django URL!
-            type: 'POST',
-            data: {
-                quantity: quantity,
-                csrfmiddlewaretoken: '{{ csrf_token }}'  // обязательно для POST
-            },
-            success: function (response) {
-                if (response.success) {
-                    // Обновляем корзину в хедере
-                    $('#cart-total .item-count').text(response.cart_total_items || 0);
-                    $('#cart-total .price').text((response.cart_total_price || 0).toFixed(2) + ' ₽');
 
-                    alert('Товар добавлен в корзину!');
-                } else {
-                    alert('Ошибка: ' + (response.error || 'Неизвестная ошибка'));
-                }
-            },
-            error: function (xhr) {
-                alert('Ошибка сервера: ' + xhr.status);
-            }
-        });
-    }
-</script>
 
 <script>
             var wd_live_search = {
@@ -258,8 +246,216 @@
         </script>
 
 
+<!-- Кнопки + - количество штук -->
+<script>
+    $(document).ready(function () {
+        // Обработка кликов по кнопкам + и -
+        $(document).on('click', '.btn-number', function (e) {
+            e.preventDefault();
+
+            var $this = $(this);
+            var type = $this.data('type');       // plus / minus
+            var field = $this.data('field');     // quantity
+            var $input = $('input[name="' + field + '"]');
+            var currentVal = parseInt($input.val()) || 1;
+
+            if (type === 'minus') {
+                if (currentVal > 1) {
+                    $input.val(currentVal - 1);
+                }
+                // Отключаем кнопку -, если стало 1
+                if ($input.val() <= 1) {
+                    $this.prop('disabled', true);
+                }
+                // Включаем кнопку +, если она была отключена
+                $('.btn-number[data-type="plus"][data-field="' + field + '"]').prop('disabled', false);
+            } else if (type === 'plus') {
+                $input.val(currentVal + 1);
+                // Включаем кнопку -, если она была отключена
+                $('.btn-number[data-type="minus"][data-field="' + field + '"]').prop('disabled', false);
+            }
+
+            $input.trigger('change'); // если нужно обновить что-то ещё
+        });
+
+        // Изначально отключаем кнопку -, если количество = 1
+        var $qtyInput = $('#input-quantity');
+        if ($qtyInput.length && parseInt($qtyInput.val()) === 1) {
+            $('.btn-number[data-type="minus"]').prop('disabled', true);
+        }
+    });
+</script>
 
 
+
+<!-- удаление товара из карзини -->
+<script>
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let cookie of cookies) {
+                cookie = cookie.trim();
+                if (cookie.startsWith(name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    const csrftoken = getCookie('csrftoken');
+
+    async function removeFromCart(itemId) {
+            try {
+                const response = await fetch(`/cart/remove/${itemId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrftoken,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // 1. Заменяем весь блок корзины новым HTML
+                    const headerCart = document.querySelector('.header_cart');
+                    headerCart.innerHTML = data.cart_html;
+
+                    // 2. Находим новую кнопку dropdown-toggle
+                    const newToggle = headerCart.querySelector('.dropdown-toggle');
+
+                    // 3. Переинициализируем Bootstrap dropdown на новой кнопке
+                    if (newToggle) {
+                        // Удаляем старые экземпляры, если они были (на всякий случай)
+                        if (newToggle._bootstrapDropdown) {
+                            newToggle._bootstrapDropdown.dispose();
+                        }
+                        // Создаём новый экземпляр dropdown
+                        newToggle._bootstrapDropdown = new bootstrap.Dropdown(newToggle);
+                    }
+
+                    // 4. Показываем красивое уведомление
+                    $.notify({
+                        icon: 'fa fa-check-circle',
+                        message: `Товар успешно удалён из <a href="{% url 'cart_detail' %}">корзины</a>!`
+                    }, {
+                        type: 'success',
+                        allow_dismiss: true,
+                        placement: { from: "top", align: "center" },
+                        offset: 20,
+                        spacing: 10,
+                        z_index: 2031,
+                        delay: 3000,
+                        timer: 300,
+                        animate: {
+                            enter: 'animated fadeInDown',
+                            exit: 'animated fadeOutUp'
+                        },
+                        progress: true,
+                        icon_type: 'class',
+                        template: '<div data-notify="container" class="col-xs-11 col-sm-3 alert alert-{0} animated fadeInDown fadeOutUp" role="alert">' +
+                            '<button type="button" aria-hidden="true" class="close" data-notify="dismiss">×</button>' +
+                            '<span data-notify="icon"></span> ' +
+                            '<span data-notify="message">{2}</span>' +
+                            '<div class="progress" data-notify="progressbar">' +
+                            '<div class="progress-bar progress-bar-{0}" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;"></div>' +
+                            '</div>' +
+                            '<a href="{3}" target="{4}" data-notify="url"></a>' +
+                            '</div>'
+                    });
+                } else {
+                    $.notify({
+                        icon: 'fa fa-times-circle',
+                        message: data.error || 'Ошибка при удалении'
+                    }, { type: 'danger', placement: { from: "top", align: "center" } });
+                }
+            } catch (error) {
+                console.error('Ошибка удаления:', error);
+                $.notify({
+                    icon: 'fa fa-times-circle',
+                    message: 'Не удалось связаться с сервером'
+                }, { type: 'danger', placement: { from: "top", align: "center" } });
+            }
+        }
+
+</script>
+
+<!-- Добавить товар -->
+<script>
+    async function addToCart(productId, quantity = 1) {
+        try {
+            const response = await fetch(`/cart/add/${productId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken
+                },
+                body: JSON.stringify({ quantity: quantity })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Обновляем хедер корзины (если есть)
+                document.querySelector('#cart-total .item-count').textContent = data.cart_total_items || 0;
+                document.querySelector('#cart-total .price').textContent = (data.cart_total_price || 0).toFixed(2) + ' ₽';
+
+                document.querySelector('.cart-menu').innerHTML = data.cart_html;
+
+                const productUrl = `/product/${productId}/`;  // ← твоя структура URL
+                const cartUrl = "{% url 'cart_detail' %}";    // ← эту можно оставить от Django
+
+                // ТВОЁ ИДЕАЛЬНОЕ уведомление — почти 1 в 1 как в примере
+                $.notify({
+                    icon: 'fa fa-check-circle',
+                    message: `Успешно. вы добавили <a href="${productUrl}">${data.product_name || 'Товар'}</a> в <a href="${cartUrl}">корзину</a>!`
+                }, {
+                    type: 'success',
+                    allow_dismiss: true,
+                    placement: { from: "top", align: "center" },
+                    offset: 20,
+                    spacing: 10,
+                    z_index: 2031,
+                    delay: 1000,
+                    timer: 300,
+                    animate: {
+                        enter: 'animated fadeInDown',
+                        exit: 'animated fadeOutUp'
+                    },
+                    progress: true,
+                    icon_type: 'class',
+                    template: '<div data-notify="container" class="col-xs-11 col-sm-3 alert alert-{0} animated fadeInDown fadeOutUp" role="alert">' +
+                        '<button type="button" aria-hidden="true" class="close" data-notify="dismiss">×</button>' +
+                        '<span data-notify="icon"></span> ' +
+                        '<span data-notify="message">{2}</span>' +
+                        '<div class="progress" data-notify="progressbar">' +
+                        '<div class="progress-bar progress-bar-{0}" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;"></div>' +
+                        '</div>' +
+                        '<a href="{3}" target="{4}" data-notify="url"></a>' +
+                        '</div>'
+                });
+
+            } else {
+                $.notify({
+                    icon: 'fa fa-times-circle',
+                    message: data.error || 'Ошибка при добавлении'
+                }, { type: 'danger', placement: { from: "top", align: "center" } });
+            }
+        } catch (error) {
+            $.notify({
+                icon: 'fa fa-times-circle',
+                message: 'Не удалось связаться с сервером'
+            }, { type: 'danger', placement: { from: "top", align: "center" } });
+        }
+    }
+</script>
 
 
     

@@ -1,9 +1,14 @@
 {% load static %}
 
 {% block extra_head %}
-<!-- Подключаем InputMask (CDN) -->
+<!-- jQuery — обязательно ПЕРВЫМ -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"
+  integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+
+<!-- Inputmask — после jQuery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.9/jquery.inputmask.min.js"></script>
 {% endblock %}
+
 {% block content %}
 
 <div class="video-background">
@@ -17,9 +22,16 @@
   <div class="login-form">
     <h2 class="form-title">Создать аккаунт</h2>
 
-    {% if form.errors %}
+    <!-- Показываем все ошибки формы (очень важно!) -->
+    {% if form.non_field_errors %}
     <div class="alert alert-danger">
-      Пожалуйста, исправьте ошибки в форме.
+      {{ form.non_field_errors }}
+    </div>
+    {% endif %}
+
+    {% if form.errors %}
+    <div class="alert alert-warning">
+      Есть ошибки в полях. Пожалуйста, исправьте:
     </div>
     {% endif %}
 
@@ -51,13 +63,17 @@
         {{ form.password2 }}
       </div>
 
-      <!-- Скрытое поле для реферального кода из URL -->
-      {{ form.referral_code }}
-
-      <!-- Кодовое слово — показываем только если НЕТ реферального кода -->
-      <div class="form-group" id="codeword-group" {% if form.referral_code.value %}style="display:none;" {% endif %}>
-        <label for="{{ form.code_word.id_for_label }}">Кодовое слово (необязательно)</label>
-        {{ form.code_word }}
+      <!-- Реферальный код — видимый, с предзаполнением -->
+      <div class="form-group">
+        <label for="{{ form.invite_code.id_for_label }}">Реферальный код (если есть)</label>
+        {{ form.invite_code }}
+        <small class="form-text text-muted">
+          {% if form.invite_code.value %}
+          Автоматически из ссылки. Можно изменить.
+          {% else %}
+          Введите вручную или перейдите по реферальной ссылке.
+          {% endif %}
+        </small>
       </div>
 
       <button type="submit" class="btn-login">Зарегистрироваться</button>
@@ -68,6 +84,33 @@
     </form>
   </div>
 </div>
+
+
+<script>
+  // Скрытие кодового слова при наличии реферального кода
+  document.addEventListener('DOMContentLoaded', function () {
+    const inviteInput = document.querySelector('input[name="invite_code"]');
+    const codewordGroup = document.getElementById('codeword-group');
+
+    if (inviteInput && inviteInput.value.trim() !== '' && codewordGroup) {
+      codewordGroup.style.display = 'none';
+    }
+  });
+
+  // Маска телефона
+  $(document).ready(function () {
+    if ($('#phone-input').length) {
+      $('#phone-input').inputmask({
+        mask: "+7 (999) 999-99-99",
+        placeholder: " ",
+        showMaskOnHover: false,
+        showMaskOnFocus: true,
+        clearIncomplete: true,         // не даст отправить неполный номер
+        greedy: false
+      });
+    }
+  });
+</script>
 
 
 
@@ -217,26 +260,3 @@
 </style>
 {% endblock %}
 
-{% block extra_js %}
-<script>
-  // Если реферальный код уже подставлен — скрываем поле кодового слова
-  document.addEventListener('DOMContentLoaded', function () {
-    const referralInput = document.querySelector('input[name="referral_code"]');
-    const codewordGroup = document.getElementById('codeword-group');
-
-    if (referralInput && referralInput.value.trim() !== '') {
-      codewordGroup.style.display = 'none';
-    }
-  });
-  
-  $(document).ready(function () {
-    // Маска для телефона: +7 (XXX) XXX-XX-XX
-    $('#phone-input').inputmask({
-      "mask": "+7 (999) 999-99-99",
-      "placeholder": "_",
-      "showMaskOnHover": false,
-      "showMaskOnFocus": true
-    });
-  });
-</script>
-{% endblock %}

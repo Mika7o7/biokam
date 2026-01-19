@@ -1,0 +1,63 @@
+{% load static %}
+{% if user.is_authenticated and user.cart and user.cart.items.exists %}
+<li>
+    <table class="table table-striped">
+        <tbody>
+            {% for item in user.cart.items.all %}
+            <tr>
+                <td class="text-center">
+                    {% if item.product.image %}
+                    <a href="{% url 'product_detail' item.product.id %}">
+                        <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}"
+                            title="{{ item.product.name }}" width="40">
+                    </a>
+                    {% else %}
+                    <img src="{% static 'images/no-image.jpg' %}" alt="Нет изображения" width="40">
+                    {% endif %}
+                </td>
+                <td class="text-left">
+                    <a href="{% url 'product_detail' item.product.id %}">
+                        {{ item.product.name }}
+                    </a>
+                </td>
+                <td class="text-right">x {{ item.quantity }}</td>
+                <td class="text-right">{{ item.product.price|floatformat:2 }} ₽</td>
+                <td class="text-center">
+                    <button type="button" onclick="removeFromCart({{ item.id }});" title="Удалить"
+                        class="btn btn-danger btn-xs">
+                        <i class="fa fa-times"></i>
+                    </button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</li>
+<li>
+    <div class="text-right">
+        <table class="table table-bordered">
+            <tbody>
+                <tr>
+                    <td class="text-right"><strong>Промежуточный итог</strong></td>
+                    <td class="text-right">{{ user.cart.total_price|floatformat:2 }} ₽</td>
+                </tr>
+                <tr>
+                    <td class="text-right"><strong>Итого</strong></td>
+                    <td class="text-right"><strong>{{ user.cart.total_price|floatformat:2 }} ₽</strong></td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="text-right button-container">
+            <div class="cart-button offer-btn">
+                <a href="{% url 'checkout' %}" class="btn btn-success">
+                    <strong>К оформлению заказа</strong>
+                </a>
+            </div>
+        </div>
+    </div>
+</li>
+{% else %}
+<li>
+    <p class="text-center">Ваша корзина пуста!</p>
+</li>
+{% endif %}

@@ -98,7 +98,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-sm-4 header-logo">
-                    <div id="logo"><a href="index.php%3Froute=common%252Fhome.html"><img
+                    <div id="logo"><a href="{% url 'account' %}"><img
                                 src="{% static 'img/favicon.svg'%}"
                                 style="width: 40px; height: 40px;"
                                 title="BIOKAM - Биокомплексы Камчатки" alt="BIOKAM - Биокомплексы Камчатки"
@@ -188,7 +188,7 @@
                                                 <td class="text-right">x {{ item.quantity }}</td>
                                                 <td class="text-right">{{ item.product.price|floatformat:2 }} ₽</td>
                                                 <td class="text-center">
-                                                    <button type="button" onclick="removeFromCart({{ item.id }});" title="Удалить"
+                                                    <button type="button" onclick="removeFromCart({{ item.id }});"  title="Удалить"
                                                         class="btn btn-danger btn-xs">
                                                         <i class="fa fa-times"></i>
                                                     </button>
@@ -216,14 +216,8 @@
                     
                                         <div class="text-right button-container">
                                             <div class="cart-button offer-btn">
-                                                <a href="{% url 'cart_detail' %}" class="btn btn-primary">
-                                                    <strong>Просмотр корзины</strong>
-                                                </a>
-                                            </div>
-                                            &nbsp;&nbsp;
-                                            <div class="cart-button offer-btn">
                                                 <a href="{% url 'checkout' %}" class="btn btn-success">
-                                                    <strong>Оформить заказ</strong>
+                                                    <strong>К оформлению заказа</strong>
                                                 </a>
                                             </div>
                                         </div>
@@ -247,21 +241,26 @@
                             <ul class="dropdown-menu dropdown-menu-right myaccount-menu">
                                 <span class="drop_account">
                                     <div class="login_acc">
-                                        <li><a class="login"
-                                                href="index.php%3Froute=account%252Fpassword.html">Login</a></li>
                                         <li><a class="reg"
-                                                href="index.php%3Froute=account%252Fregister.html">Register</a></li>
-                                        <li><a href="index.php%3Froute=checkout%252Fcheckout.html"
-                                                title="Checkout"><span class="checkout">Checkout</span></a></li>
-                                        <div class="compare"><a href="index.php%3Froute=product%252Fcompare.html"
-                                                id="compare-total" title="Compare">Compare</a></div>
+                                                href="{% url 'account' %}">Личный кабинет</a></li>
+                                        <li><a href="{% url 'account_order_history' %}"
+                                                title="Checkout"><span class="checkout">История заказов</span></a></li>
+                                        <div class="compare">
+                                            <form method="post" action="{% url 'logout' %}" style="display:inline;">
+                                                {% csrf_token %}
+                                                <button type="submit" class="checkout"
+                                                    style="background:none; border:none; padding:0; margin:0; cursor:pointer;">
+                                                    Выход
+                                                </button>
+                                            </form>
+                                        </div>
                                     </div>
 
                                 </span>
                             </ul>
                         </div>
                     </div>
-                    <div class="col-sm-5 header_search">
+                    <!-- <div class="col-sm-5 header_search">
                         <div id="search" class="input-group">
                             <span class="search_button"></span><span class="search-title">Search</span>
                             <div class="search_toggle">
@@ -277,7 +276,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
             </div>
         </div>

@@ -3,15 +3,7 @@
 
 
 {% block content %}
-<!-- <div class="content-top-breadcum">
-    <div class="container">
-        <ul class="breadcrumb">
-            <li><a href="http://31.128.43.100/index.php?route=common/home"><i class="fa fa-home"></i></a></li>
-            <li><a href="http://31.128.43.100/index.php?route=product/category&amp;path=20">Мойки</a></li>
-            <li><a href="http://31.128.43.100/index.php?route=product/category&amp;path=20_61">Односекционные</a></li>
-        </ul>
-    </div>
-</div> -->
+
 
 <div id="product-special" class="container">
     <div class="row">
@@ -34,7 +26,7 @@
                 </div>
             </div>
 
-            <div class="box">
+            <!-- <div class="box">
                 <div class="container-fluid">
                     <div class="row">
                         <div class="box-heading">Новинки</div>
@@ -267,17 +259,19 @@
 
                         </div>
                     </div>
-                    <!-- If we need pagination -->
                     <div class="swiper-pagination"></div>
                 </div>
             </div>
-            <script type="text/javascript"><!-
+            <script type="text/javascript">
 $('#banner0').swiper({
 autoplay: 4000,
-pagination: '.swiper-pagination',  // If we need pagination
+pagination: '.swiper-pagination',  
 autoplayDisableOnInteraction: false
 });
--></script>
+</script> 
+                If we need pagination -->
+ 
+
         </aside>
         <div id="content" class="col-sm-9">
 
@@ -407,19 +401,6 @@ autoplayDisableOnInteraction: false
                                     {% endif %}
                                 </a>
                 
-                                <!-- <div class="product_hover_block">
-                                    <div class="compare-button offer-btn">
-                                        <button class="compare_button" type="button" title="Добавить к сравнению"
-                                            onclick="compare.add('{{ product.id }}');"></button>
-                                    </div>
-                                    <div class="quickview-button offer-btn">
-                                        <a class="quickbox" title="" href="{% url 'quick_view' product.id %}"></a>
-                                    </div>
-                                    <div class="wishlist-button offer-btn">
-                                        <button class="wishlist" type="button" title="Добавить в закладки"
-                                            onclick="wishlist.add('{{ product.id }}');"></button>
-                                    </div>
-                                </div> -->
                                 
                                 <!-- Если есть таймер акции — добавь позже -->
                                 <div class="countdown"></div>
@@ -454,28 +435,12 @@ autoplayDisableOnInteraction: false
                                     </p>
                 
                                     <div class="action">
-                                        <button type="button" class="cart_button" onclick="cart.add('{{ product.id }}');"
-                                            title="Купить">Купить</button>
+                                        <button type="button" class="cart_button" title="Купить">
+                                        <a href="{% url 'product_detail' product.id %}">Купить</a>
+                                        </button>
                                     </div>
                 
-                                    <!-- Дублируем hover-блок для совместимости со старым JS -->
-                                    <div class="product_hover_block">
-                                        <div class="compare-button offer-btn">
-                                            <button class="compare_button" type="button" title="Добавить к сравнению"
-                                                onclick="compare.add('{{ product.id }}');"></button>
-                                        </div>
-                                        <div class="quickview-button offer-btn">
-                                            <a class="quickbox" title="" href="{% url 'quick_view' product.id %}"></a>
-                                        </div>
-                                        <div class="wishlist-button offer-btn">
-                                            <button class="wishlist" type="button" title="Добавить в закладки"
-                                                onclick="wishlist.add('{{ product.id }}');"></button>
-                                        </div>
-                                        <div class="action">
-                                            <button type="button" class="cart_button" onclick="cart.add('{{ product.id }}');"
-                                                title="Купить">Купить</button>
-                                        </div>
-                                    </div>
+                                   
                                 </div>
                             </div>
                         </div>
@@ -486,104 +451,6 @@ autoplayDisableOnInteraction: false
                     <p class="lead">В этой категории пока нет товаров.</p>
                 </div>
                 {% endfor %}
-                <!-- <div class="product-layout product-grid col-lg-3 col-md-4 col-sm-4 col-xs-6">
-                    <div class="product-block product-thumb">
-                        <div class="product-block-inner">
-                            <div class="image ">
-                                <a
-                                    href="http://31.128.43.100/index.php?route=product/product&amp;path=20_61&amp;product_id=44">
-                                    <img src="http://31.128.43.100/image/cache/catalog/table-328x328.jpg"
-                                        title="Andres Upholstered Arm Chair in Dark Grey Colour"
-                                        alt="Andres Upholstered Arm Chair in Dark Grey Colour"
-                                        class="img-responsive"></a>
-
-
-
-                                <div class="product_hover_block">
-                                    <div class="compare-button offer-btn">
-                                        <button class="compare_button" type="button" title="Добавить к сравнению "
-                                            onclick="compare.add('44 ');"></button>
-                                    </div>
-                                    <div class="quickview-button offer-btn">
-                                        <a class="quickbox" title=""
-                                            href="http://31.128.43.100/index.php?route=product/quick_view&amp;path=20_61&amp;product_id=44"></a>
-                                    </div>
-                                    <div class="wishlist-button offer-btn">
-                                        <button class="wishlist" type="button" title="Добавить в закладки "
-                                            onclick="wishlist.add('44 ');"></button>
-                                    </div>
-                                </div>
-
-                                <div class="countdown">
-                                </div>
-
-                            </div>
-                            <div class="product-details">
-                                <div class="caption">
-
-                                    <span class="product-cat">Cabinets</span>
-
-                                    <div class="rating">
-                                        <span class="fa fa-stack"><i class="fa fa-star off fa-stack-2x"></i></span>
-                                        <span class="fa fa-stack"><i class="fa fa-star off fa-stack-2x"></i></span>
-                                        <span class="fa fa-stack"><i class="fa fa-star off fa-stack-2x"></i></span>
-                                        <span class="fa fa-stack"><i class="fa fa-star off fa-stack-2x"></i></span>
-                                        <span class="fa fa-stack"><i class="fa fa-star off fa-stack-2x"></i></span>
-                                    </div>
-
-
-                                    <h4><a
-                                            href="http://31.128.43.100/index.php?route=product/product&amp;path=20_61&amp;product_id=44">Andres
-                                            Upholstered Arm Chair in Dark Grey Colour</a></h4>
-
-                                    <p class="description">MacBook Air is ultrathin, ultraportable, and ultra unlike
-                                        anything else. But you don’t lose inches and pounds overnight. It’s the result
-                                        of rethinking conventions. Of m..</p>
-
-                                    <p class="price">
-                                        $1 202.00
-                                    </p>
-
-
-
-                                    <div class="action">
-                                        <button type="button" class="cart_button" onclick="cart.add('44');"
-                                            title="Купить">Купить</button>
-                                    </div>
-
-                                    <div class="product_hover_block">
-                                        <div class="compare-button offer-btn">
-                                            <button class="compare_button" type="button" title="Добавить к сравнению "
-                                                onclick="compare.add('44 ');"></button>
-                                        </div>
-                                        <div class="quickview-button offer-btn">
-                                            <a class="quickbox" title=""
-                                                href="http://31.128.43.100/index.php?route=product/quick_view&amp;path=20_61&amp;product_id=44"></a>
-                                        </div>
-                                        <div class="wishlist-button offer-btn">
-                                            <button class="wishlist" type="button" title="Добавить в закладки "
-                                                onclick="wishlist.add('44 ');"></button>
-                                        </div>
-                                        <div class="action">
-                                            <button type="button" class="cart_button" onclick="cart.add('44');"
-                                                title="Купить">Купить</button>
-                                        </div>
-                                    </div>
-                                </div>
-
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <script>
-                    $('.total-review44').on('click', function () {
-                        var t = 'http://31.128.43.100/index.php?route=product/product&amp;path=20_61&amp;product_id=44';
-                        const parseResult = new DOMParser().parseFromString(t, "text/html");
-                        const parsedUrl = parseResult.documentElement.textContent;
-                        window.location.href = parsedUrl + '&review';
-                        return false;
-                    });
-                </script> -->
             </div>
             <div class="pagination-wrapper">
                 <div class="col-sm-6 text-right page-result">Показано с 1 по 6 из 6 (всего страниц: 1)</div>

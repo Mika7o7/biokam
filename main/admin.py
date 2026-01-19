@@ -2,11 +2,12 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django import forms
+from django.utils.html import format_html
 
 from .models import (
     User, Category, Product, Cart, CartItem,
     Order, OrderItem, Review, SiteSettings,
-    ProductCertificate
+    ProductCertificate, Coupon, Banner
 )
 
 # Форма создания пользователя (та же, что в регистрации)
@@ -118,6 +119,13 @@ class CartItemAdmin(admin.ModelAdmin):
     list_filter = ('cart__user',)
 
 
+@admin.register(Coupon)
+class CouponAdmin(admin.ModelAdmin):
+    list_display = ('id', 'uses', 'max_uses', 'discount_percent', 'code')
+    list_filter = ('active', 'valid_to')
+    search_fields = ('user__username',)
+    
+
 # Заказы и позиции
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
@@ -156,3 +164,45 @@ class SiteSettingsAdmin(admin.ModelAdmin):
     
     def has_delete_permission(self, request, obj=None):
         return False  # Запрещаем удаление настроек
+    
+@admin.register(Banner)
+class BannerAdmin(admin.ModelAdmin):
+    list_display = ['title', 'position', 'status', 'order', 'preview_image', 'is_active_display', 'created_at']
+    list_filter = ['status', 'position', 'created_at']
+    search_fields = ['title', 'link']
+    list_editable = ['order', 'status']
+    readonly_fields = ['preview_image_large', 'created_at', 'updated_at']
+    fieldsets = (
+        ('Основная информация', {
+            'fields': ('title', 'image', 'preview_image_large', 'link')
+        }),
+        ('Настройки показа', {
+            'fields': ('position', 'status', 'order', 'start_date', 'end_date')
+        }),
+        ('Системная информация', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def preview_image(self, obj):
+        """Миниатюра в списке"""
+        if obj.image:
+            return format_html('<img src="{}" width="50" height="30" style="object-fit: cover;" />', obj.image.url)
+        return '-'
+    preview_image.short_description = 'Превью'
+    
+    def preview_image_large(self, obj):
+        """Большое изображение в форме"""
+        if obj.image:
+            return format_html('<img src="{}" width="300" style="max-width: 100%; height: auto;" />', obj.image.url)
+        return 'Изображение не загружено'
+    preview_image_large.short_description = 'Превью изображения'
+    
+    def is_active_display(self, obj):
+        """Отображение активности"""
+        if obj.is_active():
+            return format_html('<span style="color: green;">✓ Активен</span>')
+        else:
+            return format_html('<span style="color: red;">✗ Неактивен</span>')
+    is_active_display.short_description = 'Активность'

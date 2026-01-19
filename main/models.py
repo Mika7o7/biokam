@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 from django.contrib.auth.models import AbstractUser
 from django.utils.crypto import get_random_string
 from django.template.defaulttags import register
@@ -125,6 +126,9 @@ class ProductCertificate(models.Model):
 
 
 class User(AbstractUser):
+    # Эти поля уже есть в AbstractUser, но можно добавить verbose_name
+    first_name = models.CharField(max_length=150, verbose_name="Имя", blank=True)
+    last_name = models.CharField(max_length=150, verbose_name="Фамилия", blank=True)
     referral_code = models.CharField(
         max_length=10,
         unique=True,
@@ -149,6 +153,12 @@ class User(AbstractUser):
         blank=True,
         null=True,
         verbose_name="Адрес доставки"
+    )
+    phone = models.CharField(  # ДОБАВЬТЕ ЭТО ПОЛЕ
+        max_length=20,
+        blank=True,
+        null=True,
+        verbose_name="Телефон"
     )
     groups = models.ManyToManyField(
         'auth.Group',
@@ -237,12 +247,45 @@ class CartItem(models.Model):
         return f"{self.quantity} x {self.product.name if self.product else 'Удалённый товар'}"
 
 
+class Coupon(models.Model):
+    code = models.CharField(max_length=50, unique=True, verbose_name="Код купона")
+    discount_percent = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=5.00,
+        verbose_name="Процент скидки"
+    )
+    valid_from = models.DateTimeField(verbose_name="Действует с")
+    valid_to = models.DateTimeField(verbose_name="Действует до")
+    active = models.BooleanField(default=True, verbose_name="Активен")
+    max_uses = models.PositiveIntegerField(default=0, verbose_name="Макс. использований (0 — без лимита)")
+    uses = models.PositiveIntegerField(default=0, verbose_name="Сколько раз использован")
+
+    class Meta:
+        verbose_name = "Купон на скидку"
+        verbose_name_plural = "Купоны на скидку"
+
+    def __str__(self):
+        return f"{self.code} ({self.discount_percent}% скидки)"
+
+    def is_valid(self, user=None):
+        if not self.active:
+            return False
+        if self.valid_to < timezone.now() or self.valid_from > timezone.now():
+            return False
+        if self.max_uses > 0 and self.uses >= self.max_uses:
+            return False
+        return True
+
+
 class Order(models.Model):
     STATUS_CHOICES = (
         ('new', 'Новый'),
+        ('pending_payment', 'Ожидает оплаты'),  # Добавим этот статус
         ('paid', 'Оплачен'),
         ('shipped', 'Отправлен'),
         ('completed', 'Завершён'),
+        ('canceled', 'Отменен'),
     )
 
     user = models.ForeignKey(
@@ -258,7 +301,7 @@ class Order(models.Model):
         verbose_name="Общая сумма"
     )
     status = models.CharField(
-        max_length=10,
+        max_length=20,  # Увеличим для 'pending_payment'
         choices=STATUS_CHOICES,
         default='new',
         verbose_name="Статус"
@@ -266,13 +309,39 @@ class Order(models.Model):
     address = models.TextField(
         verbose_name="Адрес доставки (на момент заказа)"
     )
+    phone = models.CharField(
+        max_length=20,
+        verbose_name="Телефон (на момент заказа)",
+        blank=True
+    )
     created_at = models.DateTimeField(
         auto_now_add=True,
         verbose_name="Дата создания"
     )
+    coupon = models.ForeignKey(
+        Coupon,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        verbose_name="Купон на скидку"
+    )
+    discount_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0.00,
+        verbose_name="Сумма скидки"
+    )
 
+    # УБИРАЕМ расчет скидки из save() - он уже сделан во view
     def save(self, *args, **kwargs):
+        # Только увеличиваем счетчик использования купона
+        if self.coupon and self.coupon.is_valid() and not self.pk:
+            # Увеличиваем uses только при создании нового заказа
+            self.coupon.uses += 1
+            self.coupon.save()
+        
         super().save(*args, **kwargs)
+        
         if self.status == 'paid':
             settings = SiteSettings.objects.first() or SiteSettings()
             referrer = self.user.referrer
@@ -287,10 +356,11 @@ class Order(models.Model):
     class Meta:
         verbose_name = "Заказ"
         verbose_name_plural = "Заказы"
+        ordering = ['-created_at']  # Добавим сортировку по умолчанию
 
     def __str__(self):
         return f"Заказ #{self.id} от {self.user.username if self.user else 'Гость'}"
-
+    
 
 class OrderItem(models.Model):
     order = models.ForeignKey(
@@ -360,3 +430,76 @@ class Review(models.Model):
 
     def __str__(self):
         return f"Отзыв от {self.user.username if self.user else 'Аноним'} на {self.product.name if self.product else 'Удалённый товар'}"
+    
+
+class Banner(models.Model):
+    """Модель для баннеров в сайдбаре"""
+    POSITION_CHOICES = (
+        ('account_sidebar', 'Сайдбар личного кабинета'),
+        ('home_top', 'Главная страница - верх'),
+        ('home_sidebar', 'Главная страница - сайдбар'),
+        ('category', 'Категории товаров'),
+        ('product', 'Страница товара'),
+    )
+    
+    STATUS_CHOICES = (
+        ('active', 'Активен'),
+        ('inactive', 'Неактивен'),
+        ('scheduled', 'По расписанию'),
+    )
+    
+    title = models.CharField(max_length=200, verbose_name="Название баннера")
+    image = models.ImageField(upload_to='banners/', verbose_name="Изображение")
+    link = models.URLField(max_length=500, verbose_name="Ссылка", blank=True)
+    position = models.CharField(
+        max_length=50, 
+        choices=POSITION_CHOICES, 
+        default='account_sidebar',
+        verbose_name="Позиция"
+    )
+    status = models.CharField(
+        max_length=20, 
+        choices=STATUS_CHOICES, 
+        default='active',
+        verbose_name="Статус"
+    )
+    order = models.IntegerField(default=0, verbose_name="Порядок сортировки")
+    start_date = models.DateTimeField(
+        null=True, 
+        blank=True, 
+        verbose_name="Дата начала показа"
+    )
+    end_date = models.DateTimeField(
+        null=True, 
+        blank=True, 
+        verbose_name="Дата окончания показа"
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
+    
+    class Meta:
+        verbose_name = "Баннер"
+        verbose_name_plural = "Баннеры"
+        ordering = ['order', '-created_at']
+    
+    def __str__(self):
+        return self.title
+    
+    def is_active(self):
+        """Проверка активности баннера"""
+        if self.status == 'inactive':
+            return False
+        elif self.status == 'scheduled':
+            now = timezone.now()
+            if self.start_date and now < self.start_date:
+                return False
+            if self.end_date and now > self.end_date:
+                return False
+        return True
+    
+    @property
+    def image_url(self):
+        """URL изображения"""
+        if self.image and hasattr(self.image, 'url'):
+            return self.image.url
+        return ''

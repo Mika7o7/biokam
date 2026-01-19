@@ -7,21 +7,19 @@ urlpatterns = [
     path('account/', views.account, name='account'),
     path('account/edit/', views.account_edit, name='account_edit'),
     path('account/change_password/', views.account_change_password, name='account_change_password'),
-    path('account/change_address/', views.account_change_address, name='account_change_address'),
-    path('account/change_bookmarks/', views.account_change_bookmarks, name='account_change_bookmarks'),
     path('account/order_history/', views.account_order_history, name='account_order_history'),
-    path('account/bonus_points/', views.account_bonus_points, name='account_bonus_points'),
-    path('account/return/', views.account_return, name='account_return'),
-    path('account/transaction/', views.account_transaction, name='account_transaction'),
-    path('account/recurring/', views.account_recurring, name='account_recurring'),
-    path('account/affiliate/add/', views.account_affiliate_add, name='account_affiliate_add'),
-    path('account/newsletter/', views.account_newsletter, name='account_newsletter'),
+    path('account/order/<int:order_id>/', views.account_order_detail, name='order_detail'),
+    path('account/affiliate/add/', views.affiliate_dashboard, name='account_affiliate_add'),
+
+    path('save-profile-info/', views.save_profile_info, name='save_profile_info'),
+    path('save-contact-info/', views.save_contact_info, name='save_contact_info'),
+    path('account/change_password_api/', views.change_password_api, name='change_password_api'),
 
     # Category Detail
     path('category/<slug:slug>', views.category_detail, name='category_detail'),
     path('product/', views.product_list, name='product_list'),
     path('product/<int:pk>/', views.product_detail, name='product_detail'),
-    path('quick-view/<int:pk>/', views.quick_view, name='quick_view'),
+    path('yookassa-webhook/', views.yookassa_webhook, name='yookassa_webhook'),
     
 
 
@@ -30,6 +28,8 @@ urlpatterns = [
     path('cart/', views.cart_detail, name='cart_detail'),  # ← страница корзины
     path('cart/remove/<int:item_id>/', views.remove_from_cart, name='remove_from_cart'),
     path('checkout/', views.checkout, name='checkout'),
+    path('create-payment/', views.create_payment, name='create_payment'),
+    path('order-success/<int:order_id>/', views.order_success, name='order_success'),
     
     
     

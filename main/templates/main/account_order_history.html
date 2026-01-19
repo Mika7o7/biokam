@@ -15,72 +15,263 @@
 <div id="account-order" class="container">
 
     <div class="row">
-
-        <aside id="column-left" class="col-sm-3 hidden-xs">
-            <div class="box">
-                <div class="box-heading">Личный кабинет</div>
-                <div class="list-group">
-        
-                    <a href="{% url 'account' %}" class="list-group-item">Личный
-                        кабинет </a>
-        
-                    <a href="{% url 'account_edit' %}" class="list-group-item">Изменить
-                        профиль</a> <a href="{% url 'account_change_password' %}"
-                        class="list-group-item">Пароль</a>
-        
-                    <a href="{% url 'account_change_address' %}" class="list-group-item">Список адресов</a>
-                    <a href="{% url 'account_change_bookmarks' %}" class="list-group-item">Закладки </a>
-                    <a href="{% url 'account_order_history' %}" class="list-group-item">История покупок </a>
-                    <a href="{% url 'account_recurring' %}" class="list-group-item">Регулярные платежи </a>
-                    <a href="{% url 'account_bonus_points' %}" class="list-group-item">Бонусные баллы </a>
-                    <a href="{% url 'account_return' %}" class="list-group-item">Возвраты </a>
-                    <a href="{% url 'account_transaction' %} " class="list-group-item">Транзакции </a>
-                    <a href="{% url 'account_newsletter' %}" class="list-group-item">Новостная рассылка </a>
-        
-                    <form method="post" action="{% url 'logout' %}">
-                        {% csrf_token %}
-                        <button class="list-group-item" type="submit" style="background: transparent;">Выйти</button>
-                    </form>
-        
+        <!-- Вставляем сайдбар -->
+        {% include 'main/account_sidebar.html' %}
+        <div class="col-md-9">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">История заказов</h4>
+                        <span class="badge bg-primary">{{ orders.count }} заказ{{ orders.count|pluralize:"ов,а," }}</span>
+                    </div>
                 </div>
-            </div>
         
-            <div class="swiper-viewport">
-                <div id="banner" class="swiper-container single-banner">
-                    <div class="swiper-wrapper">
-                        <div class="swiper-slide">
-                            <a href="#">
-                                <img src="{% static 'img/product_oe-removebg-preview.png' %}" alt="Get 15% OFF on Bedside Desk"
-                                    class="img-responsive">
-                                <div class="left-banner">
-                                    <div class="left-title">Get 15% OFF on Bedside Desk</div>
-                                </div>
+                <div class="card-body">
+                    {% if orders %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>№ Заказа</th>
+                                    <th>Дата</th>
+                                    <th>Сумма</th>
+                                    <th>Статус</th>
+                                    <th class="text-end">Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for order in orders %}
+                                <tr>
+                                    <td>
+                                        <strong>#{{ order.id }}</strong>
+                                    </td>
+                                    <td>
+                                        {{ order.created_at|date:"d.m.Y" }}
+                                        <br>
+                                        <small class="text-muted">{{ order.created_at|time:"H:i" }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="fw-bold">{{ order.total_price }} ₽</span>
+                                        {% if order.discount_amount %}
+                                        <br>
+                                        <small class="text-success">Скидка: -{{ order.discount_amount }} ₽</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge 
+                                                    {% if order.status == 'paid' %}bg-success
+                                                    {% elif order.status == 'new' %}bg-warning
+                                                    {% elif order.status == 'pending_payment' %}bg-info
+                                                    {% elif order.status == 'shipped' %}bg-primary
+                                                    {% elif order.status == 'completed' %}bg-success
+                                                    {% elif order.status == 'canceled' %}bg-danger
+                                                    {% else %}bg-secondary{% endif %}">
+                                            {{ order.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td class="text-end">
+                                        <a href="{% url 'order_detail' order.id %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-eye me-1"></i> Подробнее
+                                        </a>
+                                        {% if order.status == 'paid' or order.status == 'completed' %}
+                                        <button type="button" class="btn btn-sm btn-outline-success mt-1"
+                                            onclick="window.print()">
+                                            <i class="bi bi-printer me-1"></i> Печать
+                                        </button>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+        
+                    <!-- Пагинация (если нужно) -->
+                    {% comment %}
+                    {% if page_obj.has_other_pages %}
+                    <nav aria-label="Навигация по страницам">
+                        <ul class="pagination justify-content-center mt-4">
+                            {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Предыдущая</a>
+                            </li>
+                            {% endif %}
+        
+                            {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                            {% else %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                            </li>
+                            {% endif %}
+                            {% endfor %}
+        
+                            {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Следующая</a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                    {% endcomment %}
+        
+                    {% else %}
+                    <div class="text-center py-5">
+                        <div class="mb-4">
+                            <i class="bi bi-bag-x" style="font-size: 4rem; color: #6c757d;"></i>
+                        </div>
+                        <h4>У вас еще не было заказов!</h4>
+                        <p class="text-muted">Сделайте свой первый заказ в нашем магазине</p>
+                        <div class="mt-4">
+                            <a href="/" class="btn btn-primary">
+                                <i class="bi bi-shop me-1"></i> Перейти к покупкам
                             </a>
-        
                         </div>
                     </div>
-                    <!-- If we need pagination -->
-                    <div class="swiper-pagination"></div>
+                    {% endif %}
+                </div>
+        
+                <div class="card-footer">
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'account' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i> Назад в кабинет
+                        </a>
+                        {% if orders %}
+                        <div class="text-muted small">
+                            Последнее обновление: {% now "d.m.Y H:i" %}
+                        </div>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
-            <script type="text/javascript">
-                $('#banner0').swiper({
-                    autoplay: 4000,
-                    pagination: '.swiper-pagination',  // If we need pagination
-                    autoplayDisableOnInteraction: false
-                });
-            </script>
-        
-        </aside>
-        <div id="content" class="col-sm-9">
-            <h1>История заказов</h1>
-            <p>У вас еще не было заказов!</p>
-            <div class="buttons clearfix">
-                <div class="pull-right"><a href="{% url 'account'%}"
-                        class="btn btn-primary">Продолжить</a></div>
-            </div>
         </div>
-    </div>
-</div>
-{% endblock %}
+        </div>
+        </div>
+        <style>
+            @media print {
+        
+                .profile-sidebar,
+                .card-footer,
+                .btn,
+                nav,
+                footer {
+                    display: none !important;
+                }
+        
+                .card {
+                    border: none !important;
+                    box-shadow: none !important;
+                }
+        
+                .card-header {
+                    border-bottom: 2px solid #000 !important;
+                }
+        
+                .table {
+                    font-size: 12px !important;
+                }
+            }
 
+            @media (max-width: 768px) {
+                .table-responsive {
+                    border: 0;
+                }
+        
+                .table-responsive table {
+                    width: 100%;
+                    border-collapse: collapse;
+                }
+        
+                .table-responsive thead {
+                    display: none;
+                }
+        
+                .table-responsive tr {
+                    display: block;
+                    margin-bottom: 15px;
+                    border: 1px solid #dee2e6;
+                    border-radius: 8px;
+                }
+        
+                .table-responsive td {
+                    display: block;
+                    text-align: right;
+                    padding: 10px;
+                    border-bottom: 1px solid #dee2e6;
+                    position: relative;
+                }
+        
+                .table-responsive td:before {
+                    content: attr(data-label);
+                    position: absolute;
+                    left: 10px;
+                    width: 45%;
+                    padding-right: 10px;
+                    white-space: nowrap;
+                    text-align: left;
+                    font-weight: bold;
+                }
+        
+                .table-responsive td:last-child {
+                    border-bottom: 0;
+                }
+        
+                .btn-sm {
+                    width: 100%;
+                    margin-top: 5px;
+                }
+            }
+        </style>
+        
+        <script>
+             // Добавление data-label атрибутов для мобильной таблицы
+                document.addEventListener('DOMContentLoaded', function () {
+                    if (window.innerWidth < 768) {
+                        const tableRows = document.querySelectorAll('.table-responsive tbody tr');
+                        const headers = ['№ Заказа', 'Дата', 'Сумма', 'Статус', 'Действия'];
+
+                        tableRows.forEach((row, rowIndex) => {
+                            const cells = row.querySelectorAll('td');
+                            cells.forEach((cell, cellIndex) => {
+                                if (cellIndex < headers.length) {
+                                    cell.setAttribute('data-label', headers[cellIndex]);
+                                }
+                            });
+                        });
+                    }
+                });
+
+            // Функция для печати заказа
+            function printOrder(orderId) {
+                // Можно открыть отдельную страницу для печати
+                window.open(`/account/order/${orderId}/print/`, '_blank');
+            }
+
+            // Если хотите сделать AJAX обновление статусов
+            function refreshOrders() {
+                const refreshBtn = document.getElementById('refresh-btn');
+                const originalText = refreshBtn.innerHTML;
+
+                refreshBtn.disabled = true;
+                refreshBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+
+                // Здесь можно сделать AJAX запрос для обновления статусов
+                setTimeout(() => {
+                    location.reload();
+                }, 1000);
+            }
+
+            // Инициализация tooltips (если используете Bootstrap)
+            document.addEventListener('DOMContentLoaded', function () {
+                // Включаем tooltips
+                var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                    return new bootstrap.Tooltip(tooltipTriggerEl);
+                });
+            });
+        </script>
+        {% endblock %}

@@ -63,6 +63,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'main.context_processors.categories_processor',
+                'main.context_processors.account_sidebar_banners',
             ],
         },
     },
@@ -147,3 +148,7 @@ LOGIN_URL = '/accounts/login/'
 # Login redirects
 LOGIN_REDIRECT_URL = '/account/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
+
+
+YOOKASSA_SHOP_ID = '366398'
+YOOKASSA_SECRET_KEY = 'test_dpk-2f7SnJvSKF-2xyIZr_5uwaJp_B5aPw9p5cfMkpE'

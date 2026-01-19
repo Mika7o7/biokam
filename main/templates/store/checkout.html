@@ -1,0 +1,111 @@
+{% extends "main/base.html" %}
+{% load static %}
+{% block content %}
+<div class="container my-5">
+    <h2 class="mb-4">Оформление заказа</h2>
+
+    <!-- Сообщения -->
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <!-- Товары -->
+    <div class="card mb-4">
+        <div class="card-header">Ваши товары</div>
+        <div class="card-body">
+            {% for item in items %}
+            <div class="d-flex justify-content-between mb-3 border-bottom pb-2">
+                <div><strong>{{ item.product.name }}</strong> × {{ item.quantity }}</div>
+                <div>{{ item.quantity|multiply:item.product.price|floatformat:2 }} ₽</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Форма купона -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form id="coupon-form" method="post" class="mb-3">
+                {% csrf_token %}
+                <div class="input-group">
+                    <input type="text" name="coupon_code" id="coupon_code" class="form-control"
+                        placeholder="Введите промокод" value="{{ applied_coupon_code|default:'' }}">
+                    <button type="submit" class="btn btn-outline-primary" id="apply-coupon">
+                        Применить
+                    </button>
+                </div>
+            </form>
+            <div id="coupon-message" class="mt-2"></div>
+        </div>
+    </div>
+
+    <!-- Итог -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="d-flex justify-content-between">
+                <span>Сумма товаров:</span>
+                <span id="subtotal">{{ subtotal|floatformat:2 }} ₽</span>
+            </div>
+
+            <div class="d-flex justify-content-between text-success" id="discount-row" {% if not discount_amount %}style="display:none;" {% endif %}>
+                <span>Скидка по купону:</span>
+                <span id="discount-amount">-{{ discount_amount|floatformat:2 }} ₽</span>
+            </div>
+
+            <hr>
+
+            <div class="d-flex justify-content-between fw-bold fs-5">
+                <span>Итого к оплате:</span>
+                <span id="total-price">{{ total|floatformat:2 }} ₽</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Кнопка открытия модалки -->
+    <button type="button" class="btn btn-success btn-lg w-100" data-bs-toggle="modal" data-bs-target="#paymentModal"
+        id="open-payment-modal">
+        Оплатить <span id="pay-amount">{{ total|floatformat:2 }}</span> ₽
+    </button>
+</div>
+
+<!-- МОДАЛЬНОЕ ОКНО -->
+<div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="paymentModalLabel">
+                    Выберите способ оплаты
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="d-grid gap-3">
+                    <button type="button" class="btn btn-outline-primary btn-lg" onclick="startPayment('sbp')">
+                        Оплата по СБП (QR-код)
+                    </button>
+
+                    <button type="button" class="btn btn-outline-primary btn-lg" onclick="startPayment('card')">
+                        Банковская карта
+                    </button>
+
+                    <button type="button" class="btn btn-primary btn-lg" onclick="startPayment('yookassa')">
+                        Оплатить через ЮKassa
+                    </button>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    Отмена
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

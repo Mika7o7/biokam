@@ -1,44 +1,837 @@
+{% extends 'main/base.html' %}
 {% load static %}
 
-{% block title %}Корзина{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <h1>Ваша корзина</h1>
-    
-    {% if items %}
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Товар</th>
-                <th>Цена</th>
-                <th>Количество</th>
-                <th>Сумма</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in items %}
-            <tr>
-                <td>{{ item.product.name }}</td>
-                <td>{{ item.product.price }} ₽</td>
-                <td>{{ item.quantity }}</td>
-                <td>{{ item.get_subtotal }} ₽</td>
-                <td>
-                    <a href="{% url 'remove_from_cart' item.id %}" class="btn btn-danger btn-sm">Удалить</a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    
-    <h3 class="text-end">Итого: {{ total }} ₽</h3>
-    
-    <div class="text-end mt-4">
-        <a href="{% url 'checkout' %}" class="btn btn-success btn-lg">Оформить заказ</a>
+<div class="content-top-breadcum">
+    <div class="container">
+        <ul class="breadcrumb">
+            <li><a href="{% url 'home' %}"><i class="fa fa-home"></i></a></li>
+            <li><a href="{% url 'cart_detail' %}">Корзина</a></li>
+        </ul>
     </div>
-    {% else %}
-    <p class="alert alert-info">Ваша корзина пуста. Добавьте товары!</p>
-    {% endif %}
 </div>
+<div id="checkout-cart" class="container">
+
+
+    <div class="row">
+        <div id="content" class="col-sm-12">
+            
+            {% if cart.items.exists %}
+            <form action="{% url 'cart_detail' %}" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+            
+                <!-- Мобильная версия (одна колонка) -->
+                <table class="table table-bordered shopping-cart responsive">
+                    <tbody>
+                        {% for item in cart.items.all %}
+                        <tr>
+                            <td class="text-center">Изображение</td>
+                            <td class="text-center">
+                                {% if item.product.image %}
+                                <a href="{% url 'product_detail' item.product.id %}">
+                                    <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}"
+                                        title="{{ item.product.name }}" class="img-thumbnail" width="80">
+                                </a>
+                                {% else %}
+                                <img src="{% static 'images/no-image.jpg' %}" alt="Нет изображения" class="img-thumbnail"
+                                    width="80">
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-center">Наименование товара</td>
+                            <td class="text-center">
+                                <a href="{% url 'product_detail' item.product.id %}">{{ item.product.name }}</a><br>
+                                <!-- Если есть дополнительные атрибуты — добавь -->
+                                <small>Количество: {{ item.quantity }}</small>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-center">Модель</td>
+                            <td class="text-center">Товар #{{ item.product.id }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-center">Количество</td>
+                            <td class="text-center">
+                                <div class="input-group btn-block" style="max-width: 200px;">
+                                    <input type="text" name="quantity[{{ item.id }}]" value="{{ item.quantity }}" size="1"
+                                        class="form-control" readonly>
+                                    <span class="input-group-btn">
+                                        <button type="button" title="Удалить" class="btn btn-danger"
+                                            onclick="removeFromCart({{ item.id }});">
+                                            <i class="fa fa-times-circle"></i>
+                                        </button>
+                                    </span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-center">Цена за единицу</td>
+                            <td class="text-center">{{ item.product.price|floatformat:2 }} ₽</td>
+                        </tr>
+                        <tr>
+                            <td class="text-center">Всего</td>
+                            <td class="text-center total">{{ item.quantity|multiply:item.product.price|floatformat:2 }} ₽</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            
+                <!-- Полная версия (на десктопе) -->
+                <div class="table-responsive full-view">
+                    <table class="table table-bordered shopping-cart">
+                        <thead>
+                            <tr>
+                                <td class="text-center">Изображение</td>
+                                <td class="text-left">Наименование товара</td>
+                                <td class="text-left">Модель</td>
+                                <td class="text-left">Количество</td>
+                                <td class="text-right">Цена за единицу</td>
+                                <td class="text-right">Всего</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in cart.items.all %}
+                            <tr>
+                                <td class="text-center">
+                                    {% if item.product.image %}
+                                    <a href="{% url 'product_detail' item.product.id %}">
+                                        <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}"
+                                            width="80">
+                                    </a>
+                                    {% else %}
+                                    <img src="{% static 'images/no-image.jpg' %}" alt="Нет изображения"
+                                        width="80">
+                                    {% endif %}
+                                </td>
+                                <td class="text-left">
+                                    <a href="{% url 'product_detail' item.product.id %}">
+                                        {{ item.product.name }}
+                                    </a>
+                                </td>
+                                <td class="text-left">Товар #{{ item.product.id }}</td>
+                                <td class="text-left">
+                                    <div class="input-group btn-block" style="max-width: 200px;">
+                                        <input type="text" name="quantity[{{ item.id }}]" value="{{ item.quantity }}" size="1"
+                                            class="form-control" readonly>
+                                        <span class="input-group-btn">
+                                            
+                                            <button type="button" title="Удалить" class="btn btn-danger"
+                                                onclick="removeFromCart({{ item.id }});">
+                                                <i class="fa fa-times-circle"></i>
+                                            </button>
+                                        </span>
+                                    </div>
+                                </td>
+                                <td class="text-right">{{ item.product.price|floatformat:2 }} ₽</td>
+                                <td class="text-right">{{ item.quantity|multiply:item.product.price|floatformat:2 }} ₽</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            
+
+
+<!-- Блок контактной информации -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">
+            <button class="btn btn-link text-decoration-none text-dark fw-bold" type="button" data-bs-toggle="collapse"
+                data-bs-target="#collapseContact" aria-expanded="true">
+                Контактная информация <i class="bi bi-chevron-down ms-2"></i>
+            </button>
+        </h5>
+    </div>
+
+    <div id="collapseContact" class="collapse show">
+        <div class="card-body">
+            <div class="row">
+                <!-- Имя -->
+                <div class="col-md-6 mb-3">
+                    <label for="input-firstname" class="form-label">
+                        <i class="bi bi-person me-1"></i> Имя *
+                    </label>
+                    <input type="text" class="form-control" id="input-firstname" name="first_name"
+                        value="{{ request.user.first_name|default:'' }}" placeholder="Ваше имя" required>
+                    
+                </div>
+
+                <!-- Фамилия -->
+                <div class="col-md-6 mb-3">
+                    <label for="input-lastname" class="form-label">
+                        <i class="bi bi-person-badge me-1"></i> Фамилия
+                    </label>
+                    <input type="text" class="form-control" id="input-lastname" name="last_name"
+                        value="{{ request.user.last_name|default:'' }}" placeholder="Ваша фамилия">
+                </div>
+
+                <!-- Адрес -->
+                <div class="col-md-6 mb-3">
+                    <label for="input-address" class="form-label">
+                        <i class="bi bi-geo-alt me-1"></i> Адрес доставки *
+                    </label>
+                    <input type="text" class="form-control" id="input-address" name="address"
+                        value="{{ request.user.address|default:'' }}" placeholder="Введите полный адрес доставки"
+                        required>
+                    
+                </div>
+
+                <!-- Телефон -->
+                <div class="col-md-6 mb-3">    
+                    <label for="input-phone" class="form-label">
+                        <i class="bi bi-telephone me-1"></i> Телефон *
+                    </label>
+                    <input type="tel" class="form-control" id="input-phone" name="phone"
+                        value="{{ request.user.phone|default:'' }}" placeholder="+7 (999) 999-99-99" required>
+                    
+                </div>
+            </div>
+            
+            <!-- Кнопка сохранения -->
+            <div class="mt-2 pt-3" style="margin-top: 2rem;">
+                <button type="button" class="btn btn-primary" id="save-contact-info">
+                    <i class="bi bi-check-lg me-1"></i> Сохранить информацию для будущих заказов
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Блок купона — современный, AJAX, без перезагрузки -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">
+            <button class="btn btn-link text-decoration-none text-dark fw-bold" type="button" data-bs-toggle="collapse"
+                data-bs-target="#collapseCoupon" aria-expanded="false">
+                Использовать код купона <i class="bi bi-chevron-down ms-2"></i>
+            </button>
+        </h5>
+    </div>
+
+    <div id="collapseCoupon" class="collapse">
+        <div class="card-body">
+            <div class="input-group mb-3">
+                <input type="text" name="coupon_code" id="input-coupon" class="form-control"
+                    placeholder="Введите код купона" value="{{ applied_coupon_code|default:'' }}">
+                <button class="btn btn-primary" type="button" id="button-coupon" data-loading-text="Проверка...">
+                    Применить
+                </button>
+            </div>
+
+            <!-- Место для сообщений -->
+            <div id="coupon-result" class="mt-2"></div>
+        </div>
+    </div>
+</div>
+
+
+     <!-- Итого -->
+                <div class="row mt-4">
+                    <div class="col-sm-8"></div>
+                    <div class="col-sm-4">
+                        <table class="table table-bordered">
+                            <tbody>
+                               
+                                <tr>
+                                    <td class="text-right"><strong>Итого</strong></td>
+                                    <td id="total-price" class="text-right"><strong>{{ total|floatformat:2 }} ₽</strong></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                
+                
+                    </div>
+                </div>
+
+                <div class="buttons clearfix">
+                    <div class="pull-left">
+                        <a href="#" class="btn btn-default">Продолжить покупки</a>
+                    </div>
+                    <button type="button" class="pull-right btn btn-primary" id="pay-button">
+                        Оплатить заказ
+                    </button>
+                </div>
+                <!-- Скрытое поле для хранения кода купона -->
+                <input type="hidden" name="coupon_code" id="hidden-coupon-code" value="{{ applied_coupon_code|default:'' }}">
+             </form>
+            {% else %}
+            <div class="text-center py-5">
+                <h3>Ваша корзина пуста!</h3>
+                <p>Добавьте товары из каталога.</p>
+                <a href="{% url 'cart_detail' %}" class="btn btn-primary">Перейти в магазин</a>
+            </div>
+            {% endif %}
+
+            <!-- Кнопка для открытия модалки -->
+            
+            
+            <!-- Само модальное окно -->
+            <div id="testPaymentModal" class="test-modal">
+                <div class="test-modal-content">
+                    <div class="test-modal-header">
+                        <h4>Выберите способ оплаты</h4>
+                        <button type="button" class="close-modal" onclick="closeTestModal()">×</button>
+                    </div>
+            
+                    <div class="test-modal-body">
+                        <button class="payment-option sbp" onclick="startPayment('sbp')">
+                            <span class="icon">📱</span> Оплата по СБП (QR-код)
+                        </button>
+            
+                        <button class="payment-option card" onclick="startPayment('card')">
+                            <span class="icon">💳</span> Банковской картой
+                        </button>
+            
+                        <button class="payment-option yookassa" onclick="startPayment('yookassa')">
+                            <span class="icon">💰</span> Через ЮKassa
+                        </button>
+                    </div>
+            
+                    <div class="test-modal-footer">
+                        <button class="btn-cancel" onclick="closeTestModal()">Отмена</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Стили для модального окна -->
+            <style>
+                .test-modal {
+                    display: none;
+                    position: fixed;
+                    z-index: 1000;
+                    left: 0;
+                    top: 0;
+                    width: 100%;
+                    height: 100%;
+                    background-color: rgba(0, 0, 0, 0.65);
+                    backdrop-filter: blur(5px);
+                }
+            
+                .test-modal-content {
+                    background-color: white;
+                    margin: 10% auto;
+                    padding: 0;
+                    width: 90%;
+                    max-width: 420px;
+                    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5);
+                    overflow: hidden;
+                }
+            
+                .test-modal-header {
+                    background: linear-gradient(135deg, #d37657, #a74728);
+                    color: white;
+                    padding: 20px;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                }
+            
+                .test-modal-header h4 {
+                    margin: 0;
+                    font-size: 1.5rem;
+                }
+            
+                .close-modal {
+                    background: none;
+                    border: none;
+                    color: white;
+                    font-size: 2.2rem;
+                    font-weight: bold;
+                    cursor: pointer;
+                }
+            
+                .close-modal:hover {
+                    opacity: 0.8;
+                }
+            
+                .test-modal-body {
+                    padding: 30px 25px;
+                }
+            
+                .payment-option {
+                    width: 100%;
+                    padding: 18px;
+                    margin-bottom: 15px;
+                    font-size: 1.2rem;
+                    border: 1px solid #b4b4b4;
+                    background: #f8f9fa;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    gap: 15px;
+                    transition: all 0.3s;
+                }
+            
+                .payment-option:hover {
+                    transform: translateY(-4px);
+                    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+                }
+            
+                .payment-option.sbp {
+                    border-color: #000000;
+                    color: #000000;
+                }
+            
+                .payment-option.card {
+                    border-color: #000000;
+                    color: #000000;
+                }
+            
+                .payment-option.yookassa {
+                    background: #d37657;
+                    color: white;
+                    border-color: #000000;
+                }
+            
+                .icon {
+                    font-size: 1.8rem;
+                }
+            
+                .test-modal-footer {
+                    padding: 20px;
+                    text-align: center;
+                    background: #f8f9fa;
+                }
+            
+                .btn-cancel {
+                    padding: 12px 40px;
+                    font-size: 1.1rem;
+                    border: 2px solid #6c757d;
+                    background: white;
+                    color: #6c757d;
+                    cursor: pointer;
+                }
+            </style>
+            
+            <!-- JavaScript — полностью исправленный -->
+            <script>
+
+                // Функция для маски телефона
+                    function phoneMask(input) {
+                        if (!input) return;
+
+                        // Оставляем только цифры
+                        let value = input.value.replace(/\D/g, '');
+
+                        // Если номер начинается с 8, меняем на 7
+                        if (value.startsWith('8')) {
+                            value = '7' + value.substring(1);
+                        }
+
+                        // Если номер не начинается с 7, добавляем 7
+                        if (value && !value.startsWith('7')) {
+                            value = '7' + value;
+                        }
+
+                        // Ограничиваем до 11 цифр
+                        value = value.substring(0, 11);
+
+                        // Форматируем номер
+                        let formatted = '';
+                        if (value.length > 0) {
+                            formatted = '+7';
+                            if (value.length > 1) {
+                                formatted += ' (' + value.substring(1, 4);
+                            }
+                            if (value.length >= 4) {
+                                formatted += ') ' + value.substring(4, 7);
+                            }
+                            if (value.length >= 7) {
+                                formatted += '-' + value.substring(7, 9);
+                            }
+                            if (value.length >= 9) {
+                                formatted += '-' + value.substring(9, 11);
+                            }
+                        }
+
+                        input.value = formatted;
+
+                        // Валидация
+                        if (value.length >= 11) {
+                            input.classList.remove('is-invalid');
+                            return true;
+                        } else {
+                            input.classList.add('is-invalid');
+                            return false;
+                        }
+                    }
+
+                    // Функция для AJAX сохранения
+                    function saveContactInfo() {
+                        const firstName = document.getElementById('input-firstname');
+                        const address = document.getElementById('input-address');
+                        const phone = document.getElementById('input-phone');
+                        const lastName = document.getElementById('input-lastname');
+
+                        // Получаем значения
+                        const firstNameValue = firstName ? firstName.value.trim() : '';
+                        const lastNameValue = lastName ? lastName.value.trim() : '';
+                        const addressValue = address ? address.value.trim() : '';
+                        const phoneValue = phone ? phone.value.trim() : '';
+
+                        // Валидация
+                        if (!firstNameValue) {
+                            alert('Пожалуйста, укажите ваше имя');
+                            if (firstName) firstName.focus();
+                            return false;
+                        }
+
+                        if (!addressValue) {
+                            alert('Пожалуйста, укажите адрес доставки');
+                            if (address) address.focus();
+                            return false;
+                        }
+
+                        // Проверяем телефон через маску
+                        if (!phone || !phoneMask(phone)) {
+                            alert('Пожалуйста, укажите корректный номер телефона');
+                            if (phone) phone.focus();
+                            return false;
+                        }
+
+                        const btn = document.getElementById('save-contact-info');
+                        const originalText = btn.innerHTML;
+                        btn.disabled = true;
+                        btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Сохранение...';
+
+                        const formData = new FormData();
+                        formData.append('first_name', firstNameValue);
+                        formData.append('last_name', lastNameValue);
+                        formData.append('address', addressValue);
+                        formData.append('phone', phoneValue);
+                        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+                        fetch("{% url 'save_contact_info' %}", {
+                            method: 'POST',
+                            body: formData,
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        })
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error('Network response was not ok');
+                                }
+                                return response.json();
+                            })
+                            .then(data => {
+                                const resultDiv = document.getElementById('contact-result');
+                                if (resultDiv) {
+                                    if (data.success) {
+                                        resultDiv.innerHTML =
+                                            `<div class="alert alert-success alert-dismissible fade show" role="alert">
+                            ${data.message}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>`;
+                                    } else {
+                                        resultDiv.innerHTML =
+                                            `<div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            ${data.message}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>`;
+                                    }
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Ошибка:', error);
+                                const resultDiv = document.getElementById('contact-result');
+                                if (resultDiv) {
+                                    resultDiv.innerHTML =
+                                        `<div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        Ошибка сохранения. Проверьте соединение.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>`;
+                                }
+                            })
+                            .finally(() => {
+                                btn.disabled = false;
+                                btn.innerHTML = originalText;
+                            });
+
+                        return true;
+                    }
+
+                    // Инициализация после загрузки DOM
+                    document.addEventListener('DOMContentLoaded', function () {
+                        console.log('DOM загружен, инициализируем контактную форму...');
+
+                        // 1. Инициализация маски телефона
+                        const phoneInput = document.getElementById('input-phone');
+                        if (phoneInput) {
+                            console.log('Найден input для телефона');
+
+                            // При вводе
+                            phoneInput.addEventListener('input', function () {
+                                phoneMask(this);
+                            });
+
+                            // При потере фокуса
+                            phoneInput.addEventListener('blur', function () {
+                                phoneMask(this);
+                            });
+
+                            // При загрузке страницы тоже форматируем
+                            setTimeout(() => {
+                                phoneMask(phoneInput);
+                            }, 100);
+                        } else {
+                            console.error('Не найден элемент #input-phone');
+                        }
+
+                        // 2. Кнопка сохранения
+                        const saveContactBtn = document.getElementById('save-contact-info');
+                        if (saveContactBtn) {
+                            console.log('Найдена кнопка сохранения');
+                            saveContactBtn.addEventListener('click', function (e) {
+                                e.preventDefault();
+                                console.log('Кнопка сохранения нажата');
+                                saveContactInfo();
+                            });
+                        } else {
+                            console.error('Не найден элемент #save-contact-info');
+                        }
+
+                        // 3. Проверка URL
+                        console.log('URL для сохранения:', "{% url 'save_contact_info' %}");
+                        console.log('CSRF токен:', '{{ csrf_token }}' ? 'присутствует' : 'отсутствует');
+                    });
+
+                
+                // Глобальная переменная
+                    let currentOrderId = null;
+
+                 // Открытие модального окна
+                    function openTestModal() {
+                        document.getElementById('testPaymentModal').style.display = 'block';
+                    }
+
+                    // Закрытие модального окна
+                    function closeTestModal() {
+                        document.getElementById('testPaymentModal').style.display = 'none';
+                    }
+
+                    // Закрытие по клику на фон
+                    document.getElementById('testPaymentModal').addEventListener('click', function (e) {
+                        if (e.target === this) {
+                            closeTestModal();
+                        }
+                    });
+
+                    // Закрытие по Esc
+                    document.addEventListener('keydown', function (e) {
+                        if (e.key === 'Escape') {
+                            closeTestModal();
+                        }
+                    });
+
+                    document.addEventListener('DOMContentLoaded', function () {
+                        // Элементы для работы с купоном
+                        const applyBtn = document.getElementById('button-coupon');
+                        const couponInput = document.getElementById('input-coupon');
+                        const resultDiv = document.getElementById('coupon-result');
+                        const hiddenCoupon = document.getElementById('hidden-coupon-code');
+                        const totalEl = document.getElementById('total-price');
+                        const payButton = document.getElementById('pay-button');
+                        const subtotalEl = document.getElementById('subtotal-price');
+
+                        const first_name = document.getElementById('input-firstname');
+                        const last_name = document.getElementById('input-lastname');
+                        const address = document.getElementById('input-address');
+                        const phone = document.getElementById('input-phone');
+
+                        // 1. Обработка применения купона
+                        if (applyBtn && couponInput && resultDiv && hiddenCoupon) {
+                            applyBtn.addEventListener('click', function () {
+                                const couponCode = couponInput.value.trim();
+                                if (!couponCode) {
+                                    resultDiv.innerHTML = '<div class="alert alert-warning">Введите код купона</div>';
+                                    return;
+                                }
+
+                                const originalText = applyBtn.innerHTML;
+                                applyBtn.disabled = true;
+                                applyBtn.innerHTML = 'Проверка...';
+
+                                const formData = new FormData();
+                                formData.append('coupon_code', couponCode);
+                                formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+                                fetch("{% url 'checkout' %}", {
+                                    method: 'POST',
+                                    body: formData,
+                                    headers: {
+                                        'X-Requested-With': 'XMLHttpRequest'
+                                    }
+                                })
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        resultDiv.innerHTML = '';
+                                        if (data.success) {
+                                            resultDiv.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
+
+                                            // Обновляем отображение цен
+                                            if (totalEl) {
+                                                totalEl.textContent = `${data.new_total.toFixed(2)} ₽`;
+                                            }
+
+                                            // Сохраняем код купона
+                                            hiddenCoupon.value = data.coupon_code;
+
+                                            // Обновляем кнопку оплаты
+                                            if (payButton) {
+                                                payButton.innerHTML = `Оплатить ${data.new_total.toFixed(2)} ₽`;
+                                            }
+
+                                            console.log('Купон зафиксирован:', data.coupon_code);
+                                        } else {
+                                            resultDiv.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
+                                            hiddenCoupon.value = '';
+                                        }
+                                    })
+                                    .catch(error => {
+                                        console.error('Ошибка:', error);
+                                        resultDiv.innerHTML = '<div class="alert alert-danger">Ошибка проверки купона</div>';
+                                    })
+                                    .finally(() => {
+                                        applyBtn.disabled = false;
+                                        applyBtn.innerHTML = originalText;
+                                    });
+                            });
+                        }
+
+                        // 2. Обработка нажатия "Оплатить заказ"
+                        if (payButton) {
+                            payButton.addEventListener('click', function () {
+                                const btn = this;
+                                const originalText = btn.innerHTML;
+                                btn.disabled = true;
+                                btn.innerHTML = 'Создание заказа...';
+
+                                // Берём код купона из скрытого поля (если был применён)
+                                const couponCode = hiddenCoupon ? hiddenCoupon.value : '';
+                               
+                                const formData = new FormData();
+                                formData.append('create_order', 'true');
+                                formData.append('coupon_code', couponCode);
+                                formData.append('first_name', first_name.value);
+                                formData.append('last_name', last_name.value);
+                                formData.append('address', address.value);
+                                formData.append('phone', phone.value);
+                                formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+                                fetch("{% url 'checkout' %}", {
+                                    method: 'POST',
+                                    body: formData,
+                                    headers: {
+                                        'X-Requested-With': 'XMLHttpRequest'
+                                    }
+                                })
+                                    .then(res => res.json())
+                                    .then(data => {
+                                        console.log('Ответ на создание заказа:', data);
+                                        // В обработчике создания заказа:
+                                        if (data.success) {
+                                            // Сохраняем order_id в ГЛОБАЛЬНУЮ переменную
+                                            currentOrderId = data.order_id;
+                                            console.log('Order ID сохранен в currentOrderId:', currentOrderId);
+                                            console.log('Сумма заказа из ответа:', data.total_price);
+
+                                            // Проверим, какая сумма сейчас на странице
+                                            const displayTotal = document.getElementById('total-price').textContent;
+                                            console.log('Сумма на странице:', displayTotal);
+
+                                            // Сохраняем сумму в localStorage
+                                            localStorage.setItem('lastOrderAmount', data.total_price);
+
+                                            // Показываем КАСТОМНОЕ модальное окно с выбором оплаты
+                                            openTestModal();
+
+                                            // Обновляем сообщение
+                                            if (resultDiv) {
+                                                resultDiv.innerHTML = `<div class="alert alert-success">${data.message} Сумма: ${data.total_price} ₽</div>`;
+                                            }
+                                        } else {
+                                            alert('Ошибка создания заказа: ' + (data.message || 'Неизвестная ошибка'));
+                                        }
+                                    })
+                                    .catch(error => {
+                                        console.error('Ошибка:', error);
+                                        alert('Ошибка создания заказа');
+                                    })
+                                    .finally(() => {
+                                        btn.innerHTML = originalText;
+                                        btn.disabled = false;
+                                    });
+                            });
+                        }
+                    });
+
+                    // 3. Функция для начала оплаты (вызывается из модального окна) - ГЛОБАЛЬНАЯ
+                    function startPayment(method) {
+                            console.log('=== startPayment вызван ===');
+                            console.log('method:', method);
+                            console.log('currentOrderId:', currentOrderId);
+                            console.log('Сумма из localStorage:', localStorage.getItem('lastOrderAmount'));
+                            console.log('Сумма на странице:', document.getElementById('total-price').textContent);
+
+                            if (!currentOrderId) {
+                                alert('Ошибка: заказ не найден. Пожалуйста, создайте заказ заново.');
+                                return;
+                            }
+
+                            // Закрываем модальное окно
+                            closeTestModal();
+
+                            // Собираем данные для отправки
+                            const requestData = {
+                                payment_method: method,
+                                order_id: currentOrderId,
+                                // Добавляем сумму для проверки
+                                expected_amount: parseFloat(document.getElementById('total-price').textContent.replace(' ₽', ''))
+                            };
+
+                            console.log('Данные для отправки:', requestData);
+
+                            // Отправляем запрос на создание платежа
+                            fetch("{% url 'create_payment' %}", {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRFToken': '{{ csrf_token }}',
+                                    'X-Requested-With': 'XMLHttpRequest'
+                                },
+                                body: JSON.stringify(requestData)
+                            })
+                                .then(res => res.json())
+                                .then(data => {
+                                    console.log('Ответ от create_payment:', data);
+
+                                    if (data.success && data.payment_url) {
+                                        console.log('Перенаправляем на:', data.payment_url);
+                                        window.location.href = data.payment_url;
+                                    } else {
+                                        alert('Ошибка: ' + (data.message || 'Неизвестная ошибка'));
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Ошибка:', error);
+                                    alert('Произошла ошибка при обработке платежа');
+                                });
+                        }
+            </script>
+            
+            
+</div>
+</div>
+</div>
+<br>
+
+
+
+
+
+               
+   
+
 {% endblock %}

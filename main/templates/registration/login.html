@@ -1,8 +1,30 @@
 {% load static %}
 
+
 <!-- {% block title %}Вход{% endblock %} -->
 
 {% block content %}
+
+<!-- jQuery сначала (обязательно перед Inputmask) -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"
+  integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+
+<!-- Inputmask -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.9/jquery.inputmask.min.js"></script>
+
+<!-- Inputmask для красивой маски телефона -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.9/jquery.inputmask.min.js"></script>
+
+<script>
+  $(document).ready(function () {
+    $('#phone-input').inputmask({
+      mask: '+7 (999) 999-99-99',
+      placeholder: "_",
+      showMaskOnHover: false,
+      showMaskOnFocus: true
+    });
+  });
+</script>
 
 <!-- Полноэкранный видео-фон -->
 <div class="video-background">

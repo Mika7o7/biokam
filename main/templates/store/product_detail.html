@@ -7,8 +7,8 @@
     <div class="container">
         <ul class="breadcrumb">
             <li><a href="{% url 'home' %}"><i class="fa fa-home"></i></a></li>
-            <li><a href="http://31.128.43.100/index.php?route=product/category&amp;path=20">Мойки</a></li>
-            <li><a href="http://31.128.43.100/index.php?route=product/category&amp;path=20_61">Односекционные</a></li>
+            <li><a href="http://31.128.43.100/index.php?route=product/category&amp;path=20">{{ category.name }}</a></li>
+            <li><a href="http://31.128.43.100/index.php?route=product/category&amp;path=20_61">{{ product.name }}</a></li>
         </ul>
     </div>
 </div>
@@ -65,7 +65,7 @@
                                         <td><span class="desc">Категория:</span></td>
                                         <td class="description-right">{{ product.category.name|default:"Без категории"}}</td>
                                     </tr>
-                                    <tr>
+                                    <!-- <tr>
                                         <td><span class="desc">В наличии:</span></td>
                                         <td class="description-right">
                                             {% if product.stock > 0 %}
@@ -74,7 +74,7 @@
                                             <span style="color:#ff0000;">Нет в наличии</span>
                                             {% endif %}
                                         </td>
-                                    </tr>
+                                    </tr> -->
                                 </tbody>
                             </table>
                         </div>
@@ -120,8 +120,7 @@
                             <a class="addthis_button_pinterest_pinit"></a>
                             <a class="addthis_counter addthis_pill_style"></a>
                         </div>
-                        <script type="text/javascript"
-                            src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-515eeaf54693130e"></script>
+                        
 
                         <div class="content_product_block"></div>
                     </div>

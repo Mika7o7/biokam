@@ -15,178 +15,113 @@
 <div id="account-affiliate" class="container">
 
     <div class="row">
-
-        <aside id="column-left" class="col-sm-3 hidden-xs">
-            <div class="box">
-                <div class="box-heading">Личный кабинет</div>
-                <div class="list-group">
-        
-                    <a href="{% url 'account' %}" class="list-group-item">Личный
-                        кабинет </a>
-        
-                    <a href="{% url 'account_edit' %}" class="list-group-item">Изменить
-                        профиль</a> <a href="{% url 'account_change_password' %}"
-                        class="list-group-item">Пароль</a>
-        
-                    <a href="{% url 'account_change_address' %}" class="list-group-item">Список адресов</a>
-                    <a href="{% url 'account_change_bookmarks' %}" class="list-group-item">Закладки </a>
-                    <a href="{% url 'account_order_history' %}" class="list-group-item">История покупок </a>
-                    <a href="{% url 'account_recurring' %}" class="list-group-item">Регулярные платежи </a>
-                    <a href="{% url 'account_bonus_points' %}" class="list-group-item">Бонусные баллы </a>
-                    <a href="{% url 'account_return' %}" class="list-group-item">Возвраты </a>
-                    <a href="{% url 'account_transaction' %} " class="list-group-item">Транзакции </a>
-                    <a href="{% url 'account_newsletter' %}" class="list-group-item">Новостная рассылка </a>
-        
-                    <form method="post" action="{% url 'logout' %}">
-                        {% csrf_token %}
-                        <button class="list-group-item" type="submit" style="background: transparent;">Выйти</button>
-                    </form>
-        
+        <!-- Вставляем сайдбар -->
+        {% include 'main/account_sidebar.html' %}
+    
+    <div id="content" class="col-sm-9">
+        <h1>Реферальная программа</h1>
+    
+        <form class="form-horizontal">
+            <fieldset>
+                <legend>Ваши реферальные данные</legend>
+    
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">Реф. ссылка</label>
+                    <div class="col-sm-10">
+                        <div class="form-control-static"
+                            style="word-break:break-all; padding: 8px 12px; background:#f5f5f5; border:1px solid #ddd; border-radius:4px;">
+                            {{ referral_link }}
+                        </div>
+                        <button type="button" class="btn btn-default btn-sm" style="margin-top:8px;"
+                            onclick="navigator.clipboard.writeText('{{ referral_link }}')">Скопировать</button>
+                    </div>
                 </div>
+    
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">Ваш код</label>
+                    <div class="col-sm-10">
+                        <strong style="font-size:1.4em; letter-spacing:1px;">{{ referral_code }}</strong>
+                    </div>
+                </div>
+    
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">Ваша ставка</label>
+                    <div class="col-sm-10">
+                        <h3 style="margin:5px 0 0 0; color:#27ae60;">{{ referral_rate }}%</h3>
+                        <small class="text-muted">от суммы оплаченных заказов привлечённых пользователей</small>
+                    </div>
+                </div>
+    
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">Баланс</label>
+                    <div class="col-sm-10">
+                        <h2 style="margin:5px 0 0 0; color:#2c3e50;">{{ total_balance }} €</h2>
+                        <small class="text-success">Всего заработано по рефералам: {{ total_earned }} €</small>
+                    </div>
+                </div>
+            </fieldset>
+    
+            <fieldset>
+                <legend>Привлечённые пользователи ({{ referral_count }})</legend>
+    
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover table-condensed ref-table">
+                        <thead>
+                            <tr>
+                                <th>Пользователь</th>
+                                <th class="text-center">Дата</th>
+                                <th class="text-right">Вам начислено</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ref in recent_referrals %}
+                            <tr>
+                                <td>{{ ref.username }}</td>
+                                <td class="text-center">{{ ref.date_joined|date:"d.m.Y" }}</td>
+                                <td class="text-right text-success">+{{ ref.earned_from_user }} €</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3" class="text-center text-muted">Пока нет привлечённых пользователей</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </fieldset>
+    
+            <div class="alert alert-info" style="margin-top:25px;">
+                <i class="fa fa-info-circle"></i>
+                Максимальная глубина рефералов: {{ max_levels }} уровень(ей)
             </div>
-        
-            <div class="swiper-viewport">
-                <div id="banner" class="swiper-container single-banner">
-                    <div class="swiper-wrapper">
-                        <div class="swiper-slide">
-                            <a href="#">
-                                <img src="{% static 'img/product_oe-removebg-preview.png' %}" alt="Get 15% OFF on Bedside Desk"
-                                    class="img-responsive">
-                                <div class="left-banner">
-                                    <div class="left-title">Get 15% OFF on Bedside Desk</div>
-                                </div>
-                            </a>
-        
-                        </div>
-                    </div>
-                    <!-- If we need pagination -->
-                    <div class="swiper-pagination"></div>
-                </div>
-            </div>
-            <script type="text/javascript">
-                $('#banner0').swiper({
-                    autoplay: 4000,
-                    pagination: '.swiper-pagination',  // If we need pagination
-                    autoplayDisableOnInteraction: false
-                });
-            </script>
-        
-        </aside>
-        <div id="content" class="col-sm-9">
-            <h1>Информация партнера</h1>
-            <form action="http://31.128.43.100/index.php?route=account/affiliate/add" method="post"
-                enctype="multipart/form-data" class="form-horizontal">
-                <fieldset>
-                    <legend>Информация партнера</legend>
-                    <div class="form-group">
-                        <label class="col-sm-2 control-label" for="input-company">Компания</label>
-                        <div class="col-sm-10">
-                            <input type="text" name="company" value="" placeholder="Компания" id="input-company"
-                                class="form-control">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="col-sm-2 control-label" for="input-website">Веб-сайт</label>
-                        <div class="col-sm-10">
-                            <input type="text" name="website" value="" placeholder="Веб-сайт" id="input-website"
-                                class="form-control">
-                        </div>
-                    </div>
-                </fieldset>
-                <fieldset>
-                    <legend>Платежная информация</legend>
-                    <div class="form-group">
-                        <label class="col-sm-2 control-label" for="input-tax">ИНН</label>
-                        <div class="col-sm-10">
-                            <input type="text" name="tax" value="" placeholder="ИНН" id="input-tax"
-                                class="form-control">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="col-sm-2 control-label">Метод оплаты</label>
-                        <div class="col-sm-10">
-                            <div class="radio">
-                                <label> <input type="radio" name="payment" value="cheque" checked="checked">
-                                    Чек</label>
-                            </div>
-                            <div class="radio">
-                                <label> <input type="radio" name="payment" value="paypal">
-                                    PayPal</label>
-                            </div>
-                            <div class="radio">
-                                <label> <input type="radio" name="payment" value="bank">
-                                    Банковский перевод</label>
-                            </div>
-                        </div>
-                    </div>
-                    <div id="payment-cheque" class="payment" style="display: block;">
-                        <div class="form-group required">
-                            <label class="col-sm-2 control-label" for="input-cheque">Получатель чека</label>
-                            <div class="col-sm-10">
-                                <input type="text" name="cheque" value="" placeholder="Получатель чека"
-                                    id="input-cheque" class="form-control">
-                            </div>
-                        </div>
-                    </div>
-                    <div id="payment-paypal" class="payment" style="display: none;">
-                        <div class="form-group required">
-                            <label class="col-sm-2 control-label" for="input-paypal">Аккаунт PayPal</label>
-                            <div class="col-sm-10">
-                                <input type="text" name="paypal" value="" placeholder="Аккаунт PayPal" id="input-paypal"
-                                    class="form-control">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="payment" id="payment-bank" style="display: none;">
-                        <div class="form-group">
-                            <label class="col-sm-2 control-label" for="input-bank-name">Банк</label>
-                            <div class="col-sm-10">
-                                <input type="text" name="bank_name" value="" placeholder="Банк" id="input-bank-name"
-                                    class="form-control">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-sm-2 control-label" for="input-bank-branch-number">Номер отделения</label>
-                            <div class="col-sm-10">
-                                <input type="text" name="bank_branch_number" value="" placeholder="Номер отделения"
-                                    id="input-bank-branch-number" class="form-control">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-sm-2 control-label" for="input-bank-swift-code">БИК</label>
-                            <div class="col-sm-10">
-                                <input type="text" name="bank_swift_code" value="" placeholder="БИК"
-                                    id="input-bank-swift-code" class="form-control">
-                            </div>
-                        </div>
-                        <div class="form-group required">
-                            <label class="col-sm-2 control-label" for="input-bank-account-name">Корр. счет</label>
-                            <div class="col-sm-10">
-                                <input type="text" name="bank_account_name" value="" placeholder="Корр. счет"
-                                    id="input-bank-account-name" class="form-control">
-                            </div>
-                        </div>
-                        <div class="form-group required">
-                            <label class="col-sm-2 control-label" for="input-bank-account-number">Расчетный счет</label>
-                            <div class="col-sm-10">
-                                <input type="text" name="bank_account_number" value="" placeholder="Расчетный счет"
-                                    id="input-bank-account-number" class="form-control">
-                            </div>
-                        </div>
-                    </div>
-
-                </fieldset>
-                <div class="buttons clearfix">
-                    <div class="pull-right">Я прочитал и согласен с <a
-                            href="http://31.128.43.100/index.php?route=information/information/agree&amp;information_id=4"
-                            class="agree"><b>About Us</b></a>
-                        <input type="checkbox" name="agree" value="1">
-                        &nbsp;
-                        <input type="submit" value="Продолжить" class="btn btn-primary">
-                    </div>
-                </div>
-            </form>
-        </div>
+        </form>
+    </div>
+    
+    <!-- Добавляем минимальные стили именно для мобильных -->
+    <style type="text/css">
+        @media (max-width: 767px) {
+            .ref-table {
+                font-size: 13px !important;
+            }
+    
+            .ref-table th,
+            .ref-table td {
+                padding: 6px 8px !important;
+            }
+    
+            .ref-table thead th {
+                font-size: 12px !important;
+            }
+    
+            .ref-table tfoot td {
+                font-size: 14px !important;
+            }
+    
+            .table-responsive {
+                margin-bottom: 15px;
+            }
+        }
+    </style>
     </div>
 </div>
 {% endblock %}
