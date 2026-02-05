@@ -16,7 +16,38 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.9/jquery.inputmask.min.js"></script>
 
     {% block extra_head %}{% endblock %}
+    <script>
+        const input = document.getElementById('phone');
 
+        input.addEventListener('input', () => {
+            let numbers = input.value.replace(/\D/g, '');
+
+            if (numbers.startsWith('8')) {
+                numbers = '7' + numbers.slice(1);
+            }
+
+            if (!numbers.startsWith('7')) {
+                numbers = '7' + numbers;
+            }
+
+            let formatted = '+7';
+
+            if (numbers.length > 1) {
+                formatted += ' (' + numbers.slice(1, 4);
+            }
+            if (numbers.length >= 5) {
+                formatted += ') ' + numbers.slice(4, 7);
+            }
+            if (numbers.length >= 8) {
+                formatted += '-' + numbers.slice(7, 9);
+            }
+            if (numbers.length >= 10) {
+                formatted += '-' + numbers.slice(9, 11);
+            }
+
+            input.value = formatted;
+        });
+    </script>
     <style>
         *,
         *::before,
