@@ -22,7 +22,7 @@ import json
 import uuid
 import os
 
-from .forms import RegisterForm, VerifyEmailForm
+from .forms import RegisterForm, VerifyEmailForm, LoginForm
 from .models import (
     Product, Cart, CartItem, Order,
     OrderItem, Category, Review, User,
@@ -33,6 +33,11 @@ Configuration.account_id = settings.YOOKASSA_SHOP_ID
 Configuration.secret_key = settings.YOOKASSA_SECRET_KEY
 
 
+from django.contrib.auth.views import LoginView
+
+class CustomLoginView(LoginView):
+    template_name = "registration/login.html"
+    authentication_form = LoginForm
 
 class RegisterView(FormView):
     template_name = 'registration/register.html'
@@ -103,6 +108,7 @@ class VerifyEmailView(FormView):
             referrer = User.objects.filter(referral_code=invite_code).first()
             if referrer:
                 user.referrer = referrer
+                user.is_active = True
                 user.save()
 
         # очищаем session

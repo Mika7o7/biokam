@@ -38,9 +38,9 @@ urlpatterns = [
     
 
 
-    
+
  
-    
+    path('login/', views.CustomLoginView.as_view(), name='login'),
     path('register/', views.RegisterView.as_view(), name='register'),
     path('verify-email/', views.VerifyEmailView.as_view(), name='verify_email'),
     path('', include('django.contrib.auth.urls')),
