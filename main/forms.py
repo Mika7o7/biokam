@@ -25,6 +25,10 @@ class LoginForm(AuthenticationForm):
             "placeholder": "Введите пароль"
         })
     )
+    
+    class Meta:
+        model = User
+        fields = ('username', 'password')
 
 
 class RegisterForm(UserCreationForm):

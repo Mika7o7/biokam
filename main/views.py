@@ -38,7 +38,13 @@ from django.contrib.auth.views import LoginView
 class CustomLoginView(LoginView):
     template_name = "registration/login.html"
     authentication_form = LoginForm
+    redirect_authenticated_user = True
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['request'] = self.request
+        return kwargs
+    
 class RegisterView(FormView):
     template_name = 'registration/register.html'
     form_class = RegisterForm
