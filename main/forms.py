@@ -10,7 +10,7 @@ import re
 
 class LoginForm(AuthenticationForm):
 
-    email = forms.EmailField(
+    username = forms.EmailField(
         label="Email",
         widget=forms.EmailInput(attrs={
             "class": "form-control",
