@@ -1,120 +1,34 @@
 {% extends "registration/auth_base.html" %}
 
-{% block content %}
+{% block title %}Подтверждение email{% endblock %}
 
-<div class="verify-container">
+{% block auth_content %}
 
-    ```
-    <h2 class="verify-title">Подтверждение email</h2>
+<h2 class="form-title">Подтверждение email</h2>
 
-    <p class="verify-text">
-        Мы отправили код подтверждения на вашу почту
-    </p>
+<p style="text-align:center; margin-bottom:20px;">
+    Мы отправили код подтверждения на вашу почту
+</p>
 
-    <form method="post" class="verify-form">
-        {% csrf_token %}
+<form method="post">
+    {% csrf_token %}
 
-        <div class="form-group">
-            <label for="{{ form.code.id_for_label }}">
-                {{ form.code.label }}
-            </label>
+    <div class="form-group">
+        <label for="{{ form.code.id_for_label }}">
+            Код подтверждения
+        </label>
 
-            {{ form.code }}
+        {{ form.code }}
+    </div>
 
-            {% if form.code.errors %}
-            <div class="error">
-                {{ form.code.errors }}
-            </div>
-            {% endif %}
-        </div>
+    <button type="submit" class="btn-auth">
+        Подтвердить
+    </button>
 
-        <button type="submit" class="verify-button">
-            Подтвердить
-        </button>
+</form>
 
-    </form>
-    ```
-
+<div class="form-footer">
+    <a href="{% url 'register' %}">Назад к регистрации</a>
 </div>
-
-<style>
-    .verify-container {
-        max-width: 400px;
-        margin: 0 auto;
-        padding: 20px;
-    }
-
-    .verify-title {
-        text-align: center;
-        margin-bottom: 10px;
-    }
-
-    .verify-text {
-        text-align: center;
-        margin-bottom: 20px;
-        color: #666;
-    }
-
-    .verify-form {
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-    }
-
-    .form-group {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .form-group input {
-        padding: 12px;
-        font-size: 16px;
-        border: 1px solid #ccc;
-        border-radius: 8px;
-    }
-
-    .verify-button {
-        padding: 12px;
-        font-size: 16px;
-        border: none;
-        border-radius: 8px;
-        background-color: #4CAF50;
-        color: white;
-        cursor: pointer;
-    }
-
-    .verify-button:hover {
-        background-color: #45a049;
-    }
-
-    .error {
-        color: red;
-        font-size: 14px;
-    }
-
-
-    /* мобильные устройства */
-    @media (max-width: 480px) {
-
-        .verify-container {
-            padding: 15px;
-        }
-
-        .verify-title {
-            font-size: 20px;
-        }
-
-        .form-group input {
-            font-size: 16px;
-            padding: 14px;
-        }
-
-        .verify-button {
-            font-size: 16px;
-            padding: 14px;
-        }
-
-    }
-</style>
 
 {% endblock %}
