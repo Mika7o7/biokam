@@ -39,11 +39,11 @@ class CustomLoginView(LoginView):
     template_name = "registration/login.html"
     authentication_form = LoginForm
     redirect_authenticated_user = True
+    success_url = reverse_lazy('account')  # или 'home' — любая твоя страница
 
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['request'] = self.request
-        return kwargs
+    # или через метод
+    def get_success_url(self):
+        return reverse_lazy('account')  # или self.request.GET.get('next', '/')
     
 class RegisterView(FormView):
     template_name = 'registration/register.html'
@@ -106,7 +106,8 @@ class VerifyEmailView(FormView):
             email=session_data['email'],
             phone=session_data['phone'],
             password=session_data['password'],
-            is_active= True
+            is_active=True,
+            is_email_verified=True,
         )
 
         # реферал

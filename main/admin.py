@@ -50,26 +50,23 @@ class CustomUserCreationForm(forms.ModelForm):
 # Форма изменения существующего пользователя
 class CustomUserChangeForm(forms.ModelForm):
     password = forms.CharField(
-        widget=forms.PasswordInput(render_value=True),
+        widget=forms.PasswordInput,
         required=False,
         label="Пароль",
-        help_text="Оставьте пустым, если не хотите менять пароль. "
-                  "Если заполните — будет установлен новый."
+        help_text="Оставьте пустым, если не хотите менять пароль"
     )
 
     class Meta:
         model = User
         fields = '__all__'
 
-    def clean_password(self):
-        # Возвращаем исходный хэш пароля, если поле пустое
-        return self.initial.get('password')
-
     def save(self, commit=True):
         user = super().save(commit=False)
         password = self.cleaned_data.get('password')
+
         if password:
             user.set_password(password)
+
         if commit:
             user.save()
         return user
