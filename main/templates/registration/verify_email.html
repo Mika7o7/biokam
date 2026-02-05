@@ -1,0 +1,19 @@
+{% extends "auth_base.html" %}
+
+{% block content %}
+
+<h2>Подтверждение email</h2>
+
+<form method="post">
+    {% csrf_token %}
+
+    {{ form.code.label }}
+    {{ form.code }}
+
+    <button type="submit">
+        Подтвердить
+    </button>
+
+</form>
+
+{% endblock %}

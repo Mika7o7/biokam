@@ -1,4 +1,4 @@
-from django.views.generic import CreateView
+from django.views.generic import CreateView, FormView
 from django.urls import reverse_lazy, reverse
 from django.contrib.messages.views import SuccessMessageMixin
 from django.shortcuts import render, redirect, get_object_or_404
@@ -22,7 +22,7 @@ import json
 import uuid
 import os
 
-from .forms import RegisterForm
+from .forms import RegisterForm, VerifyEmailForm
 from .models import (
     Product, Cart, CartItem, Order,
     OrderItem, Category, Review, User,
@@ -34,50 +34,82 @@ Configuration.secret_key = settings.YOOKASSA_SECRET_KEY
 
 
 
-class RegisterView(CreateView):
-    form_class = RegisterForm
+class RegisterView(FormView):
     template_name = 'registration/register.html'
-    success_url = reverse_lazy('verify_email')  # страница для ввода кода
+    form_class = RegisterForm
+    success_url = reverse_lazy('verify_email')
 
     def form_valid(self, form):
-        user = form.save(commit=False)
-        user.is_active = False  # пока не подтвердил email
-        code = f"{random.randint(100000, 999999)}"  # 6-значный код
-        user.email_verification_code = code
-        user.save()
 
-        # Реферальная логика
-        invite_code = form.cleaned_data.get('invite_code')
-        if invite_code:
-            referrer = User.objects.filter(referral_code=invite_code).first()
-            if referrer and referrer != user:
-                user.referrer = referrer
-                user.save(update_fields=['referrer'])
+        # генерируем код
+        code = str(random.randint(100000, 999999))
 
-        # Отправка кода на email
+        # сохраняем данные временно в session
+        self.request.session['register_data'] = {
+            'email': form.cleaned_data['email'],
+            'phone': form.cleaned_data['phone'],
+            'password': form.cleaned_data['password1'],
+            'invite_code': form.cleaned_data.get('invite_code', ''),
+            'code': code,
+        }
+
+        # отправляем email
         send_mail(
-            'Ваш код подтверждения',
-            f'Ваш код для подтверждения email: {code}',
-            'no-reply@yourdomain.com',
-            [user.email],
+            'Код подтверждения',
+            f'Ваш код подтверждения: {code}',
+            None,
+            [form.cleaned_data['email']],
             fail_silently=False,
         )
 
-        user = form.save(commit=False)
-        user.is_active = True  # пока не подтвердил email
-        code = f"{random.randint(100000, 999999)}"  # 6-значный код
-        user.email_verification_code = code
-        user.save()
+        messages.success(self.request, 'Код отправлен на email')
 
-        # Реферальная логика
-        invite_code = form.cleaned_data.get('invite_code')
+        return redirect('verify_email')
+
+
+# =========================
+# ШАГ 2 — Подтверждение кода
+# =========================
+
+class VerifyEmailView(FormView):
+    template_name = 'registration/verify_email.html'
+    form_class = VerifyEmailForm
+    success_url = reverse_lazy('login')
+
+    def form_valid(self, form):
+
+        entered_code = form.cleaned_data['code']
+
+        session_data = self.request.session.get('register_data')
+
+        if not session_data:
+            messages.error(self.request, 'Сессия истекла')
+            return redirect('register')
+
+        if entered_code != session_data['code']:
+            messages.error(self.request, 'Неверный код')
+            return redirect('verify_email')
+
+        # создаём пользователя
+        user = User.objects.create_user(
+            email=session_data['email'],
+            phone=session_data['phone'],
+            password=session_data['password'],
+        )
+
+        # реферал
+        invite_code = session_data.get('invite_code')
         if invite_code:
             referrer = User.objects.filter(referral_code=invite_code).first()
-            if referrer and referrer != user:
+            if referrer:
                 user.referrer = referrer
-                user.save(update_fields=['referrer'])
+                user.save()
 
-        messages.success(self.request, 'Регистрация успешна! Проверьте ваш email для подтверждения.')
+        # очищаем session
+        del self.request.session['register_data']
+
+        messages.success(self.request, 'Аккаунт создан!')
+
         return super().form_valid(form)
 
 

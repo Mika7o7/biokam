@@ -46,21 +46,30 @@ class RegisterForm(UserCreationForm):
 class VerifyEmailForm(forms.Form):
     code = forms.CharField(max_length=6, label='Код подтверждения')
 
-class VerifyEmailView(FormView):
-    template_name = 'registration/verify_email.html'
-    form_class = VerifyEmailForm
-    success_url = reverse_lazy('login')
+# class VerifyEmailView(FormView):
+#     template_name = 'registration/verify_email.html'
+#     form_class = VerifyEmailForm
+#     success_url = reverse_lazy('login')
 
-    def form_valid(self, form):
-        code = form.cleaned_data['code']
-        user = User.objects.filter(email_verification_code=code, is_active=False).first()
-        if user:
-            user.is_active = True
-            user.is_email_verified = True
-            user.email_verification_code = ''
-            user.save()
-            messages.success(self.request, 'Email подтверждён! Теперь вы можете войти.')
-            return super().form_valid(form)
-        else:
-            form.add_error('code', 'Неверный код')
-            return self.form_invalid(form)
+#     def form_valid(self, form):
+#         code = form.cleaned_data['code']
+#         user = User.objects.filter(email_verification_code=code, is_active=False).first()
+#         if user:
+#             user.is_active = True
+#             user.is_email_verified = True
+#             user.email_verification_code = ''
+#             user.save()
+#             messages.success(self.request, 'Email подтверждён! Теперь вы можете войти.')
+#             return super().form_valid(form)
+#         else:
+#             form.add_error('code', 'Неверный код')
+#             return self.form_invalid(form)
+
+class VerifyEmailForm(forms.Form):
+    code = forms.CharField(
+        max_length=6,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Введите код'
+        })
+    )
