@@ -65,11 +65,14 @@ class VerifyEmailForm(forms.Form):
 #             form.add_error('code', 'Неверный код')
 #             return self.form_invalid(form)
 
-class VerifyEmailForm(forms.Form):
+
+class VerifyCodeForm(forms.Form):
     code = forms.CharField(
+        label="Введите код",
         max_length=6,
         widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Введите код'
+            "class": "form-control",
+            "placeholder": "123456",
+            "autocomplete": "off"
         })
     )
