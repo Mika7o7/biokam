@@ -63,6 +63,20 @@ class RegisterView(CreateView):
             fail_silently=False,
         )
 
+        user = form.save(commit=False)
+        user.is_active = True  # пока не подтвердил email
+        code = f"{random.randint(100000, 999999)}"  # 6-значный код
+        user.email_verification_code = code
+        user.save()
+
+        # Реферальная логика
+        invite_code = form.cleaned_data.get('invite_code')
+        if invite_code:
+            referrer = User.objects.filter(referral_code=invite_code).first()
+            if referrer and referrer != user:
+                user.referrer = referrer
+                user.save(update_fields=['referrer'])
+
         messages.success(self.request, 'Регистрация успешна! Проверьте ваш email для подтверждения.')
         return super().form_valid(form)
 

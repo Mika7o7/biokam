@@ -67,7 +67,6 @@ yarn-error.log*
 # =====================
 docker-compose.override.yml
 *.env
-*.env.*
 
 # =====================
 # Celery
@@ -92,5 +91,4 @@ logs/
 dist/
 build/
 *.egg-info/
-
-biokam_key.json
+main/biokam_key.json
