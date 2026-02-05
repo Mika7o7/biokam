@@ -63,12 +63,8 @@ class RegisterForm(UserCreationForm):
 
 
 class VerifyEmailForm(forms.Form):
-    code = forms.CharField(max_length=6, label='Код подтверждения')
-
-
-class VerifyCodeForm(forms.Form):
     code = forms.CharField(
-        label="Введите код",
+        label="Код подтверждения",
         max_length=6,
         widget=forms.TextInput(attrs={
             "class": "form-control",
@@ -76,3 +72,5 @@ class VerifyCodeForm(forms.Form):
             "autocomplete": "off"
         })
     )
+
+

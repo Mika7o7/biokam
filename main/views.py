@@ -100,6 +100,7 @@ class VerifyEmailView(FormView):
             email=session_data['email'],
             phone=session_data['phone'],
             password=session_data['password'],
+            is_active= True
         )
 
         # реферал
@@ -108,7 +109,6 @@ class VerifyEmailView(FormView):
             referrer = User.objects.filter(referral_code=invite_code).first()
             if referrer:
                 user.referrer = referrer
-                user.is_active = True
                 user.save()
 
         # очищаем session
