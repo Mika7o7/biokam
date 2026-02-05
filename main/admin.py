@@ -1,6 +1,5 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django import forms
 from django.utils.html import format_html
 
@@ -10,18 +9,52 @@ from .models import (
     ProductCertificate, Coupon, Banner
 )
 
-# Форма создания пользователя (та же, что в регистрации)
-class CustomUserCreationForm(UserCreationForm):
+
+# Форма создания нового пользователя в админке
+class CustomUserCreationForm(forms.ModelForm):
+    """
+    Кастомная форма создания пользователя (без username)
+    """
+    password1 = forms.CharField(
+        label="Пароль",
+        widget=forms.PasswordInput,
+        strip=False,
+        help_text="Придумайте надёжный пароль"
+    )
+    password2 = forms.CharField(
+        label="Повторите пароль",
+        widget=forms.PasswordInput,
+        strip=False,
+        help_text="Введите пароль ещё раз для проверки"
+    )
+
     class Meta:
         model = User
-        fields = ('username', 'email', 'password1', 'password2')  # + твои поля, если нужно
+        fields = ('email', 'phone', 'first_name', 'last_name', 'is_staff', 'is_superuser')
 
-# Форма изменения пользователя (пароль меняется отдельно)
-class CustomUserChangeForm(UserChangeForm):
+    def clean_password2(self):
+        password1 = self.cleaned_data.get("password1")
+        password2 = self.cleaned_data.get("password2")
+        if password1 and password2 and password1 != password2:
+            raise forms.ValidationError("Пароли не совпадают.")
+        return password2
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.set_password(self.cleaned_data["password1"])
+        if commit:
+            user.save()
+        return user
+
+
+# Форма изменения существующего пользователя
+class CustomUserChangeForm(forms.ModelForm):
     password = forms.CharField(
-        widget=forms.PasswordInput,
+        widget=forms.PasswordInput(render_value=True),
         required=False,
-        help_text="Оставьте пустым, если не хотите менять пароль"
+        label="Пароль",
+        help_text="Оставьте пустым, если не хотите менять пароль. "
+                  "Если заполните — будет установлен новый."
     )
 
     class Meta:
@@ -29,13 +62,13 @@ class CustomUserChangeForm(UserChangeForm):
         fields = '__all__'
 
     def clean_password(self):
-        # Не меняем пароль, если поле пустое
-        return self.cleaned_data.get('password')
+        # Возвращаем исходный хэш пароля, если поле пустое
+        return self.initial.get('password')
 
     def save(self, commit=True):
         user = super().save(commit=False)
         password = self.cleaned_data.get('password')
-        if password:  # Если ввели новый пароль — хэшируем
+        if password:
             user.set_password(password)
         if commit:
             user.save()
@@ -44,19 +77,29 @@ class CustomUserChangeForm(UserChangeForm):
 
 @admin.register(User)
 class CustomUserAdmin(BaseUserAdmin):
-    add_form = CustomUserCreationForm       # ← та же форма, что в регистрации!
+    add_form = CustomUserCreationForm
     form = CustomUserChangeForm
-    model = User
 
-    list_display = ('username', 'email', 'referral_code', 'referrer', 'balance', 'is_staff', 'date_joined')
-    list_filter = ('is_staff', 'is_superuser', 'date_joined')
-    search_fields = ('username', 'email', 'referral_code')
+    list_display = (
+        'email',
+        'phone',
+        'first_name',
+        'last_name',
+        'referral_code',
+        'referrer_link',
+        'balance',
+        'is_staff',
+        'is_active',
+        'date_joined'
+    )
+    list_filter = ('is_staff', 'is_superuser', 'is_active', 'date_joined')
+    search_fields = ('email', 'phone', 'first_name', 'last_name', 'referral_code')
     ordering = ('-date_joined',)
 
     fieldsets = (
-        (None, {'fields': ('username', 'password')}),
-        ('Личные данные', {'fields': ('first_name', 'last_name', 'email', 'address')}),
-        ('Рефералы и бонусы', {'fields': ('referral_code', 'referrer', 'balance')}),
+        (None, {'fields': ('email', 'password')}),
+        ('Личные данные', {'fields': ('first_name', 'last_name', 'phone', 'address')}),
+        ('Рефералы и баланс', {'fields': ('referral_code', 'referrer', 'balance')}),
         ('Права доступа', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
         ('Даты', {'fields': ('last_login', 'date_joined')}),
     )
@@ -64,11 +107,30 @@ class CustomUserAdmin(BaseUserAdmin):
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('username', 'email', 'password1', 'password2', 'is_staff', 'is_superuser'),
+            'fields': (
+                'email',
+                'phone',
+                'first_name',
+                'last_name',
+                'password1',
+                'password2',
+                'is_staff',
+                'is_superuser'
+            ),
         }),
     )
 
     readonly_fields = ('referral_code', 'date_joined', 'last_login')
+
+    # Красивое отображение реферера как ссылки
+    @admin.display(description='Пригласивший')
+    def referrer_link(self, obj):
+        if obj.referrer:
+            url = f"/admin/main/user/{obj.referrer.id}/change/"
+            return format_html('<a href="{}">{}</a>', url, obj.referrer.email)
+        return "—"
+
+    referrer_link.short_description = 'Пригласивший'
 
 # Категории
 @admin.register(Category)

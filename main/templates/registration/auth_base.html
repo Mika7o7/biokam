@@ -1,5 +1,4 @@
 {% load static %}
-
 <!DOCTYPE html>
 <html lang="ru">
 
@@ -8,18 +7,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Авторизация{% endblock %}</title>
 
-    <!-- jQuery сначала (обязательно перед Inputmask) -->
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"
-        integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
-    
-    <!-- Inputmask -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.9/jquery.inputmask.min.js"></script>
-    
-    <!-- Roboto -->
+    <!-- Google Fonts Roboto -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
 
+    <!-- jQuery + Inputmask -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+        integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.9/jquery.inputmask.min.js"></script>
+
+    {% block extra_head %}{% endblock %}
+
     <style>
-        /* Box-sizing для всего проекта — решает проблему вылезания */
         *,
         *::before,
         *::after {
@@ -33,23 +31,19 @@
             height: 100%;
             font-family: 'Roboto', sans-serif;
             overflow-x: hidden;
+            background: #0a0a1f;
         }
 
-        /* Видео-фон */
         .video-background {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            inset: 0;
             overflow: hidden;
             z-index: -2;
         }
 
         .video-bg {
             position: absolute;
-            top: 50%;
-            left: 50%;
+            inset: 50%;
             min-width: 100%;
             min-height: 100%;
             width: auto;
@@ -60,43 +54,42 @@
 
         .overlay {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.65);
+            inset: 0;
+            background: rgba(0, 0, 0, 0.68);
             z-index: -1;
         }
 
         .auth-form-container {
             position: fixed;
-            top: 50%;
-            left: 50%;
+            inset: 50% auto auto 50%;
             transform: translate(-50%, -50%);
             z-index: 10;
             width: 100%;
-            max-width: 420px;
+            max-width: 400px;
+            /* Уменьшили */
             padding: 0 20px;
             margin-top: 40px;
             margin-bottom: 40px;
+            /* Вертикальные отступы */
         }
 
         .auth-form {
-            background: rgba(40, 40, 60, 0.75);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-radius: 16px;
-            padding: 30px 25px;
-            /* ← чуть меньше, чтобы инпуты не вылезали */
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(35, 35, 55, 0.78);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 20px;
+            padding: 32px 24px;
+            /* Уменьшили */
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.65);
+            border: 1px solid rgba(255, 255, 255, 0.08);
             color: white;
         }
 
         .form-title {
             text-align: center;
-            margin-bottom: 30px;
-            font-size: 28px;
+            margin-bottom: 28px;
+            font-size: 26px;
+            /* Уменьшили */
             font-weight: 700;
         }
 
@@ -108,41 +101,42 @@
             display: block;
             margin-bottom: 8px;
             font-size: 14px;
-            color: #ddd;
+            color: #d0d0e0;
             font-weight: 500;
         }
 
         .form-group input {
             width: 100%;
             padding: 12px 16px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.1);
+            /* Уменьшили */
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.07);
             color: white;
             font-size: 16px;
         }
 
         .form-group input:focus {
             outline: none;
-            border-color: #007bff;
-            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+            border-color: #3390ff;
+            box-shadow: 0 0 0 4px rgba(51, 144, 255, 0.22);
         }
 
         .btn-auth {
             width: 100%;
             padding: 14px;
-            background: #007bff;
+            background: #1e90ff;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             color: white;
-            font-size: 18px;
+            font-size: 17px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.28s;
         }
 
         .btn-auth:hover {
-            background: #0056b3;
+            background: #0c7ae6;
             transform: translateY(-2px);
         }
 
@@ -153,7 +147,7 @@
         }
 
         .form-footer a {
-            color: #4da6ff;
+            color: #60a5fa;
             text-decoration: none;
         }
 
@@ -161,9 +155,77 @@
             text-decoration: underline;
         }
 
+        .alert {
+            padding: 10px 14px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .alert-danger {
+            background: rgba(220, 53, 69, 0.25);
+            border: 1px solid #dc3545;
+        }
+
+        .alert-warning {
+            background: rgba(255, 193, 7, 0.18);
+            border: 1px solid #ffc107;
+        }
+
+        /* Модалка для верификации */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: rgba(35, 35, 55, 0.9);
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 360px;
+            text-align: center;
+            color: white;
+        }
+
+        .modal-content input {
+            margin: 16px 0;
+            padding: 12px;
+            width: 100%;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .modal-content button {
+            padding: 12px;
+            width: 100%;
+            background: #1e90ff;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+        }
+
         @media (max-width: 480px) {
+            .auth-form-container {
+                padding: 0 15px;
+                /* Горизонтальные отступы 15px */
+                max-width: calc(100% - 30px);
+                /* 15px с каждой стороны */
+            }
+
             .auth-form {
-                padding: 25px 20px;
+                padding: 28px 20px;
+            }
+
+            .form-title {
+                font-size: 24px;
             }
         }
     </style>
@@ -181,9 +243,26 @@
 
     <div class="auth-form-container">
         <div class="auth-form">
-            {% block auth_content %}{% endblock %}
+            {% block auth_content %}
+            <!-- Контент login/register -->
+            {% endblock %}
         </div>
     </div>
+
+    <!-- Модалка для верификации (общая) -->
+    <div id="verification-modal" class="modal">
+        <div class="modal-content">
+            <h3>Подтверждение номера</h3>
+            <p>Мы отправили код на ваш телефон. Введите его ниже.</p>
+            <form id="verification-form">
+                <input type="text" id="verification-code" placeholder="Введите код" maxlength="6">
+                <button type="submit">Подтвердить</button>
+            </form>
+            <p id="verification-error" style="color: red; display: none;">Неверный код. Попробуйте снова.</p>
+        </div>
+    </div>
+
+    {% block extra_js %}{% endblock %}
 
 </body>
 

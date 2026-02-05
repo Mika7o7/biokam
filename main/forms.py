@@ -1,69 +1,66 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from .models import User
+from django.views.generic import FormView
+from django.contrib import messages
+from django.shortcuts import redirect
+from django.urls import reverse_lazy
 import re
 
-# Форма с исправлением: переименовали поле для ввода кода реферера, чтобы избежать конфликта с моделью
+
 class RegisterForm(UserCreationForm):
-    email = forms.EmailField(
-        required=True,
-        widget=forms.EmailInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Ваш email'
-        })
-    )
-    phone = forms.CharField(
-        max_length=20,
-        required=True,
-        widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'placeholder': '+7 (XXX) XXX-XX-XX',
-            'id': 'phone-input',
-            'data-mask': '+7 (999) 999-99-99'
-        }),
-        help_text="Введите номер телефона в международном формате"
-    )
-    invite_code = forms.CharField(
-        max_length=50,
-        required=False,
-        widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Реферальный код (если есть)'
-        }),
-        help_text="Введите реферальный код пригласившего"
-    )
-    code_word = forms.CharField(
-        max_length=50,
-        required=False,
-        widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Кодовое слово (необязательно)'
-        })
-    )
+    email = forms.EmailField(required=True, widget=forms.EmailInput(attrs={
+        'class': 'form-control',
+        'placeholder': 'Ваш email'
+    }))
+    phone = forms.CharField(required=True, widget=forms.TextInput(attrs={
+        'class': 'form-control',
+        'placeholder': '+7 (XXX) XXX-XX-XX'
+    }))
+    invite_code = forms.CharField(required=False, widget=forms.TextInput(attrs={
+        'class': 'form-control',
+        'placeholder': 'Реферальный код (если есть)'
+    }))
 
     class Meta:
         model = User
-        fields = ('username', 'email', 'phone', 'password1', 'password2', 'code_word')  # ← Убрали 'referral_code', т.к. оно генерируется автоматически в модели
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Подставляем реферальный код из GET-параметра ?ref=... в invite_code
-        if 'invite_code' in self.initial:
-            self.fields['invite_code'].initial = self.initial['invite_code']
-
-        # Bootstrap-классы для всех полей
-        for field in self.fields.values():
-            if not field.widget.attrs.get('class'):
-                field.widget.attrs['class'] = 'form-control'
+        fields = ('email', 'phone', 'password1', 'password2', 'invite_code')
 
     def clean_phone(self):
         phone = self.cleaned_data.get('phone', '')
-        phone = re.sub(r'[\s\-\(\)]', '', phone)
+        phone = re.sub(r'[^0-9+]', '', phone)
         if not phone.startswith('+'):
             phone = '+' + phone
-
         digits = phone[1:]
         if not digits.isdigit() or not (10 <= len(digits) <= 15):
-            raise forms.ValidationError("Номер телефона должен содержать от 10 до 15 цифр и состоять только из цифр после +")
-
+            raise forms.ValidationError("Неверный формат номера телефона")
         return phone
+
+    def clean_invite_code(self):
+        code = self.cleaned_data.get('invite_code', '').strip().upper()
+        if code and not User.objects.filter(referral_code=code).exists():
+            raise forms.ValidationError("Такой реферальный код не найден")
+        return code
+
+
+class VerifyEmailForm(forms.Form):
+    code = forms.CharField(max_length=6, label='Код подтверждения')
+
+class VerifyEmailView(FormView):
+    template_name = 'registration/verify_email.html'
+    form_class = VerifyEmailForm
+    success_url = reverse_lazy('login')
+
+    def form_valid(self, form):
+        code = form.cleaned_data['code']
+        user = User.objects.filter(email_verification_code=code, is_active=False).first()
+        if user:
+            user.is_active = True
+            user.is_email_verified = True
+            user.email_verification_code = ''
+            user.save()
+            messages.success(self.request, 'Email подтверждён! Теперь вы можете войти.')
+            return super().form_valid(form)
+        else:
+            form.add_error('code', 'Неверный код')
+            return self.form_invalid(form)

@@ -1,8 +1,9 @@
 from django.db import models
 from django.utils import timezone
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 from django.utils.crypto import get_random_string
 from django.template.defaulttags import register
+from django.utils.translation import gettext_lazy as _
 
 
 class SiteSettings(models.Model):
@@ -124,68 +125,78 @@ class ProductCertificate(models.Model):
     def __str__(self):
         return f"Сертификат для {self.product.name}"
 
+class CustomUserManager(BaseUserManager):
+    """
+    Кастомный менеджер, чтобы create_user / create_superuser работали без username
+    """
+    def create_user(self, email, phone, password=None, **extra_fields):
+        if not email:
+            raise ValueError(_("Email обязателен"))
+        if not phone:
+            raise ValueError(_("Телефон обязателен"))
 
-class User(AbstractUser):
-    # Эти поля уже есть в AbstractUser, но можно добавить verbose_name
-    first_name = models.CharField(max_length=150, verbose_name="Имя", blank=True)
-    last_name = models.CharField(max_length=150, verbose_name="Фамилия", blank=True)
-    referral_code = models.CharField(
-        max_length=10,
-        unique=True,
-        blank=True,
-        verbose_name="Реферальный код"
-    )
+        email = self.normalize_email(email)
+        user = self.model(email=email, phone=phone, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, email, phone, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+
+        if extra_fields.get('is_staff') is not True:
+            raise ValueError(_("Superuser must have is_staff=True."))
+        if extra_fields.get('is_superuser') is not True:
+            raise ValueError(_("Superuser must have is_superuser=True."))
+
+        return self.create_user(email, phone, password, **extra_fields)
+
+
+class User(AbstractBaseUser, PermissionsMixin):
+    email = models.EmailField(_("email адрес"), unique=True, max_length=254)
+    phone = models.CharField(_("телефон"), max_length=20, unique=True)
+    first_name = models.CharField(_("имя"), max_length=150, blank=True)
+    last_name = models.CharField(_("фамилия"), max_length=150, blank=True)
+    referral_code = models.CharField(_("реферальный код"), max_length=10, unique=True, blank=True, editable=False)
     referrer = models.ForeignKey(
-        'self',
-        null=True,
-        blank=True,
+        'self', null=True, blank=True,
         on_delete=models.SET_NULL,
         related_name='referrals',
-        verbose_name="Пригласивший"
+        verbose_name=_("пригласивший")
     )
-    balance = models.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        default=0.00,
-        verbose_name="Баланс"
-    )
-    address = models.TextField(
-        blank=True,
-        null=True,
-        verbose_name="Адрес доставки"
-    )
-    phone = models.CharField(  # ДОБАВЬТЕ ЭТО ПОЛЕ
-        max_length=20,
-        blank=True,
-        null=True,
-        verbose_name="Телефон"
-    )
-    groups = models.ManyToManyField(
-        'auth.Group',
-        related_name='custom_user_set',
-        blank=True,
-        help_text='The groups this user belongs to.',
-        verbose_name='группы'
-    )
-    user_permissions = models.ManyToManyField(
-        'auth.Permission',
-        related_name='custom_user_permissions_set',
-        blank=True,
-        help_text='Specific permissions for this user.',
-        verbose_name='права пользователя'
-    )
+    balance = models.DecimalField(_("баланс"), max_digits=10, decimal_places=2, default=0.00)
+    address = models.TextField(_("адрес доставки"), blank=True, null=True)
 
-    def save(self, *args, **kwargs):
-        if not self.referral_code:
-            self.referral_code = get_random_string(10).upper()
-        super().save(*args, **kwargs)
+    is_active = models.BooleanField(_("активен"), default=False)  # пользователь активен после подтверждения email
+    is_email_verified = models.BooleanField(_("email подтверждён"), default=False)
+    email_verification_code = models.CharField(max_length=6, blank=True, null=True)  # код для подтверждения email
 
-    def __str__(self):
-        return self.username
+    is_staff = models.BooleanField(_("сотрудник"), default=False)
+    date_joined = models.DateTimeField(_("дата регистрации"), auto_now_add=True)
+
+    # Настройки аутентификации
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['phone']
+
+    objects = CustomUserManager()  # твой менеджер пользователей
 
     class Meta:
-        verbose_name = "Пользователь"
-        verbose_name_plural = "Пользователи"
+        verbose_name = _("пользователь")
+        verbose_name_plural = _("пользователи")
+
+    def __str__(self):
+        return self.email
+
+    def save(self, *args, **kwargs):
+        # Генерация реферального кода
+        if not self.referral_code:
+            while True:
+                code = get_random_string(10).upper()
+                if not User.objects.filter(referral_code=code).exists():
+                    self.referral_code = code
+                    break
+        super().save(*args, **kwargs)
 
 
 class Cart(models.Model):

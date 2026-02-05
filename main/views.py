@@ -1,4 +1,3 @@
-import json
 from django.views.generic import CreateView
 from django.urls import reverse_lazy, reverse
 from django.contrib.messages.views import SuccessMessageMixin
@@ -14,11 +13,14 @@ from django.template.loader import render_to_string
 from django.conf import settings
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
-from yookassa import Configuration, Payment
 from django.utils import timezone
+from django.core.mail import send_mail
 from django.db import models
+from yookassa import Configuration, Payment
+import random
+import json
 import uuid
-
+import os
 
 from .forms import RegisterForm
 from .models import (
@@ -31,44 +33,39 @@ Configuration.account_id = settings.YOOKASSA_SHOP_ID
 Configuration.secret_key = settings.YOOKASSA_SECRET_KEY
 
 
+
 class RegisterView(CreateView):
     form_class = RegisterForm
     template_name = 'registration/register.html'
-    success_url = reverse_lazy('home')  # или куда ведёт после регистрации
-
-    def get_initial(self):
-        """Передаём ?ref=... в initial формы как 'invite_code'"""
-        initial = super().get_initial()
-        initial['invite_code'] = self.request.GET.get('ref', '')
-        return initial
+    success_url = reverse_lazy('verify_email')  # страница для ввода кода
 
     def form_valid(self, form):
-        # Сохраняем пользователя (пароль хешируется автоматически)
-        user = form.save()
+        user = form.save(commit=False)
+        user.is_active = False  # пока не подтвердил email
+        code = f"{random.randint(100000, 999999)}"  # 6-значный код
+        user.email_verification_code = code
+        user.save()
 
-        # Устанавливаем реферера по invite_code
+        # Реферальная логика
         invite_code = form.cleaned_data.get('invite_code')
-        print(f"\n\n\n{invite_code}\n\n\n")
         if invite_code:
             referrer = User.objects.filter(referral_code=invite_code).first()
-            if referrer and referrer != user:  # Защита от самоприглашения
+            if referrer and referrer != user:
                 user.referrer = referrer
                 user.save(update_fields=['referrer'])
-                messages.success(self.request, f'Вы успешно зарегистрированы по приглашению от {referrer.username}!')
-            else:
-                messages.warning(self.request, 'Реферальный код не найден или недействителен')
 
-        # Автоматический вход
-        login(self.request, user)
-        messages.success(self.request, 'Регистрация прошла успешно! Добро пожаловать!')
+        # Отправка кода на email
+        send_mail(
+            'Ваш код подтверждения',
+            f'Ваш код для подтверждения email: {code}',
+            'no-reply@yourdomain.com',
+            [user.email],
+            fail_silently=False,
+        )
 
+        messages.success(self.request, 'Регистрация успешна! Проверьте ваш email для подтверждения.')
         return super().form_valid(form)
 
-    def form_invalid(self, form):
-        for field, errors in form.errors.items():
-            for error in errors:
-                messages.error(self.request, f"{field}: {error}")
-        return super().form_invalid(form)
 
 
 # Main Page.

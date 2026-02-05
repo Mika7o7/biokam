@@ -92,3 +92,5 @@ logs/
 dist/
 build/
 *.egg-info/
+
+biokam_key.json

@@ -152,3 +152,11 @@ LOGOUT_REDIRECT_URL = '/accounts/login/'
 
 YOOKASSA_SHOP_ID = '366398'
 YOOKASSA_SECRET_KEY = 'test_dpk-2f7SnJvSKF-2xyIZr_5uwaJp_B5aPw9p5cfMkpE'
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'mydoctorcenter02@gmail.com'
+EMAIL_HOST_PASSWORD = 'Itisjustpassword'
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
