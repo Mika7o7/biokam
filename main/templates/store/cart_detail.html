@@ -187,6 +187,16 @@
                         value="{{ request.user.phone|default:'' }}" placeholder="+7 (999) 999-99-99" required>
                     
                 </div>
+
+                <!-- Почта -->
+                <div class="col-md-6 mb-3">
+                    <label for="input-email" class="form-label">
+                        <i class="bi bi-telephone me-1"></i> Почта *
+                    </label>
+                    <input type="text" class="form-control" id="input-email" name="email" value="{{ request.user.email|default:'' }}"
+                        placeholder="example@gmail.com" required>
+                
+                </div>
             </div>
             
             <!-- Кнопка сохранения -->
@@ -254,7 +264,24 @@
                 </div>
                 <!-- Скрытое поле для хранения кода купона -->
                 <input type="hidden" name="coupon_code" id="hidden-coupon-code" value="{{ applied_coupon_code|default:'' }}">
-             </form>
+                <!-- Блок ввода кода подтверждения (появляется после отправки данных) -->
+                <div id="confirm-code-block" style="display: none; margin-top: 20px;">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Подтверждение заказа</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>На ваш email <strong>{{ request.user.email }}</strong> отправлен код подтверждения.</p>
+                            <div class="input-group mb-3">
+                                <input type="text" class="form-control" id="confirm-code" placeholder="Введите код из email"
+                                    maxlength="6">
+                                <button class="btn btn-primary" type="button" id="confirm-order-btn">Подтвердить заказ</button>
+                            </div>
+                            <div id="confirm-result" class="mt-2"></div>
+                        </div>
+                    </div>
+                </div>
+            </form>
             {% else %}
             <div class="text-center py-5">
                 <h3>Ваша корзина пуста!</h3>
@@ -263,9 +290,27 @@
             </div>
             {% endif %}
 
-            <!-- Кнопка для открытия модалки -->
-            
-            
+            <!-- Модалка подтверждения email -->
+            <div id="emailVerificationModal" class="test-modal" style="display: none;">
+                <div class="test-modal-content">
+                    <div class="test-modal-header">
+                        <h4>Подтверждение email</h4>
+                        <button type="button" class="close-modal" onclick="closeEmailModal()">×</button>
+                    </div>
+                    <div class="test-modal-body">
+                        <p>На ваш email <strong id="modalEmail"></strong> отправлен код подтверждения.</p>
+                        <p>Проверьте терминал (код выведен в консоль).</p>
+                        <input type="text" id="verificationCode" class="form-control text-center" placeholder="123456"
+                            maxlength="6">
+                        <div id="verificationMessage" class="mt-2 small text-danger"></div>
+                    </div>
+                    <div class="test-modal-footer">
+                        <button class="btn-cancel" onclick="closeEmailModal()">Отмена</button>
+                        <button class="btn btn-primary" id="verifyCodeBtn">Подтвердить</button>
+                    </div>
+                </div>
+            </div>
+
             <!-- Само модальное окно -->
             <div id="testPaymentModal" class="test-modal">
                 <div class="test-modal-content">
@@ -273,27 +318,21 @@
                         <h4>Выберите способ оплаты</h4>
                         <button type="button" class="close-modal" onclick="closeTestModal()">×</button>
                     </div>
-            
                     <div class="test-modal-body">
-                        <button class="payment-option sbp" onclick="startPayment('sbp')">
-                            <span class="icon">📱</span> Оплата по СБП (QR-код)
-                        </button>
-            
-                        <button class="payment-option card" onclick="startPayment('card')">
-                            <span class="icon">💳</span> Банковской картой
-                        </button>
-            
                         <button class="payment-option yookassa" onclick="startPayment('yookassa')">
-                            <span class="icon">💰</span> Через ЮKassa
+                            <span class="icon">💰</span> ЮKassa (Карты, СБП, Кошельки)
+                        </button>
+            
+                        <button class="payment-option robokassa" onclick="startPayment('robokassa')">
+                            <span class="icon">🏦</span> Робокасса (Карты, СБП, Кошельки)
                         </button>
                     </div>
-            
                     <div class="test-modal-footer">
                         <button class="btn-cancel" onclick="closeTestModal()">Отмена</button>
                     </div>
                 </div>
             </div>
-            
+
             <!-- Стили для модального окна -->
             <style>
                 .test-modal {
@@ -405,395 +444,114 @@
             </style>
             
             <!-- JavaScript — полностью исправленный -->
+            <!-- ЕДИНЫЙ СКРИПТ -->
             <script>
+                // Глобальные переменные
+                let currentOrderId = null;
+                let pendingData = {};
 
                 // Функция для маски телефона
-                    function phoneMask(input) {
-                        if (!input) return;
+                function phoneMask(input) {
+                    if (!input) return;
+                    let value = input.value.replace(/\D/g, '');
+                    if (value.startsWith('8')) value = '7' + value.substring(1);
+                    if (value && !value.startsWith('7')) value = '7' + value;
+                    value = value.substring(0, 11);
 
-                        // Оставляем только цифры
-                        let value = input.value.replace(/\D/g, '');
-
-                        // Если номер начинается с 8, меняем на 7
-                        if (value.startsWith('8')) {
-                            value = '7' + value.substring(1);
-                        }
-
-                        // Если номер не начинается с 7, добавляем 7
-                        if (value && !value.startsWith('7')) {
-                            value = '7' + value;
-                        }
-
-                        // Ограничиваем до 11 цифр
-                        value = value.substring(0, 11);
-
-                        // Форматируем номер
-                        let formatted = '';
-                        if (value.length > 0) {
-                            formatted = '+7';
-                            if (value.length > 1) {
-                                formatted += ' (' + value.substring(1, 4);
-                            }
-                            if (value.length >= 4) {
-                                formatted += ') ' + value.substring(4, 7);
-                            }
-                            if (value.length >= 7) {
-                                formatted += '-' + value.substring(7, 9);
-                            }
-                            if (value.length >= 9) {
-                                formatted += '-' + value.substring(9, 11);
-                            }
-                        }
-
-                        input.value = formatted;
-
-                        // Валидация
-                        if (value.length >= 11) {
-                            input.classList.remove('is-invalid');
-                            return true;
-                        } else {
-                            input.classList.add('is-invalid');
-                            return false;
-                        }
+                    let formatted = '';
+                    if (value.length > 0) {
+                        formatted = '+7';
+                        if (value.length > 1) formatted += ' (' + value.substring(1, 4);
+                        if (value.length >= 4) formatted += ') ' + value.substring(4, 7);
+                        if (value.length >= 7) formatted += '-' + value.substring(7, 9);
+                        if (value.length >= 9) formatted += '-' + value.substring(9, 11);
                     }
+                    input.value = formatted;
+                    return value.length >= 11;
+                }
 
-                    // Функция для AJAX сохранения
-                    function saveContactInfo() {
-                        const firstName = document.getElementById('input-firstname');
-                        const address = document.getElementById('input-address');
-                        const phone = document.getElementById('input-phone');
-                        const lastName = document.getElementById('input-lastname');
+                // Функция для AJAX сохранения
+                function saveContactInfo() {
+                    const firstName = document.getElementById('input-firstname');
+                    const address = document.getElementById('input-address');
+                    const phone = document.getElementById('input-phone');
+                    const lastName = document.getElementById('input-lastname');
+                    const email = document.getElementById('input-email');
 
-                        // Получаем значения
-                        const firstNameValue = firstName ? firstName.value.trim() : '';
-                        const lastNameValue = lastName ? lastName.value.trim() : '';
-                        const addressValue = address ? address.value.trim() : '';
-                        const phoneValue = phone ? phone.value.trim() : '';
+                    const firstNameValue = firstName ? firstName.value.trim() : '';
+                    const lastNameValue = lastName ? lastName.value.trim() : '';
+                    const addressValue = address ? address.value.trim() : '';
+                    const phoneValue = phone ? phone.value.trim() : '';
+                    const emailValue = email ? email.value.trim() : '';
 
-                        // Валидация
-                        if (!firstNameValue) {
-                            alert('Пожалуйста, укажите ваше имя');
-                            if (firstName) firstName.focus();
-                            return false;
-                        }
+                    if (!firstNameValue) { alert('Укажите имя'); firstName.focus(); return; }
+                    if (!addressValue) { alert('Укажите адрес'); address.focus(); return; }
+                    if (!phone || !phoneMask(phone)) { alert('Укажите телефон'); phone.focus(); return; }
+                    if (!emailValue || !emailValue.includes('@')) { alert('Укажите email'); email.focus(); return; }
 
-                        if (!addressValue) {
-                            alert('Пожалуйста, укажите адрес доставки');
-                            if (address) address.focus();
-                            return false;
-                        }
+                    const btn = document.getElementById('save-contact-info');
+                    const originalText = btn.innerHTML;
+                    btn.disabled = true;
+                    btn.innerHTML = 'Сохранение...';
 
-                        // Проверяем телефон через маску
-                        if (!phone || !phoneMask(phone)) {
-                            alert('Пожалуйста, укажите корректный номер телефона');
-                            if (phone) phone.focus();
-                            return false;
-                        }
+                    const formData = new FormData();
+                    formData.append('first_name', firstNameValue);
+                    formData.append('last_name', lastNameValue);
+                    formData.append('address', addressValue);
+                    formData.append('phone', phoneValue);
+                    formData.append('email', emailValue);
+                    formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
 
-                        const btn = document.getElementById('save-contact-info');
-                        const originalText = btn.innerHTML;
-                        btn.disabled = true;
-                        btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Сохранение...';
-
-                        const formData = new FormData();
-                        formData.append('first_name', firstNameValue);
-                        formData.append('last_name', lastNameValue);
-                        formData.append('address', addressValue);
-                        formData.append('phone', phoneValue);
-                        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
-
-                        fetch("{% url 'save_contact_info' %}", {
-                            method: 'POST',
-                            body: formData,
-                            headers: {
-                                'X-Requested-With': 'XMLHttpRequest'
+                    fetch("{% url 'save_contact_info' %}", {
+                        method: 'POST',
+                        body: formData,
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            const resultDiv = document.getElementById('contact-result');
+                            if (resultDiv) {
+                                resultDiv.innerHTML = `<div class="alert alert-${data.success ? 'success' : 'danger'}">${data.message}</div>`;
                             }
                         })
-                            .then(response => {
-                                if (!response.ok) {
-                                    throw new Error('Network response was not ok');
-                                }
-                                return response.json();
-                            })
-                            .then(data => {
-                                const resultDiv = document.getElementById('contact-result');
-                                if (resultDiv) {
-                                    if (data.success) {
-                                        resultDiv.innerHTML =
-                                            `<div class="alert alert-success alert-dismissible fade show" role="alert">
-                            ${data.message}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>`;
-                                    } else {
-                                        resultDiv.innerHTML =
-                                            `<div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            ${data.message}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>`;
-                                    }
-                                }
-                            })
-                            .catch(error => {
-                                console.error('Ошибка:', error);
-                                const resultDiv = document.getElementById('contact-result');
-                                if (resultDiv) {
-                                    resultDiv.innerHTML =
-                                        `<div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        Ошибка сохранения. Проверьте соединение.
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>`;
-                                }
-                            })
-                            .finally(() => {
-                                btn.disabled = false;
-                                btn.innerHTML = originalText;
-                            });
+                        .catch(() => {
+                            document.getElementById('contact-result').innerHTML = '<div class="alert alert-danger">Ошибка сохранения</div>';
+                        })
+                        .finally(() => {
+                            btn.disabled = false;
+                            btn.innerHTML = originalText;
+                        });
+                }
 
-                        return true;
-                    }
+                // Функции для модалки оплаты
+                function openTestModal() {
+                    document.getElementById('testPaymentModal').style.display = 'block';
+                }
 
-                    // Инициализация после загрузки DOM
-                    document.addEventListener('DOMContentLoaded', function () {
-                        console.log('DOM загружен, инициализируем контактную форму...');
+                function closeTestModal() {
+                    document.getElementById('testPaymentModal').style.display = 'none';
+                }
 
-                        // 1. Инициализация маски телефона
-                        const phoneInput = document.getElementById('input-phone');
-                        if (phoneInput) {
-                            console.log('Найден input для телефона');
+                // Функция закрытия модалки подтверждения
+                function closeEmailModal() {
+                    document.getElementById('emailVerificationModal').style.display = 'none';
+                }
 
-                            // При вводе
-                            phoneInput.addEventListener('input', function () {
-                                phoneMask(this);
-                            });
-
-                            // При потере фокуса
-                            phoneInput.addEventListener('blur', function () {
-                                phoneMask(this);
-                            });
-
-                            // При загрузке страницы тоже форматируем
-                            setTimeout(() => {
-                                phoneMask(phoneInput);
-                            }, 100);
-                        } else {
-                            console.error('Не найден элемент #input-phone');
-                        }
-
-                        // 2. Кнопка сохранения
-                        const saveContactBtn = document.getElementById('save-contact-info');
-                        if (saveContactBtn) {
-                            console.log('Найдена кнопка сохранения');
-                            saveContactBtn.addEventListener('click', function (e) {
-                                e.preventDefault();
-                                console.log('Кнопка сохранения нажата');
-                                saveContactInfo();
-                            });
-                        } else {
-                            console.error('Не найден элемент #save-contact-info');
-                        }
-
-                        // 3. Проверка URL
-                        console.log('URL для сохранения:', "{% url 'save_contact_info' %}");
-                        console.log('CSRF токен:', '{{ csrf_token }}' ? 'присутствует' : 'отсутствует');
-                    });
-
-                
-                // Глобальная переменная
-                    let currentOrderId = null;
-
-                 // Открытие модального окна
-                    function openTestModal() {
-                        document.getElementById('testPaymentModal').style.display = 'block';
-                    }
-
-                    // Закрытие модального окна
-                    function closeTestModal() {
-                        document.getElementById('testPaymentModal').style.display = 'none';
-                    }
-
-                    // Закрытие по клику на фон
-                    document.getElementById('testPaymentModal').addEventListener('click', function (e) {
-                        if (e.target === this) {
-                            closeTestModal();
-                        }
-                    });
-
-                    // Закрытие по Esc
-                    document.addEventListener('keydown', function (e) {
-                        if (e.key === 'Escape') {
-                            closeTestModal();
-                        }
-                    });
-
-                    document.addEventListener('DOMContentLoaded', function () {
-                        // Элементы для работы с купоном
-                        const applyBtn = document.getElementById('button-coupon');
-                        const couponInput = document.getElementById('input-coupon');
-                        const resultDiv = document.getElementById('coupon-result');
-                        const hiddenCoupon = document.getElementById('hidden-coupon-code');
-                        const totalEl = document.getElementById('total-price');
-                        const payButton = document.getElementById('pay-button');
-                        const subtotalEl = document.getElementById('subtotal-price');
-
-                        const first_name = document.getElementById('input-firstname');
-                        const last_name = document.getElementById('input-lastname');
-                        const address = document.getElementById('input-address');
-                        const phone = document.getElementById('input-phone');
-
-                        // 1. Обработка применения купона
-                        if (applyBtn && couponInput && resultDiv && hiddenCoupon) {
-                            applyBtn.addEventListener('click', function () {
-                                const couponCode = couponInput.value.trim();
-                                if (!couponCode) {
-                                    resultDiv.innerHTML = '<div class="alert alert-warning">Введите код купона</div>';
-                                    return;
-                                }
-
-                                const originalText = applyBtn.innerHTML;
-                                applyBtn.disabled = true;
-                                applyBtn.innerHTML = 'Проверка...';
-
-                                const formData = new FormData();
-                                formData.append('coupon_code', couponCode);
-                                formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
-
-                                fetch("{% url 'checkout' %}", {
-                                    method: 'POST',
-                                    body: formData,
-                                    headers: {
-                                        'X-Requested-With': 'XMLHttpRequest'
-                                    }
-                                })
-                                    .then(response => response.json())
-                                    .then(data => {
-                                        resultDiv.innerHTML = '';
-                                        if (data.success) {
-                                            resultDiv.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
-
-                                            // Обновляем отображение цен
-                                            if (totalEl) {
-                                                totalEl.textContent = `${data.new_total.toFixed(2)} ₽`;
-                                            }
-
-                                            // Сохраняем код купона
-                                            hiddenCoupon.value = data.coupon_code;
-
-                                            // Обновляем кнопку оплаты
-                                            if (payButton) {
-                                                payButton.innerHTML = `Оплатить ${data.new_total.toFixed(2)} ₽`;
-                                            }
-
-                                            console.log('Купон зафиксирован:', data.coupon_code);
-                                        } else {
-                                            resultDiv.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
-                                            hiddenCoupon.value = '';
-                                        }
-                                    })
-                                    .catch(error => {
-                                        console.error('Ошибка:', error);
-                                        resultDiv.innerHTML = '<div class="alert alert-danger">Ошибка проверки купона</div>';
-                                    })
-                                    .finally(() => {
-                                        applyBtn.disabled = false;
-                                        applyBtn.innerHTML = originalText;
-                                    });
-                            });
-                        }
-
-                        // 2. Обработка нажатия "Оплатить заказ"
-                        if (payButton) {
-                            payButton.addEventListener('click', function () {
-                                const btn = this;
-                                const originalText = btn.innerHTML;
-                                btn.disabled = true;
-                                btn.innerHTML = 'Создание заказа...';
-
-                                // Берём код купона из скрытого поля (если был применён)
-                                const couponCode = hiddenCoupon ? hiddenCoupon.value : '';
-                               
-                                const formData = new FormData();
-                                formData.append('create_order', 'true');
-                                formData.append('coupon_code', couponCode);
-                                formData.append('first_name', first_name.value);
-                                formData.append('last_name', last_name.value);
-                                formData.append('address', address.value);
-                                formData.append('phone', phone.value);
-                                formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
-
-                                fetch("{% url 'checkout' %}", {
-                                    method: 'POST',
-                                    body: formData,
-                                    headers: {
-                                        'X-Requested-With': 'XMLHttpRequest'
-                                    }
-                                })
-                                    .then(res => res.json())
-                                    .then(data => {
-                                        console.log('Ответ на создание заказа:', data);
-                                        // В обработчике создания заказа:
-                                        if (data.success) {
-                                            // Сохраняем order_id в ГЛОБАЛЬНУЮ переменную
-                                            currentOrderId = data.order_id;
-                                            console.log('Order ID сохранен в currentOrderId:', currentOrderId);
-                                            console.log('Сумма заказа из ответа:', data.total_price);
-
-                                            // Проверим, какая сумма сейчас на странице
-                                            const displayTotal = document.getElementById('total-price').textContent;
-                                            console.log('Сумма на странице:', displayTotal);
-
-                                            // Сохраняем сумму в localStorage
-                                            localStorage.setItem('lastOrderAmount', data.total_price);
-
-                                            // Показываем КАСТОМНОЕ модальное окно с выбором оплаты
-                                            openTestModal();
-
-                                            // Обновляем сообщение
-                                            if (resultDiv) {
-                                                resultDiv.innerHTML = `<div class="alert alert-success">${data.message} Сумма: ${data.total_price} ₽</div>`;
-                                            }
-                                        } else {
-                                            alert('Ошибка создания заказа: ' + (data.message || 'Неизвестная ошибка'));
-                                        }
-                                    })
-                                    .catch(error => {
-                                        console.error('Ошибка:', error);
-                                        alert('Ошибка создания заказа');
-                                    })
-                                    .finally(() => {
-                                        btn.innerHTML = originalText;
-                                        btn.disabled = false;
-                                    });
-                            });
-                        }
-                    });
-
-                    // 3. Функция для начала оплаты (вызывается из модального окна) - ГЛОБАЛЬНАЯ
+                // Функция для начала оплаты
                     function startPayment(method) {
-                            console.log('=== startPayment вызван ===');
-                            console.log('method:', method);
-                            console.log('currentOrderId:', currentOrderId);
-                            console.log('Сумма из localStorage:', localStorage.getItem('lastOrderAmount'));
-                            console.log('Сумма на странице:', document.getElementById('total-price').textContent);
+                        if (!currentOrderId) {
+                            alert('Ошибка: заказ не найден');
+                            return;
+                        }
+                        closeTestModal();
 
-                            if (!currentOrderId) {
-                                alert('Ошибка: заказ не найден. Пожалуйста, создайте заказ заново.');
-                                return;
-                            }
-
-                            // Закрываем модальное окно
-                            closeTestModal();
-
-                            // Собираем данные для отправки
+                        if (method === 'yookassa') {
                             const requestData = {
                                 payment_method: method,
                                 order_id: currentOrderId,
-                                // Добавляем сумму для проверки
                                 expected_amount: parseFloat(document.getElementById('total-price').textContent.replace(' ₽', ''))
                             };
 
-                            console.log('Данные для отправки:', requestData);
-
-                            // Отправляем запрос на создание платежа
                             fetch("{% url 'create_payment' %}", {
                                 method: 'POST',
                                 headers: {
@@ -805,10 +563,7 @@
                             })
                                 .then(res => res.json())
                                 .then(data => {
-                                    console.log('Ответ от create_payment:', data);
-
                                     if (data.success && data.payment_url) {
-                                        console.log('Перенаправляем на:', data.payment_url);
                                         window.location.href = data.payment_url;
                                     } else {
                                         alert('Ошибка: ' + (data.message || 'Неизвестная ошибка'));
@@ -816,9 +571,262 @@
                                 })
                                 .catch(error => {
                                     console.error('Ошибка:', error);
-                                    alert('Произошла ошибка при обработке платежа');
+                                    alert('Ошибка при обработке платежа');
                                 });
                         }
+                        else if (method === 'robokassa') {
+                            fetch("{% url 'create_robokassa_payment' %}", {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRFToken': '{{ csrf_token }}'
+                                },
+                                body: JSON.stringify({ order_id: currentOrderId })
+                            })
+                                .then(res => {
+                                    if (res.headers.get('content-type')?.includes('application/json')) {
+                                        return res.json().then(data => {
+                                            alert('Ошибка: ' + data.message);
+                                        });
+                                    } else {
+                                        // Это HTML с формой - заменяем всю страницу
+                                        return res.text().then(html => {
+                                            document.open();
+                                            document.write(html);
+                                            document.close();
+                                        });
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Ошибка:', error);
+                                    alert('Ошибка при создании платежа');
+                                });
+                        }
+                    }
+
+                // ЕДИНСТВЕННЫЙ обработчик DOMContentLoaded
+                document.addEventListener('DOMContentLoaded', function () {
+                    console.log('DOM загружен');
+
+                    // Маска телефона
+                    const phoneInput = document.getElementById('input-phone');
+                    if (phoneInput) {
+                        phoneInput.addEventListener('input', function () { phoneMask(this); });
+                        phoneInput.addEventListener('blur', function () { phoneMask(this); });
+                        setTimeout(() => phoneMask(phoneInput), 100);
+                    }
+
+                    // Кнопка сохранения
+                    const saveContactBtn = document.getElementById('save-contact-info');
+                    if (saveContactBtn) {
+                        saveContactBtn.addEventListener('click', function (e) {
+                            e.preventDefault();
+                            saveContactInfo();
+                        });
+                    }
+
+                    // Элементы для купона
+                    const applyBtn = document.getElementById('button-coupon');
+                    const couponInput = document.getElementById('input-coupon');
+                    const resultDiv = document.getElementById('coupon-result');
+                    const hiddenCoupon = document.getElementById('hidden-coupon-code');
+                    const totalEl = document.getElementById('total-price');
+                    const payButton = document.getElementById('pay-button');
+                    const first_name = document.getElementById('input-firstname');
+                    const last_name = document.getElementById('input-lastname');
+                    const address = document.getElementById('input-address');
+                    const phone = document.getElementById('input-phone');
+                    const email = document.getElementById('input-email');
+
+                    // Применение купона
+                    if (applyBtn && couponInput && resultDiv && hiddenCoupon) {
+                        applyBtn.addEventListener('click', function () {
+                            const couponCode = couponInput.value.trim();
+                            if (!couponCode) {
+                                resultDiv.innerHTML = '<div class="alert alert-warning">Введите код купона</div>';
+                                return;
+                            }
+
+                            const originalText = applyBtn.innerHTML;
+                            applyBtn.disabled = true;
+                            applyBtn.innerHTML = 'Проверка...';
+
+                            const formData = new FormData();
+                            formData.append('coupon_code', couponCode);
+                            formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+                            fetch("{% url 'checkout' %}", {
+                                method: 'POST',
+                                body: formData,
+                                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                            })
+                                .then(response => response.json())
+                                .then(data => {
+                                    resultDiv.innerHTML = '';
+                                    if (data.success) {
+                                        resultDiv.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
+                                        if (totalEl) totalEl.textContent = `${data.new_total.toFixed(2)} ₽`;
+                                        hiddenCoupon.value = data.coupon_code;
+                                        if (payButton) payButton.innerHTML = `Оплатить ${data.new_total.toFixed(2)} ₽`;
+                                    } else {
+                                        resultDiv.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
+                                        hiddenCoupon.value = '';
+                                    }
+                                })
+                                .catch(error => {
+                                    resultDiv.innerHTML = '<div class="alert alert-danger">Ошибка проверки купона</div>';
+                                })
+                                .finally(() => {
+                                    applyBtn.disabled = false;
+                                    applyBtn.innerHTML = originalText;
+                                });
+                        });
+                    }
+
+                    // Обработка нажатия "Оплатить заказ"
+                    if (payButton) {
+                        payButton.addEventListener('click', function () {
+                            const btn = this;
+                            const originalText = btn.innerHTML;
+                            btn.disabled = true;
+                            btn.innerHTML = 'Создание заказа...';
+
+                            const couponCode = hiddenCoupon ? hiddenCoupon.value : '';
+
+                            const formData = new FormData();
+                            formData.append('create_order', 'true');
+                            formData.append('coupon_code', couponCode);
+                            formData.append('first_name', first_name.value);
+                            formData.append('last_name', last_name.value);
+                            formData.append('address', address.value);
+                            formData.append('phone', phone.value);
+                            formData.append('email', email.value);
+                            formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+                            fetch("{% url 'checkout' %}", {
+                                method: 'POST',
+                                body: formData,
+                                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                            })
+                                .then(res => res.json())
+                                .then(data => {
+                                    console.log('Ответ:', data);
+                                    if (data.success) {
+                                        if (data.require_verification) {
+                                            console.log('✅ НУЖНО ПОДТВЕРЖДЕНИЕ EMAIL');
+                                            pendingData = {
+                                                first_name: first_name.value,
+                                                last_name: last_name.value,
+                                                email: email.value,
+                                                phone: phone.value,
+                                                address: address.value,
+                                                coupon_code: couponCode
+                                            };
+                                            document.getElementById('modalEmail').textContent = email.value;
+                                            openEmailModal();
+
+                                            // ТОЧНО ТАК ЖЕ КАК В openTestModal()
+                                            document.getElementById('emailVerificationModal').style.display = 'block';
+
+                                        } else if (data.require_login) {
+                                            alert('Этот email уже зарегистрирован. Пожалуйста, войдите в аккаунт.');
+                                        } else {
+                                            console.log('✅ ЗАКАЗ СОЗДАН, ПОКАЗЫВАЕМ ОПЛАТУ');
+                                            currentOrderId = data.order_id;
+                                            openTestModal();
+                                        }
+                                    }
+                                })
+                                .catch(error => {
+                                    alert('Ошибка создания заказа');
+                                })
+                                .finally(() => {
+                                    btn.innerHTML = originalText;
+                                    btn.disabled = false;
+                                });
+                        });
+                    }
+
+                    // Функции для модалки подтверждения email
+                    function openEmailModal() {
+                        document.getElementById('emailVerificationModal').style.display = 'block';
+                        // Добавьте эту строку для автоматического фокуса на поле ввода
+                        setTimeout(function () {
+                            document.getElementById('verificationCode').focus();
+                        }, 300);
+                    }
+                    function closeEmailModal() {
+                        document.getElementById('emailVerificationModal').style.display = 'none';
+                    }
+
+                    // Закрытие по клику на фон
+                    document.getElementById('verificationCode').addEventListener('keypress', function (e) {
+                        if (e.key === 'Enter') {
+                            document.getElementById('verifyCodeBtn').click();
+                        }
+                    });
+
+                    // Подтверждение кода
+                    const verifyBtn = document.getElementById('verifyCodeBtn');
+                    if (verifyBtn) {
+                        verifyBtn.addEventListener('click', function () {
+                            const code = document.getElementById('verificationCode').value;
+                            if (!code || code.length !== 6) {
+                                document.getElementById('verificationMessage').textContent = 'Введите 6-значный код';
+                                return;
+                            }
+
+                            const btn = this;
+                            const originalText = btn.innerHTML;
+                            btn.disabled = true;
+                            btn.innerHTML = 'Проверка...';
+
+                            fetch('{% url "verify_order_code" %}', {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRFToken': '{{ csrf_token }}',
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({ code: code })
+                            })
+                                .then(res => res.json())
+                                .then(data => {
+                                    if (data.success) {
+                                        closeEmailModal();
+
+                                        // Заказ уже создан на сервере, просто показываем оплату
+                                        currentOrderId = data.order_id;
+                                        localStorage.setItem('lastOrderAmount', data.total_price);
+                                        openTestModal();
+
+                                        // Очищаем поле ввода
+                                        document.getElementById('verificationCode').value = '';
+                                        document.getElementById('verificationMessage').textContent = '';
+                                    } else {
+                                        document.getElementById('verificationMessage').textContent = data.message || 'Неверный код';
+                                    }
+                                })
+                                .catch(err => {
+                                    document.getElementById('verificationMessage').textContent = 'Ошибка соединения';
+                                })
+                                .finally(() => {
+                                    btn.disabled = false;
+                                    btn.innerHTML = originalText;
+                                });
+                        });
+                    }
+
+                    // Закрытие модалки оплаты по клику на фон
+                    document.getElementById('testPaymentModal')?.addEventListener('click', function (e) {
+                        if (e.target === this) closeTestModal();
+                    });
+
+                    // Очистка модалки при закрытии
+                    $('#emailVerificationModal').on('hidden.bs.modal', function () {
+                        document.getElementById('verificationCode').value = '';
+                        document.getElementById('verificationMessage').textContent = '';
+                    });
+                });
             </script>
             
             

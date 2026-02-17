@@ -19,7 +19,13 @@ urlpatterns = [
     path('category/<slug:slug>', views.category_detail, name='category_detail'),
     path('product/', views.product_list, name='product_list'),
     path('product/<int:pk>/', views.product_detail, name='product_detail'),
+
     path('yookassa-webhook/', views.yookassa_webhook, name='yookassa_webhook'),
+    
+    path('create-robokassa-payment/', views.create_robokassa_payment, name='create_robokassa_payment'),
+    path('robokassa/result/', views.robokassa_result, name='robokassa_result'),
+    path('robokassa/success/', views.robokassa_success, name='robokassa_success'),
+    path('robokassa/fail/', views.robokassa_fail, name='robokassa_fail'),
     
 
 
@@ -27,6 +33,7 @@ urlpatterns = [
     path('cart/add/<int:product_id>/', views.add_to_cart, name='add_to_cart'),
     path('cart/', views.cart_detail, name='cart_detail'),  # ← страница корзины
     path('cart/remove/<int:item_id>/', views.remove_from_cart, name='remove_from_cart'),
+    path('verify-order-code/', views.verify_order_code, name='verify_order_code'),
     path('checkout/', views.checkout, name='checkout'),
     path('create-payment/', views.create_payment, name='create_payment'),
     path('order-success/<int:order_id>/', views.order_success, name='order_success'),

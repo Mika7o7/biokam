@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Отладка сессии</title>
+    <style>
+        body {
+            font-family: Arial;
+            padding: 20px;
+        }
+
+        button {
+            padding: 10px;
+            margin: 5px;
+            font-size: 16px;
+        }
+
+        pre {
+            background: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .success {
+            color: green;
+        }
+
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🔧 Отладка сессии</h1>
+
+    <div>
+        <button onclick="checkSession()">1️⃣ Проверить сессию</button>
+        <button onclick="addToCart(1)">2️⃣ Добавить товар ID=1</button>
+        <button onclick="viewCart()">3️⃣ Посмотреть корзину</button>
+        <button onclick="clearCart()">4️⃣ Очистить корзину</button>
+        <button onclick="createTestSession()">5️⃣ Создать тестовые данные</button>
+    </div>
+
+    <h3>Результат:</h3>
+    <pre id="result">Нажмите кнопку для проверки...</pre>
+
+    <script>
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        async function checkSession() {
+            const response = await fetch('/view-session/');
+            const data = await response.json();
+            document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+        }
+
+        async function addToCart(productId) {
+            try {
+                const response = await fetch(`/cart/add/${productId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({ quantity: 1 })
+                });
+                const data = await response.json();
+
+                let result = '✅ Товар добавлен!\n\n';
+                result += JSON.stringify(data, null, 2);
+                document.getElementById('result').textContent = result;
+
+                // После добавления сразу проверим сессию
+                setTimeout(checkSession, 500);
+            } catch (error) {
+                document.getElementById('result').textContent = '❌ Ошибка: ' + error;
+            }
+        }
+
+        async function viewCart() {
+            const response = await fetch('/view-session/');
+            const data = await response.json();
+
+            let cartData = data.session_data_current_request.cart || 'Нет данных';
+            document.getElementById('result').textContent =
+                '🛒 Корзина:\n' + JSON.stringify(cartData, null, 2);
+        }
+
+        async function clearCart() {
+            // Очищаем корзину через сессию
+            const response = await fetch('/view-session/');
+            const data = await response.json();
+
+            // Очищаем через отдельный запрос (нужно добавить такую вьюху)
+            document.getElementById('result').textContent = 'Корзина очищена';
+            setTimeout(checkSession, 500);
+        }
+
+        async function createTestSession() {
+            // Создаем тестовые данные в сессии
+            const response = await fetch('/view-session/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    action: 'create_test',
+                    test_data: { message: 'Тестовые данные', time: new Date().toISOString() }
+                })
+            });
+            const data = await response.json();
+            document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+        }
+    </script>
+</body>
+
+</html>

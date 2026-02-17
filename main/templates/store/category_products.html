@@ -302,14 +302,13 @@ autoplayDisableOnInteraction: false
 
                     </div>
                 </div>
-                <div class="compare-total"><a href="http://31.128.43.100/index.php?route=product/compare"
-                        id="compare-total">Сравнение (0)</a></div>
+                
                 <div class="pagination-right">
                     <div class="sort-by-wrapper">
                         <div class="col-md-2 text-right sort-by">
                             <label class="control-label" for="input-sort">Сортировать по</label>
                         </div>
-                        <div class="col-md-3 text-right sort">
+                        <div class="col-md-3 text-right sort baby_blue">
                             <select id="input-sort" class="form-control hasCustomSelect"
                                 onchange="location = this.value;"
                                 style="appearance: menulist-button; width: 150px; position: absolute; opacity: 0; height: 33px; font-size: 12px;">
@@ -386,9 +385,9 @@ autoplayDisableOnInteraction: false
             </div>
             <div class="row cat_prod">
                 {% for product in products %}
-                <div class="product-layout product-grid col-lg-3 col-md-4 col-sm-4 col-xs-6">
-                    <div class="product-block product-thumb">
-                        <div class="product-block-inner">
+                <div class="product-layout product-grid col-lg-3 col-md-4 col-sm-4 col-xs-6 tiffany_blue">
+                    <div class="product-block product-thumb tiffany_blue">
+                        <div class="product-block-inner tiffany_blue">
                             <div class="image">
                                 <a href="{% url 'product_detail' product.id %}">
                                     {% if product.image %}
@@ -411,14 +410,7 @@ autoplayDisableOnInteraction: false
                                     <!-- Категория (можно убрать, если не нужно) -->
                                     <span class="product-cat">{{ product.category.name|default:"Без категории" }}</span>
                 
-                                    <!-- Рейтинг (пока заглушка, потом подключи через Review) -->
-                                    <div class="rating">
-                                        <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i></span>
-                                        <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i></span>
-                                        <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i></span>
-                                        <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i></span>
-                                        <span class="fa fa-stack"><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                    </div>
+                                    
                 
                                     <h4>
                                         <a href="{% url 'product_detail' product.id %}">

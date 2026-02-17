@@ -207,22 +207,23 @@ class Cart(models.Model):
         blank=True,
         verbose_name="Пользователь"
     )
-    created_at = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name="Дата создания"
+    session_key = models.CharField(
+        max_length=40,
+        null=True,
+        blank=True,
+        db_index=True,
+        verbose_name="Ключ сессии"
     )
+    created_at = models.DateTimeField(auto_now_add=True)
 
     @property
     def total_price(self):
         return sum(item.quantity * item.product.price for item in self.items.all())
-    
-    class Meta:
-        verbose_name = "Корзина"
-        verbose_name_plural = "Корзины"
-        
 
     def __str__(self):
-        return f"Корзина {self.user.username if self.user else 'Гостевая'}"
+        if self.user:
+            return f"Корзина {self.user.username}"
+        return f"Гостевая корзина {self.session_key}"
 
 
 class CartItem(models.Model):

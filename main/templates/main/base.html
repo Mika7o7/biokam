@@ -9,6 +9,7 @@
     <title>{% block title %}BIOKAM – Биокомплексы Камчатки{% endblock %}</title>
 
     <link rel="icon" type="image/svg+xml" href="{% static 'img/favicon.svg' %}">
+    
 
     <base href="" />
     <script src="{% static 'catalog/view/javascript/jquery/jquery-2.1.1.min.js' %}"></script>
@@ -18,6 +19,7 @@
     <script src="{% static 'catalog/view/javascript/jquery.countdown.js' %}"></script>
     <link href="{% static 'catalog/view/javascript/font-awesome/css/font-awesome.min.css' %}" rel="stylesheet" type="text/css" />
     <link href="{% static 'catalog/view/theme/Mydecor/stylesheet/stylesheet.css' %}" rel="stylesheet" />
+
     <link
         href="https://fonts.googleapis.com/css?family=Jost:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i"
         rel="stylesheet">
@@ -35,6 +37,11 @@
     <link rel="stylesheet" type="text/css" href="{% static 'catalog/view/theme/Mydecor/stylesheet/webdigify/megamenu.css' %}" />
     <link rel="stylesheet" type="text/css" href="{% static 'catalog/view/javascript/jquery/owl-carousel/owl.carousel.css' %}" />
     <link rel="stylesheet" type="text/css" href="{% static 'catalog/view/javascript/jquery/owl-carousel/owl.transitions.css' %}" />
+
+    
+    <link rel="stylesheet" href="{% static 'css/main.css' %}" />
+
+
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="{% static 'catalog/view/javascript/jquery/swiper/css/swiper.min.css' %}" type="text/css" rel="stylesheet" media="screen" />
     <link href="{% static 'catalog/view/javascript/jquery/swiper/css/opencart.css' %}" type="text/css" rel="stylesheet" media="screen" />
@@ -112,7 +119,7 @@
 
 
 
-<body class="account-login   layout-2 left-col">
+<body class="account-login   layout-2 left-col baby_blue">
 
     <!-- Шапка -->
     <header>
@@ -326,14 +333,16 @@
                 if (data.success) {
                     // 1. Заменяем весь блок корзины новым HTML
                     const headerCart = document.querySelector('.header_cart');
-                    headerCart.innerHTML = data.cart_html;
+                    if (headerCart) {
+                        headerCart.innerHTML = data.cart_html;
+                    }
 
                     // 2. Находим новую кнопку dropdown-toggle
-                    const newToggle = headerCart.querySelector('.dropdown-toggle');
+                    const newToggle = headerCart?.querySelector('.dropdown-toggle');
 
                     // 3. Переинициализируем Bootstrap dropdown на новой кнопке
-                    if (newToggle) {
-                        // Удаляем старые экземпляры, если они были (на всякий случай)
+                    if (newToggle && typeof bootstrap !== 'undefined') {
+                        // Удаляем старые экземпляры, если они были
                         if (newToggle._bootstrapDropdown) {
                             newToggle._bootstrapDropdown.dispose();
                         }
@@ -344,7 +353,7 @@
                     // 4. Показываем красивое уведомление
                     $.notify({
                         icon: 'fa fa-check-circle',
-                        message: `Товар успешно удалён из <a href="{% url 'cart_detail' %}">корзины</a>!`
+                        message: `Товар успешно удалён из <a href="/cart/">корзины</a>!`
                     }, {
                         type: 'success',
                         allow_dismiss: true,

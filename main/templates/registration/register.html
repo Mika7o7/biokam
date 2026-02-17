@@ -17,6 +17,7 @@
 <form id="register-form" method="post" action="{% url 'register' %}">
   {% csrf_token %}
 
+  <!-- Email -->
   <div class="form-group">
     <label for="email">Email</label>
     <input type="email" name="email" id="email" class="form-control" value="{{ form.email.value|default:'' }}" required
@@ -26,6 +27,7 @@
     {% endif %}
   </div>
 
+  <!-- Телефон -->
   <div class="form-group">
     <label for="phone">Номер телефона</label>
     <input type="text" name="phone" id="phone" class="form-control" required placeholder="+7 (999) 999-99-99">
@@ -34,26 +36,62 @@
     {% endif %}
   </div>
 
-  <div class="form-group">
-    <label for="password1">Пароль</label>
-    <input type="password" name="password1" id="password1" class="form-control" required>
+  <!-- Пароль -->
+  <div class="form-group password-group">
+    <label for="{{ form.password1.id_for_label }}">Пароль</label>
+    <div class="password-wrapper">
+      {{ form.password1 }}
+      <span class="toggle-password" onclick="togglePassword('{{ form.password1.id_for_label }}')">
+        <svg class="eye-icon eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+          <circle cx="12" cy="12" r="3" />
+        </svg>
+        <svg class="eye-icon eye-closed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          style="display:none;">
+          <path d="M2 2l20 20" />
+          <path d="M6.712 6.72C3.664 8.126 2 12 2 12s4-8 11-8c2.05 0 3.842.48 5.288 1.28" />
+          <path d="M9.01 9.02a3 3 0 0 0 4.982 4.982" />
+          <path d="M17.288 17.28C14.836 18.68 12 17 12 17s-4-8-11-8" />
+        </svg>
+      </span>
+    </div>
     {% if form.password1.errors %}
-    <div class="text-danger">{{ form.password1.errors.0 }}</div>
+    <div class="text-danger">
+      {{ form.password1.errors.0|default:"Пароль слишком простой или короткий" }}
+    </div>
+    {% else %}
+    <div class="form-text text-muted">Можно использовать любой пароль — даже из 3 символов</div>
     {% endif %}
   </div>
 
-  <div class="form-group">
-    <label for="password2">Повторите пароль</label>
-    <input type="password" name="password2" id="password2" class="form-control" required>
+  <!-- Повторите пароль -->
+  <div class="form-group password-group">
+    <label for="{{ form.password2.id_for_label }}">Повторите пароль</label>
+    <div class="password-wrapper">
+      {{ form.password2 }}
+      <span class="toggle-password" onclick="togglePassword('{{ form.password2.id_for_label }}')">
+        <svg class="eye-icon eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+          <circle cx="12" cy="12" r="3" />
+        </svg>
+        <svg class="eye-icon eye-closed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          style="display:none;">
+          <path d="M2 2l20 20" />
+          <path d="M6.712 6.72C3.664 8.126 2 12 2 12s4-8 11-8c2.05 0 3.842.48 5.288 1.28" />
+          <path d="M9.01 9.02a3 3 0 0 0 4.982 4.982" />
+          <path d="M17.288 17.28C14.836 18.68 12 17 12 17s-4-8-11-8" />
+        </svg>
+      </span>
+    </div>
     {% if form.password2.errors %}
-    <div class="text-danger">{{ form.password2.errors.0 }}</div>
+    <div class="text-danger">{{ form.password2.errors.0|default:"Пароли не совпадают" }}</div>
     {% endif %}
   </div>
 
+  <!-- Реферальный код -->
   <div class="form-group">
-    <label for="invite_code">Реферальный код (если есть)</label>
-    <input type="text" name="invite_code" id="invite_code" class="form-control"
-      value="{{ form.invite_code.value|default:'' }}" placeholder="Необязательно">
+    <label for="{{ form.invite_code.id_for_label }}">Реферальный код (если есть)</label>
+    {{ form.invite_code }}
     {% if form.invite_code.errors %}
     <div class="text-danger">{{ form.invite_code.errors.0 }}</div>
     {% endif %}
@@ -65,56 +103,79 @@
     <a href="{% url 'login' %}">Уже есть аккаунт? Войти</a>
   </div>
 </form>
+
+<!-- Скрипт для маски телефона (оставил твой) -->
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     const input = document.getElementById('phone');
-
     if (!input) return;
-    
     input.addEventListener('input', () => {
       let v = input.value.replace(/\D/g, '');
-
       if (v.startsWith('8')) v = '7' + v.slice(1);
       if (!v.startsWith('7')) v = '7' + v;
-
       let r = '+7';
       if (v.length > 1) r += ' (' + v.slice(1, 4);
       if (v.length >= 5) r += ') ' + v.slice(4, 7);
       if (v.length >= 8) r += '-' + v.slice(7, 9);
       if (v.length >= 10) r += '-' + v.slice(9, 11);
-
       input.value = r;
     });
   });
-
 </script>
 
+<!-- Скрипт для глазка -->
+<script>
+  function togglePassword(id) {
+    const field = document.getElementById(id);
+    const wrapper = field.parentElement;
+    const openEye = wrapper.querySelector('.eye-open');
+    const closedEye = wrapper.querySelector('.eye-closed');
+
+    if (field.type === "password") {
+      field.type = "text";
+      openEye.style.display = 'none';
+      closedEye.style.display = 'block';
+    } else {
+      field.type = "password";
+      openEye.style.display = 'block';
+      closedEye.style.display = 'none';
+    }
+  }
+</script>
+
+<!-- Стили (обновлённые) -->
 <style>
   .form-group {
-    margin-bottom: 15px;
+    margin-bottom: 20px;
   }
 
   .form-control {
     width: 100%;
-    padding: 12px;
+    padding: 12px 16px;
     border-radius: 6px;
     border: 1px solid #444;
     background: #222;
     color: white;
+    font-size: 16px;
   }
 
   .form-control:focus {
     border-color: #4dabf7;
     outline: none;
+    box-shadow: 0 0 0 3px rgba(77, 171, 247, 0.25);
   }
 
   .btn-auth {
     background: #4dabf7;
     color: white;
-    padding: 12px 20px;
+    padding: 14px 24px;
     border: none;
     border-radius: 8px;
     cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    width: 100%;
+    transition: background 0.3s;
   }
 
   .btn-auth:hover {
@@ -123,8 +184,43 @@
 
   .text-danger {
     font-size: 13px;
-    margin-top: 4px;
+    margin-top: 6px;
     color: #ff6b6b;
+  }
+
+  .form-text.text-muted {
+    font-size: 13px;
+    color: #aaa;
+    margin-top: 6px;
+  }
+
+  .password-wrapper {
+    position: relative;
+  }
+
+  .toggle-password {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    width: 24px;
+    height: 24px;
+    color: #aaa;
+    transition: color 0.2s;
+  }
+
+  .toggle-password:hover {
+    color: #4dabf7;
+  }
+
+  .eye-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  .eye-closed {
+    display: none;
   }
 </style>
 {% endblock %}

@@ -496,12 +496,90 @@ h2.content-layer__header {
 	}
 }
 
-.glass-modal {
-	background: rgba(40, 40, 60, 0.95) !important;
-	backdrop-filter: blur(12px) !important;
-	-webkit-backdrop-filter: blur(12px) !important;
-	border: 1px solid rgba(255, 255, 255, 0.15) !important;
-	border-radius: 16px !important;
-	color: white !important;
-	box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6) !important;
+
+@media (max-width: 768px) {
+  .hidden-item {
+    display: none;
+  }
+
+  .expandable-list.expanded .hidden-item {
+    display: list-item;
+  }
+
+  .hidden-block {
+    display: none;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+
+  .hidden-block.visible {
+    display: grid;
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* маленькая кнопка-стрелка */
+  .global-show-more-btn {
+    width: 30px;
+    height: 30px;
+    background: #52a7d549;
+    border: 2px solid #52a7d5;
+    border-radius: 50%;
+    font-size: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(82, 167, 213, 0.25);
+  }
+
+  .global-show-more-btn::after {
+    content: "↓";
+    font-size: 18px;
+    color: currentColor;
+  }
+
+  .global-show-more-btn.active::after {
+    content: "↑";
+  }
+}
+
+
+/* ===================== */
+/* 🖥️ DESKTOP */
+/* ===================== */
+@media (min-width: 769px) {
+  /* всё раскрыто */
+  .hidden-item {
+    display: list-item !important;
+  }
+
+  .hidden-block {
+    display: grid !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  /* кнопки НЕТ */
+  .global-show-more-btn {
+    display: none !important;
+  }
+}
+
+.tiffany_blue {
+	background-color: #A4E5E0 !important;
+}
+.baby_blue {
+	background-color: #DBF5F0 !important;
+}
+
+.tiffany_blue_btn {
+	background-color: #A4E5E0 !important;
+
+}
+
+.tiffany_blue_btn:hover {
+	background-color: #000000 !important;
+	color:#fff;
+
 }

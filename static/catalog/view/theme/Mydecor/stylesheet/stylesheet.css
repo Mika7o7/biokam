@@ -5390,7 +5390,7 @@ div#wdaboutcms .box-heading {
     z-index: 99;
     font-size: 0px;
     border: 0;
-    background: #d37657;
+    background: #A4E5E0;
     -webkit-animation-name: hvr-icon-bob-float, hvr-icon-bob;
     animation-name: hvr-icon-bob-float, hvr-icon-bob;
     -webkit-animation-duration: .3s, 1.5s;
@@ -5410,12 +5410,12 @@ div#wdaboutcms .box-heading {
     -moz-transition: all 400ms ease-in-out;
     -o-transition: all 400ms ease-in-out;
     -ms-transition: all 400ms ease-in-out;
-    border: 1px solid #d37657;
+    border: 1px solid #ffffff;
     border-radius: 50%;
 }
 .top_button:hover {
-	background-color: #111111;
-	border-color:#111111;
+	background-color: #000000;
+	border-color:#ffffff;
     color: #fff;
 	transition: all 400ms ease-in-out;
     -webkit-transition: all 400ms ease-in-out;

@@ -1,94 +1,91 @@
 {% load static %}
 
-
-    <div id="cart" class="btn-group btn-block">
-        <button type="button" data-toggle="dropdown" data-loading-text="Загрузка..."
-            class="btn btn-inverse btn-block btn-lg dropdown-toggle">
-            <div class="cart_detail">
-                <div class="cart_image">
-                    <i class="material-icons-outlined shopping-cart"></i>
-                </div>
-                <span id="cart-total">
-                    <span class="cart_heading">Корзина : </span>
-                    {% if user.is_authenticated and user.cart %}
-                    <span class="item-count">{{ user.cart.items.count|default:0 }}</span>
-                    <span class="mycart">Предметы</span>
-                    <span class="price">{{ user.cart.total_price|floatformat:2 }} ₽</span>
-                    {% else %}
-                    <span class="item-count">0</span>
-                    <span class="mycart">Предметы</span>
-                    <span class="price">0.00 ₽</span>
-                    {% endif %}
-                </span>
+<div id="cart" class="btn-group btn-block">
+    <button type="button" data-toggle="dropdown" data-loading-text="Загрузка..."
+        class="btn btn-inverse btn-block btn-lg dropdown-toggle">
+        <div class="cart_detail">
+            <div class="cart_image">
+                <i class="material-icons-outlined shopping-cart"></i>
             </div>
-        </button>
+            <span id="cart-total">
+                <span class="cart_heading">Корзина : </span>
+                {% if cart and cart.items.exists %}
+                <span class="item-count">{{ cart.items.count }}</span>
+                <span class="mycart">Предметы</span>
+                <span class="price">{{ cart.total_price|floatformat:2 }} ₽</span>
+                {% else %}
+                <span class="item-count">0</span>
+                <span class="mycart">Предметы</span>
+                <span class="price">0.00 ₽</span>
+                {% endif %}
+            </span>
+        </div>
+    </button>
 
-        <!-- ВСЕГДА есть <ul>, даже если пусто -->
-        <ul class="dropdown-menu pull-right cart-menu" style="display: block;">
-            {% if user.is_authenticated and cart and cart.items.exists %}
-            <li>
-                <table class="table table-striped">
+    <ul class="dropdown-menu pull-right cart-menu">
+        {% if cart and cart.items.exists %}
+        {% for item in cart.items.all %}
+        <li>
+            <table class="table table-striped">
+                <tbody>
+                    <tr>
+                        <td class="text-center">
+                            {% if item.product.image %}
+                            <a href="{% url 'product_detail' item.product.id %}">
+                                <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}"
+                                    title="{{ item.product.name }}" width="40">
+                            </a>
+                            {% else %}
+                            <img src="{% static 'images/no-image.jpg' %}" alt="Нет изображения" width="40">
+                            {% endif %}
+                        </td>
+                        <td class="text-left">
+                            <a href="{% url 'product_detail' item.product.id %}">
+                                {{ item.product.name }}
+                            </a>
+                        </td>
+                        <td class="text-right">x {{ item.quantity }}</td>
+                        <td class="text-right">{{ item.product.price|floatformat:2 }} ₽</td>
+                        <td class="text-center">
+                            <button type="button" onclick="removeFromCart({{ item.id }});" title="Удалить"
+                                class="btn btn-danger btn-xs">
+                                <i class="fa fa-times"></i>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </li>
+        {% endfor %}
+
+        <li>
+            <div class="text-right">
+                <table class="table table-bordered">
                     <tbody>
-                        {% for item in cart.items.all %}
                         <tr>
-                            <td class="text-center">
-                                {% if item.product.image %}
-                                <a href="{% url 'product_detail' item.product.id %}">
-                                    <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}"
-                                        title="{{ item.product.name }}" width="40">
-                                </a>
-                                {% else %}
-                                <img src="{% static 'images/no-image.jpg' %}" alt="Нет изображения" width="40">
-                                {% endif %}
-                            </td>
-                            <td class="text-left">
-                                <a href="{% url 'product_detail' item.product.id %}">
-                                    {{ item.product.name }}
-                                </a>
-                            </td>
-                            <td class="text-right">x {{ item.quantity }}</td>
-                            <td class="text-right">{{ item.product.price|floatformat:2 }} ₽</td>
-                            <td class="text-center">
-                                <button type="button" onclick="removeFromCart({{ item.id }});" title="Удалить"
-                                    class="btn btn-danger btn-xs">
-                                    <i class="fa fa-times"></i>
-                                </button>
-                            </td>
+                            <td class="text-right"><strong>Промежуточный итог</strong></td>
+                            <td class="text-right">{{ cart.total_price|floatformat:2 }} ₽</td>
                         </tr>
-                        {% endfor %}
+                        <tr>
+                            <td class="text-right"><strong>Итого</strong></td>
+                            <td class="text-right"><strong>{{ cart.total_price|floatformat:2 }} ₽</strong></td>
+                        </tr>
                     </tbody>
                 </table>
-            </li>
-            <li>
-                <div class="text-right">
-                    <table class="table table-bordered">
-                        <tbody>
-                            <tr>
-                                <td class="text-right"><strong>Промежуточный итог</strong></td>
-                                <td class="text-right">{{ cart.total_price|floatformat:2 }} ₽</td>
-                            </tr>
-                            <tr>
-                                <td class="text-right"><strong>Итого</strong></td>
-                                <td class="text-right"><strong>{{ cart.total_price|floatformat:2 }} ₽</strong></td>
-                            </tr>
-                        </tbody>
-                    </table>
 
-                    
-                        
-                        <div class="text-right button-container">
-                            <div class="cart-button offer-btn">
-                                <a href="{% url 'checkout' %}" class="btn btn-success">
-                                    <strong>К оформлению заказа</strong>
-                                </a>
-                            </div>
-                        </div>
+                <div class="text-right button-container">
+                    <div class="cart-button offer-btn">
+                        <a href="{% url 'checkout' %}" class="btn btn-success">
+                            <strong>К оформлению заказа</strong>
+                        </a>
+                    </div>
                 </div>
-            </li>
-            {% else %}
-            <li>
-                <p class="text-center">Ваша корзина пуста!</p>
-            </li>
-            {% endif %}
-        </ul>
-    </div>
+            </div>
+        </li>
+        {% else %}
+        <li>
+            <p class="text-center">Ваша корзина пуста!</p>
+        </li>
+        {% endif %}
+    </ul>
+</div>

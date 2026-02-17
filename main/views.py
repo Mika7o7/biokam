@@ -15,9 +15,11 @@ from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
 from django.utils import timezone
 from django.core.mail import send_mail
+from django.views.decorators.csrf import csrf_exempt
 from django.db import models
 from yookassa import Configuration, Payment
 import random
+import string 
 import json
 import uuid
 import os
@@ -129,7 +131,7 @@ class VerifyEmailView(FormView):
 
 # Main Page.
 def index(request):
-    return render(request, 'main/index.html')
+    return render(request, 'main/index3.html')
 
 
 
@@ -272,7 +274,6 @@ def affiliate_dashboard(request):
 
 
 # ================== STORE PAGE ===================
-
 def category_detail(request, slug):
     category = get_object_or_404(Category, slug=slug)
     products = Product.objects.filter(category=category).order_by('-id')  # новые сверху
@@ -307,12 +308,10 @@ def product_detail(request, pk):
 
 
 # ================== CART ===================
+from .utils import get_cart
 # cart section
-@login_required
-@login_required(login_url='login') 
-@login_required(login_url='login')
 def cart_detail(request):
-    cart, created = Cart.objects.get_or_create(user=request.user)
+    cart = get_cart(request)
     
     context = {
         'cart': cart,
@@ -322,18 +321,16 @@ def cart_detail(request):
     return render(request, 'store/cart_detail.html', context)
 
 # Добавление товара в корзину
-@login_required
-@login_required
 def add_to_cart(request, product_id):
     if request.method != 'POST':
         return JsonResponse({'success': False, 'error': 'Неверный метод'})
 
     product = get_object_or_404(Product, pk=product_id)
-    
-    if request.user.is_authenticated:
-        cart, _ = Cart.objects.get_or_create(user=request.user)
-    else:
-        cart, _ = Cart.objects.get_or_create(user=None)  # для гостей
+    cart = get_cart(request)
+    # if request.user.is_authenticated:
+    #     cart, _ = Cart.objects.get_or_create(user=request.user)
+    # else:
+    #     cart, _ = Cart.objects.get_or_create(user=None)  # для гостей
     
     # Получаем количество из тела запроса (JSON)
     data = json.loads(request.body)
@@ -344,7 +341,13 @@ def add_to_cart(request, product_id):
         product=product,
         defaults={'quantity': quantity}
     )
-    
+    # Добавьте эту отладку
+    print(f"\n=== add_to_cart ===")
+    print(f"Cart ID: {cart.id}")
+    print(f"Cart session_key: {cart.session_key}")
+    print(f"Request session_key: {request.session.session_key}")
+    print(f"User: {request.user}")
+
     if not created:
         cart_item.quantity += quantity
         cart_item.save()
@@ -367,28 +370,59 @@ def add_to_cart(request, product_id):
     })
 
 # Удаление товара из корзины
-@login_required
 @require_POST
 def remove_from_cart(request, item_id):
-    item = get_object_or_404(CartItem, id=item_id)
-    item = get_object_or_404(CartItem, id=item_id, cart__user=request.user)
+    try:
+        cart = get_cart(request)
+        
+        # Удаляем товар
+        try:
+            cart_item = CartItem.objects.get(id=item_id, cart=cart)
+            cart_item.delete()
+        except CartItem.DoesNotExist:
+            return JsonResponse({
+                'success': False,
+                'error': 'Товар не найден в корзине'
+            })
+
+        # Получаем обновленные данные
+        items = cart.items.select_related('product').all()
+        total_items = items.count()
+        total_price = float(cart.total_price)
+
+        # Подготавливаем данные для шаблона
+        cart_items = []
+        for item in items:
+            if item.product:
+                cart_items.append({
+                    'id': item.id,
+                    'product': item.product,
+                    'quantity': item.quantity
+                })
+
+        # ВАЖНО: Рендерим ПОЛНЫЙ HTML корзины (как в add_to_cart)
+        cart_html = render_to_string('main/partials/cart_dropdown.html', {
+            'cart_items': cart_items,
+            'total': total_price,
+            'cart': cart,
+            'user': request.user
+        }, request=request)
+
+        return JsonResponse({
+            'success': True,
+            'cart_html': cart_html,  # ← Полный HTML всего блока корзины
+            'cart_total_items': total_items,
+            'cart_total_price': total_price
+        })
+        
+    except Exception as e:
+        print(f"Error in remove_from_cart: {e}")
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        })
     
-    cart = item.cart
-    item.delete()  # Удаляем товар
-
-    # Рендерим свежий HTML блока корзины
-    cart_html = render_to_string('main/partials/cart_dropdown_remove.html', {
-        'cart': cart,
-        'request': request,
-        'user': request.user
-    }, request=request)
-
-    return JsonResponse({
-        'success': True,
-        'cart_html': cart_html
-    })
-
-
+    
 def validate_phone(phone):
     """Валидация российского телефона с учетом форматирования"""
     print(phone)
@@ -412,9 +446,10 @@ def validate_phone(phone):
 
 # ================== ORDER ===================
 # Оформление заказа (пока просто заглушка)
-@login_required
 def checkout(request):
-    cart = get_object_or_404(Cart, user=request.user)
+    # Получаем корзину через get_cart (как во всех других view)
+    cart = get_cart(request)
+    
     if not cart.items.exists():
         messages.warning(request, "Ваша корзина пуста")
         return redirect('cart_detail')
@@ -430,6 +465,7 @@ def checkout(request):
         last_name = request.POST.get('last_name', '').strip()
         address = request.POST.get('address', '').strip()
         phone = request.POST.get('phone', '').strip()
+        email = request.POST.get('email', '').strip()  # Добавляем email
 
         # AJAX-проверка купона
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -460,8 +496,9 @@ def checkout(request):
                 return JsonResponse({'success': False, 'message': 'Укажите ваше имя'})
             if not address:
                 return JsonResponse({'success': False, 'message': 'Укажите адрес доставки'})
+            if not email:
+                return JsonResponse({'success': False, 'message': 'Укажите email'})
             
-            # В проверке:
             if not validate_phone(phone):
                 return JsonResponse({'success': False, 'message': 'Некорректный номер телефона. Формат: +7 (999) 999-99-99'})
 
@@ -476,7 +513,72 @@ def checkout(request):
 
             total_price = subtotal - discount_amount
 
-            # Создаем заказ
+            # Если пользователь не авторизован - запускаем процесс регистрации
+            if not request.user.is_authenticated:
+                # Проверяем, существует ли пользователь с таким email
+                if User.objects.filter(email=email).exists():
+                    return JsonResponse({
+                        'success': False,
+                        'require_login': True,
+                        'message': 'Этот email уже зарегистрирован. Пожалуйста, войдите в аккаунт.'
+                    })
+                
+                # Сохраняем данные заказа в сессию
+                request.session['pending_order'] = {
+                    'first_name': first_name,
+                    'last_name': last_name,
+                    'address': address,
+                    'phone': phone,
+                    'email': email,
+                    'coupon_code': coupon_code,
+                    'total_price': float(total_price),
+                    'discount_amount': float(discount_amount),
+                }
+                
+                # Генерируем и сохраняем код подтверждения
+                verification_code = str(random.randint(100000, 999999))
+                request.session['verification_code'] = verification_code
+                request.session['verification_email'] = email
+                
+                # Сохраняем данные для регистрации
+                request.session['registration_data'] = {
+                    'email': email,
+                    'phone': phone,
+                    'first_name': first_name,
+                    'last_name': last_name,
+                    'address': address,
+                }
+                
+                # ОТПРАВЛЯЕМ КОД НА ПОЧТУ (вместо вывода в терминал)
+                try:
+                    send_mail(
+                        'Код подтверждения для регистрации',
+                        f'Здравствуйте!\n\nВаш код подтверждения: {verification_code}\n\n'
+                        f'Этот код необходимо ввести на сайте для завершения оформления заказа.\n'
+                        f'Если вы не запрашивали этот код, просто проигнорируйте это письмо.',
+                        settings.DEFAULT_FROM_EMAIL,
+                        [email],
+                        fail_silently=False,
+                    )
+                    
+                    return JsonResponse({
+                        'success': True,
+                        'require_verification': True,
+                        'message': 'Код подтверждения отправлен на ваш email'
+                    })
+                    
+                except Exception as e:
+                    # В случае ошибки отправки email, выводим код в терминал для тестирования
+                    print(f"Ошибка отправки email: {e}")
+                    print(f"Код подтверждения для {email}: {verification_code}")
+                    
+                    return JsonResponse({
+                        'success': True,
+                        'require_verification': True,
+                        'message': 'Код подтверждения (тестовый режим): ' + verification_code
+                    })
+
+            # Для авторизованных пользователей - создаем заказ сразу
             order = Order.objects.create(
                 user=request.user,
                 total_price=total_price,
@@ -484,10 +586,19 @@ def checkout(request):
                 phone=phone,
                 coupon=coupon,
                 discount_amount=discount_amount,
-                status='new'
+                status='new',
+                first_name=first_name,
+                last_name=last_name
             )
+            
+            # Сохраняем данные в профиль пользователя
+            request.user.first_name = first_name
+            request.user.last_name = last_name
+            request.user.address = address
+            request.user.phone = phone
+            request.user.save()
 
-            # Добавляем товары
+            # Добавляем товары в заказ
             for item in cart.items.all():
                 OrderItem.objects.create(
                     order=order,
@@ -498,14 +609,6 @@ def checkout(request):
 
             # Очищаем корзину
             cart.items.all().delete()
-            cart.save()
-            
-            # Сохраняем данные в профиль пользователя
-            request.user.first_name = first_name
-            request.user.last_name = last_name
-            request.user.address = address
-            request.user.phone = phone
-            request.user.save()
 
             return JsonResponse({
                 'success': True,
@@ -522,14 +625,150 @@ def checkout(request):
         'discount_amount': discount_amount,
         'total': subtotal - discount_amount,
         'applied_coupon_code': applied_coupon_code,
-        'user_first_name': request.user.first_name or '',
-        'user_last_name': request.user.last_name or '',
-        'user_address': request.user.address or '',
-        'user_phone': request.user.phone or '',
     }
+    
+    # Добавляем данные пользователя только если он авторизован
+    if request.user.is_authenticated:
+        context.update({
+            'user_first_name': request.user.first_name or '',
+            'user_last_name': request.user.last_name or '',
+            'user_address': request.user.address or '',
+            'user_phone': request.user.phone or '',
+            'user_email': request.user.email or '',
+        })
+    else:
+        context.update({
+            'user_first_name': '',
+            'user_last_name': '',
+            'user_address': '',
+            'user_phone': '',
+            'user_email': '',
+        })
+    
     return render(request, 'store/cart_detail.html', context)
 
-
+@csrf_exempt
+def verify_order_code(request):
+    """Проверяет код подтверждения и создает пользователя"""
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': 'Неверный метод'})
+    
+    try:
+        data = json.loads(request.body)
+        entered_code = data.get('code')
+        
+        # Получаем данные из сессии
+        verification_code = request.session.get('verification_code')
+        verification_email = request.session.get('verification_email')
+        registration_data = request.session.get('registration_data')
+        pending_order = request.session.get('pending_order')
+        
+        if not verification_code or not verification_email or not registration_data or not pending_order:
+            return JsonResponse({
+                'success': False, 
+                'message': 'Сессия истекла. Пожалуйста, начните оформление заказа заново.'
+            })
+        
+        if entered_code != verification_code:
+            return JsonResponse({
+                'success': False,
+                'message': 'Неверный код подтверждения'
+            })
+        
+        # Генерируем случайный пароль
+        password = ''.join(random.choices(string.ascii_letters + string.digits, k=8))
+        
+        # Создаем пользователя
+        user = User.objects.create_user(
+            email=verification_email,
+            phone=registration_data['phone'],
+            password=password,
+            first_name=registration_data['first_name'],
+            last_name=registration_data.get('last_name', ''),
+            address=registration_data.get('address', ''),
+            is_active=True,
+            is_email_verified=True,
+        )
+        
+        # Автоматически логиним пользователя
+        from django.contrib.auth import login
+        login(request, user)
+        
+        # Получаем корзину пользователя
+        from .utils import get_cart
+        cart = get_cart(request)
+        
+        # Создаем заказ сразу
+        order = Order.objects.create(
+            user=user,
+            total_price=pending_order['total_price'],
+            address=pending_order['address'],
+            phone=pending_order['phone'],
+            coupon=None,
+            discount_amount=pending_order['discount_amount'],
+            status='new',
+        )
+        
+        # Добавляем товары в заказ из корзины
+        for item in cart.items.all():
+            OrderItem.objects.create(
+                order=order,
+                product=item.product,
+                quantity=item.quantity,
+                price=item.product.price
+            )
+        
+        # Очищаем корзину
+        cart.items.all().delete()
+        
+        # ОТПРАВЛЯЕМ ДАННЫЕ НА ПОЧТУ
+        try:
+            from django.core.mail import send_mail
+            from django.conf import settings
+            
+            send_mail(
+                'Регистрация и заказ на сайте',
+                f'Здравствуйте, {user.first_name}!\n\n'
+                f'Вы успешно зарегистрировались на нашем сайте.\n\n'
+                f'Ваши данные для входа:\n'
+                f'Email: {user.email}\n'
+                f'Пароль: {password}\n\n'
+                f'Ваш заказ №{order.id} создан и принят в обработку.\n'
+                f'Сумма заказа: {order.total_price} ₽\n\n'
+                f'Спасибо за покупку!\n'
+                f'С уважением, администрация сайта.',
+                settings.DEFAULT_FROM_EMAIL,
+                [user.email],
+                fail_silently=False,
+            )
+        except Exception as e:
+            # Если не удалось отправить email, просто логируем ошибку
+            print(f"Ошибка отправки email: {e}")
+        
+        # Очищаем данные из сессии
+        if 'verification_code' in request.session:
+            del request.session['verification_code']
+        if 'verification_email' in request.session:
+            del request.session['verification_email']
+        if 'registration_data' in request.session:
+            del request.session['registration_data']
+        if 'pending_order' in request.session:
+            del request.session['pending_order']
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Регистрация успешна',
+            'order_id': order.id,
+            'total_price': float(order.total_price),
+            'user_id': user.id
+        })
+        
+    except Exception as e:
+        print(f"Error in verify_order_code: {e}")
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({'success': False, 'message': str(e)})
+    
 @login_required
 def order_success(request, order_id):
     """Страница успешной оплаты"""
@@ -537,29 +776,87 @@ def order_success(request, order_id):
     
     # Проверяем статус платежа в ЮKassa
     try:
-        # Получаем последний платеж для этого заказа
-        # (В идеале нужно хранить payment_id в заказе)
+        # Получаем payment_id из сессии (сохраняем при создании платежа)
         payment_id = request.session.get(f'payment_for_order_{order_id}')
         
+        print(f"Проверка статуса для заказа {order_id}")
+        print(f"payment_id из сессии: {payment_id}")
+        print(f"Текущий статус заказа: {order.status}")
+        
+        # Если заказ уже оплачен - просто показываем страницу
+        if order.status == 'paid':
+            messages.success(request, f'Заказ №{order_id} уже оплачен!')
+            context = {'order': order, 'title': 'Заказ оплачен'}
+            return render(request, 'store/order_success.html', context)
+        
+        # Пробуем найти платеж
+        payment = None
+        
         if payment_id:
-            # Запрашиваем статус платежа у ЮKassa
-            payment = Payment.find_one(payment_id)
+            # Если есть payment_id в сессии, ищем по нему
+            try:
+                from yookassa import Payment
+                payment = Payment.find_one(payment_id)
+                print(f"Найден платеж по ID: {payment.id}, статус: {payment.status}")
+            except Exception as e:
+                print(f"Ошибка при поиске платежа по ID: {e}")
+                payment = None
+        
+        if not payment:
+            # Если не нашли по ID, ищем по метаданным заказа
+            try:
+                from yookassa import Payment
+                payments = Payment.list({
+                    'metadata': {'order_id': str(order_id)}
+                })
+                
+                if payments and len(payments.items) > 0:
+                    payment = payments.items[0]
+                    print(f"Найден платеж по метаданным: {payment.id}, статус: {payment.status}")
+            except Exception as e:
+                print(f"Ошибка при поиске платежа по метаданным: {e}")
+        
+        if payment:
+            print(f"Статус платежа: {payment.status}")
             
             if payment.status == 'succeeded':
-                # Обновляем статус заказа
+                # Платеж успешен - обновляем статус заказа
                 order.status = 'paid'
                 order.save()
+                print(f"Заказ {order_id} обновлен на статус 'paid'")
                 
-                # Убираем payment_id из сессии
-                if f'payment_for_order_{order_id}' in request.session:
-                    del request.session[f'payment_for_order_{order_id}']
+                # Очищаем корзину пользователя
+                from .models import Cart
+                cart = Cart.objects.filter(user=request.user).first()
+                if cart:
+                    cart.items.all().delete()
+                    print(f"Корзина пользователя {request.user.id} очищена")
                 
                 messages.success(request, f'Оплата заказа №{order_id} прошла успешно!')
+                
+            elif payment.status == 'waiting_for_capture':
+                messages.info(request, 'Платеж обрабатывается. Статус обновится через несколько секунд.')
             else:
-                messages.warning(request, f'Статус платежа: {payment.status}. Мы уведомим вас об обновлениях.')
+                messages.warning(request, f'Статус платежа: {payment.status}')
+        else:
+            print(f"Платеж для заказа {order_id} не найден")
+            
+            # Для тестирования: если заказ в статусе pending_payment, 
+            # и прошло больше минуты - принудительно ставим paid
+            if order.status == 'pending_payment':
+                from datetime import timedelta
+                from django.utils import timezone
+                
+                if order.created_at < timezone.now() - timedelta(minutes=1):
+                    print(f"ТЕСТОВЫЙ РЕЖИМ: принудительно оплачиваем заказ {order_id}")
+                    order.status = 'paid'
+                    order.save()
+                    messages.success(request, f'Заказ №{order_id} оплачен (тестовый режим)!')
+        
     except Exception as e:
         print(f"Ошибка при проверке платежа: {e}")
-        # Можно оставить заказ как есть, администратор проверит вручную
+        import traceback
+        traceback.print_exc()
     
     context = {
         'order': order,
@@ -567,6 +864,7 @@ def order_success(request, order_id):
     }
     return render(request, 'store/order_success.html', context)
 
+@csrf_exempt  # Добавьте этот декоратор
 @require_POST
 @login_required
 def create_payment(request):
@@ -575,6 +873,7 @@ def create_payment(request):
         print("Заголовки:", dict(request.headers))
         print("Метод:", request.method)
         print("Content-Type:", request.content_type)
+        print("CSRF токен в заголовке:", request.headers.get('X-Csrftoken'))
         
         # Получаем данные
         if request.content_type == 'application/json':
@@ -621,6 +920,7 @@ def create_payment(request):
         print(f"Используем сумму: {amount}")
 
         # Создаем платеж в ЮKassa
+        import uuid
         idempotence_key = str(uuid.uuid4())
         
         payment_data = {
@@ -644,6 +944,7 @@ def create_payment(request):
 
         print(f"Данные для ЮKassa: {payment_data}")
         
+        from yookassa import Payment
         payment = Payment.create(payment_data, idempotence_key)
         
         # Обновляем статус заказа
@@ -668,7 +969,6 @@ def create_payment(request):
         print(traceback.format_exc())
         print("=== КОНЕЦ ОШИБКИ ===")
         return JsonResponse({'success': False, 'message': str(e)}, status=500)
-    
 
 
 import hashlib
@@ -751,34 +1051,7 @@ def yookassa_webhook(request):
     
 
 
-@require_POST
-@login_required
-def save_contact_info(request):
-    """Сохранить контактную информацию пользователя"""
-    try:
-        address = request.POST.get('address', '').strip()
-        phone = request.POST.get('phone', '').strip()
-        
-        if not address or not phone:
-            return JsonResponse({'success': False, 'message': 'Заполните все поля'})
-        
-        # Сохраняем в модель User
-        user = request.user
-        user.address = address
-        user.phone = phone
-        user.save()
-        
-        return JsonResponse({
-            'success': True, 
-            'message': 'Контактная информация сохранена',
-            'address': address,
-            'phone': phone
-        })
-    
-    except Exception as e:
-        print(f"Ошибка сохранения контактной информации: {e}")
-        return JsonResponse({'success': False, 'message': 'Ошибка сохранения'})
-    
+
 
 @require_POST
 @login_required
@@ -937,3 +1210,136 @@ def change_password_api(request):
             'success': False,
             'message': f'Ошибка при смене пароля: {str(e)}'
         })
+    
+def generate_robokassa_signature(*args, **kwargs):
+    """Генерирует подпись для Робокассы"""
+    password = settings.ROBOKASSA_PASSWORD2
+    parts = [str(arg) for arg in args]
+    return hashlib.md5(':'.join(parts).encode()).hexdigest()
+
+@login_required
+def create_robokassa_payment(request):
+    """Создает платеж через Робокассу"""
+    try:
+        data = json.loads(request.body)
+        order_id = data.get('order_id')
+        
+        order = get_object_or_404(Order, id=order_id, user=request.user)
+        
+        # Параметры для Робокассы
+        merchant_login = settings.ROBOKASSA_MERCHANT_LOGIN
+        out_sum = str(order.total_price)
+        inv_id = str(order.id)
+        description = f"Оплата заказа №{order.id}"
+        
+        # Для тестового режима
+        if settings.ROBOKASSA_TEST_MODE:
+            is_test = '1'
+        else:
+            is_test = '0'
+        
+        # Генерируем подпись (md5(Логин:Сумма:НомерЗаказа:Пароль#1))
+        signature = hashlib.md5(
+            f"{merchant_login}:{out_sum}:{inv_id}:{settings.ROBOKASSA_PASSWORD1}".encode()
+        ).hexdigest()
+        
+        # URL для отправки
+        if settings.ROBOKASSA_TEST_MODE:
+            payment_url = "http://test.robokassa.ru/Index.aspx"
+        else:
+            payment_url = "https://auth.robokassa.ru/Merchant/Index.aspx"
+        
+        # Параметры для формы
+        params = {
+            'MerchantLogin': merchant_login,
+            'OutSum': out_sum,
+            'InvId': inv_id,
+            'Description': description,
+            'SignatureValue': signature,
+            'IsTest': is_test,
+            'Encoding': 'utf-8',
+            'Culture': 'ru',
+        }
+        
+        # Обновляем статус заказа
+        order.status = 'pending_payment'
+        order.save()
+        
+        # Вместо JSON возвращаем HTML с формой для автоматического POST
+        form_html = f'''
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Перенаправление на оплату</title>
+        </head>
+        <body>
+            <form id="robokassa_form" action="{payment_url}" method="POST">
+                <input type="hidden" name="MerchantLogin" value="{merchant_login}">
+                <input type="hidden" name="OutSum" value="{out_sum}">
+                <input type="hidden" name="InvId" value="{inv_id}">
+                <input type="hidden" name="Description" value="{description}">
+                <input type="hidden" name="SignatureValue" value="{signature}">
+                <input type="hidden" name="IsTest" value="{is_test}">
+                <input type="hidden" name="Encoding" value="utf-8">
+                <input type="hidden" name="Culture" value="ru">
+            </form>
+            <script>document.getElementById('robokassa_form').submit();</script>
+        </body>
+        </html>
+        '''
+        
+        return HttpResponse(form_html)
+        
+    except Exception as e:
+        print(f"Ошибка в create_robokassa_payment: {e}")
+        return JsonResponse({'success': False, 'message': str(e)})
+
+@csrf_exempt
+def robokassa_result(request):
+    """Обработка результата оплаты (Result URL)"""
+    if request.method == 'POST':
+        data = request.POST
+    else:
+        data = request.GET
+    
+    # Получаем параметры
+    out_sum = data.get('OutSum')
+    inv_id = data.get('InvId')
+    signature = data.get('SignatureValue')
+    
+    # Проверяем подпись (md5(Сумма:НомерЗаказа:Пароль#2))
+    expected_signature = hashlib.md5(
+        f"{out_sum}:{inv_id}:{settings.ROBOKASSA_PASSWORD2}".encode()
+    ).hexdigest()
+    
+    if signature.lower() != expected_signature.lower():
+        return HttpResponse("bad sign", status=400)
+    
+    try:
+        order = Order.objects.get(id=inv_id)
+        order.status = 'paid'
+        order.save()
+        
+        # Очищаем корзину пользователя
+        cart = Cart.objects.filter(user=order.user).first()
+        if cart:
+            cart.items.all().delete()
+        
+        # Отвечаем Робокассе "OK" для подтверждения
+        return HttpResponse(f"OK{inv_id}")
+        
+    except Order.DoesNotExist:
+        return HttpResponse("order not found", status=404)
+
+def robokassa_success(request):
+    """Страница успешной оплаты (Success URL)"""
+    order_id = request.GET.get('InvId')
+    if order_id:
+        messages.success(request, f'Заказ №{order_id} успешно оплачен!')
+        return redirect('order_success', order_id=order_id)
+    return redirect('home')
+
+def robokassa_fail(request):
+    """Страница неудачной оплаты (Fail URL)"""
+    messages.error(request, 'Оплата не прошла. Пожалуйста, попробуйте снова.')
+    return redirect('checkout')

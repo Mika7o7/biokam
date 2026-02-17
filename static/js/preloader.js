@@ -1,31 +1,36 @@
-function preloadImages(urls, allImagesLoadedCallback){
-    var loadedCounter = 0;
-	var toBeLoadedNumber = urls.length;
-	var progressBar = document.querySelector('.preloader .progress .progress-value');
-	urls.forEach(function(url){
-		preloadImage(url, function(){
-			loadedCounter++;
-			loadedPercent = Math.round(loadedCounter/toBeLoadedNumber*100);
-			console.log('[App Info] loading ' + loadedPercent + '%...');
-			progressBar.style.width = loadedPercent + '%';
-			if(loadedCounter == toBeLoadedNumber){
-				allImagesLoadedCallback();
-			}
-		});
-	});
-	function preloadImage(url, anImageLoadedCallback){
-		var img = new Image();
-		img.onload = anImageLoadedCallback;
-		img.src = url;
-	}
+function preloadImages(urls, allImagesLoadedCallback) {
+    let loadedCounter = 0;
+    const toBeLoadedNumber = urls.length;
+    const progressBar = document.querySelector('.preloader .progress .progress-value');
+
+    function preloadImage(url, callback) {
+        const img = new Image();
+        img.onload = callback;
+        img.onerror = callback;               // ← важно! чтобы 404 не стопал прелоадер
+        img.src = url;
+    }
+
+    urls.forEach(url => {
+        preloadImage(url, () => {
+            loadedCounter++;
+            const loadedPercent = Math.round((loadedCounter / toBeLoadedNumber) * 100);
+            console.log('[App Info] loading ' + loadedPercent + '%...');
+            if (progressBar) progressBar.style.width = loadedPercent + '%';
+
+            if (loadedCounter === toBeLoadedNumber) {
+                allImagesLoadedCallback();
+            }
+        });
+    });
 }
 
-preloadImages([
-	'img/whale_1.png',
-	'img/whale_2.png',
-    'img/whale_3.png',
-	'img/stingray.jpg',
-], function(){
-    console.log('[App Info] loading completed.');
-    document.body.classList.add('loaded');
-});
+// Запуск
+if (window.preloadImagesList && window.preloadImagesList.length > 0) {
+    preloadImages(window.preloadImagesList, function() {
+        console.log('[App Info] loading completed.');
+        document.body.classList.add('loaded');
+    });
+} else {
+    console.warn('[App Info] No preload images defined');
+    document.body.classList.add('loaded');  // чтобы не висело вечно
+}

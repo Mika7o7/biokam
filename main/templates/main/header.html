@@ -1,11 +1,12 @@
 {% load static %}
-    <nav class="header_nav">
+
+    <!-- <nav class="header_nav">
         <div class="container">
             <div class="row">
                 <div class="left-nav">
                     <aside id="header-nav-left">
                         <div id="wdnavcmsheader">
-                            <!-- <div class="wdheader-service">Free shipping on all orders over $100</div> -->
+                            <div class="wdheader-service">Free shipping on all orders over $100</div>
                         </div>
 
                     </aside>
@@ -16,7 +17,7 @@
                         <div class="pull-left wd-language">
                             <form action="http://31.128.43.100/index.php?route=common/language/language" method="post"
                                 enctype="multipart/form-data" id="form-language">
-                                <!-- <div class="btn-group">
+                                <div class="btn-group">
                                     <button class="btn btn-link dropdown-toggle" data-toggle="dropdown">
                                         <span class="hidden-xs hidden-sm hidden-md">
 
@@ -35,14 +36,14 @@
                                                     alt="Russian" title="Russian" /> Russian</button>
                                         </li>
                                     </ul>
-                                </div> -->
+                                </div>
                                 <input type="hidden" name="code" value="" />
                                 <input type="hidden" name="redirect"
                                     value="http://31.128.43.100/index.php?route=account/login" />
                             </form>
                         </div>
 
-                        <!-- <div class="pull-left wd-currency">
+                        <div class="pull-left wd-currency">
                             <form action="http://31.128.43.100/index.php?route=common/currency/currency" method="post"
                                 enctype="multipart/form-data" id="form-currency">
                                 <div class="btn-group">
@@ -69,7 +70,7 @@
                                 <input type="hidden" name="redirect"
                                     value="http://31.128.43.100/index.php?route=account/login" />
                             </form>
-                        </div> -->
+                        </div>
 
                     </li>
 
@@ -93,12 +94,13 @@
                 </div>
             </div>
         </div>
-    </nav>
-    <div id="header_top" class="header_top">
+    </nav> -->
+
+    <div id="header_top" class="header_top tiffany_blue">
         <div class="container">
             <div class="row">
                 <div class="col-sm-4 header-logo">
-                    <div id="logo"><a href="{% url 'account' %}"><img
+                    <div id="logo"><a href="{% url 'category_detail' 'bady' %}"><img
                                 src="{% static 'img/favicon.svg'%}"
                                 style="width: 40px; height: 40px;"
                                 title="BIOKAM - Биокомплексы Камчатки" alt="BIOKAM - Биокомплексы Камчатки"
@@ -116,11 +118,11 @@
                                 <div class="wd-menu horizontal-menu wd-menu-bar" id="wd-menu-4167">
                                     <ul class="ul-top-items">
                                         {% for category in categories %}
-                                        <li class="li-top-item">
+                                        <!-- <li class="li-top-item">
                                             <a class="a-top-link" href="{% url 'category_detail' category.slug %}">
                                                 <span>{{ category.name }}</span>
                                             </a>
-                                        </li>
+                                        </li> -->
                                         {% empty %}
                                         <li>Категории не найдены</li>
                                         {% endfor %}
@@ -149,10 +151,10 @@
                                     </div>
                                     <span id="cart-total">
                                         <span class="cart_heading">Корзина : </span>
-                                        {% if user.is_authenticated and user.cart %}
-                                        <span class="item-count">{{ user.cart.items.count|default:0 }}</span>
+                                        {% if cart and cart.items.exists %}
+                                        <span class="item-count">{{ cart.items.count }}</span>
                                         <span class="mycart">Предметы</span>
-                                        <span class="price">{{ user.cart.total_price|floatformat:2 }} ₽</span>
+                                        <span class="price">{{ cart.total_price|floatformat:2 }} ₽</span>
                                         {% else %}
                                         <span class="item-count">0</span>
                                         <span class="mycart">Предметы</span>
@@ -163,11 +165,11 @@
                             </button>
                     
                             <ul class="dropdown-menu pull-right cart-menu">
-                                {% if user.is_authenticated and user.cart and user.cart.items.exists %}
+                                {% if cart and cart.items.exists %}
+                                {% for item in cart.items.all %}
                                 <li>
                                     <table class="table table-striped">
                                         <tbody>
-                                            {% for item in user.cart.items.all %}
                                             <tr>
                                                 <td class="text-center">
                                                     {% if item.product.image %}
@@ -176,8 +178,7 @@
                                                             title="{{ item.product.name }}" width="40">
                                                     </a>
                                                     {% else %}
-                                                    <img src="{% static 'images/no-image.jpg' %}" alt="Нет изображения"
-                                                         width="40">
+                                                    <img src="{% static 'images/no-image.jpg' %}" alt="Нет изображения" width="40">
                                                     {% endif %}
                                                 </td>
                                                 <td class="text-left">
@@ -188,32 +189,32 @@
                                                 <td class="text-right">x {{ item.quantity }}</td>
                                                 <td class="text-right">{{ item.product.price|floatformat:2 }} ₽</td>
                                                 <td class="text-center">
-                                                    <button type="button" onclick="removeFromCart({{ item.id }});"  title="Удалить"
+                                                    <button type="button" onclick="removeFromCart({{ item.id }});" title="Удалить"
                                                         class="btn btn-danger btn-xs">
                                                         <i class="fa fa-times"></i>
                                                     </button>
                                                 </td>
                                             </tr>
-                                            {% endfor %}
                                         </tbody>
                                     </table>
                                 </li>
-                    
+                                {% endfor %}
+                            
                                 <li>
                                     <div class="text-right">
                                         <table class="table table-bordered">
                                             <tbody>
                                                 <tr>
                                                     <td class="text-right"><strong>Промежуточный итог</strong></td>
-                                                    <td class="text-right">{{ user.cart.total_price|floatformat:2 }} ₽</td>
+                                                    <td class="text-right">{{ cart.total_price|floatformat:2 }} ₽</td>
                                                 </tr>
                                                 <tr>
                                                     <td class="text-right"><strong>Итого</strong></td>
-                                                    <td class="text-right"><strong>{{ user.cart.total_price|floatformat:2 }} ₽</strong></td>
+                                                    <td class="text-right"><strong>{{ cart.total_price|floatformat:2 }} ₽</strong></td>
                                                 </tr>
                                             </tbody>
                                         </table>
-                    
+                            
                                         <div class="text-right button-container">
                                             <div class="cart-button offer-btn">
                                                 <a href="{% url 'checkout' %}" class="btn btn-success">

@@ -40,22 +40,6 @@
                     <div class="product-detail-left">
                         <h3 class="product-title">{{ product.name }}</h3>
 
-                        <!-- Рейтинг -->
-                        <div class="rating-wrapper">
-                            {% for i in "12345" %}
-                            {% if forloop.counter <= product.average_rating|floatformat:"0" %} <span
-                                class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i></span>
-                                {% else %}
-                                <span class="fa fa-stack"><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                {% endif %}
-                                {% endfor %}
-                                <a href="#tab-review" class="review-count">
-                                    Отзывы: {{ product.review_count }}
-                                </a>
-                                <a href="#tab-review" class="write-review">
-                                    <i class="fa fa-pencil"></i> Оставить отзыв
-                                </a>
-                        </div>
 
                         <!-- Краткие характеристики -->
                         <div class="description">
@@ -137,7 +121,6 @@
                     {% if product.certificates.exists %}
                     <li><a href="#tab-certificates" data-toggle="tab">Сертификаты</a></li>
                     {% endif %}
-                    <li><a href="#tab-review" data-toggle="tab">Отзывы ({{ product.review_count }})</a></li>
                 </ul>
 
                 <div class="tab-content">

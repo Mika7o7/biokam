@@ -1,9 +1,9 @@
 {% load static %}
-{% if user.is_authenticated and user.cart and user.cart.items.exists %}
+{% if cart and cart.items.exists %}
 <li>
     <table class="table table-striped">
         <tbody>
-            {% for item in user.cart.items.all %}
+            {% for item in cart.items.all %}
             <tr>
                 <td class="text-center">
                     {% if item.product.image %}
@@ -39,11 +39,11 @@
             <tbody>
                 <tr>
                     <td class="text-right"><strong>Промежуточный итог</strong></td>
-                    <td class="text-right">{{ user.cart.total_price|floatformat:2 }} ₽</td>
+                    <td class="text-right">{{ cart.total_price|floatformat:2 }} ₽</td>
                 </tr>
                 <tr>
                     <td class="text-right"><strong>Итого</strong></td>
-                    <td class="text-right"><strong>{{ user.cart.total_price|floatformat:2 }} ₽</strong></td>
+                    <td class="text-right"><strong>{{ cart.total_price|floatformat:2 }} ₽</strong></td>
                 </tr>
             </tbody>
         </table>

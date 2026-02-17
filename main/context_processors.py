@@ -1,6 +1,9 @@
-from .models import Category, Banner
 from django.utils import timezone
 from django.db import models
+
+from .utils import get_cart
+from .models import Category, Banner
+
 
 def categories_processor(request):
     return {
@@ -22,3 +25,13 @@ def account_sidebar_banners(request):
         
         return {'account_sidebar_banners': banners}
     return {'account_sidebar_banners': []}
+
+
+def cart_processor(request):
+    """
+    Добавляет корзину во все шаблоны.
+    Работает как для авторизованных, так и для анонимных пользователей.
+    """
+    return {
+        'cart': get_cart(request)
+    }

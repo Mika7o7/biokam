@@ -3,13 +3,11 @@
 
 
 {% block content %}
-<div class="content-top-breadcum"></div>
 <div class="container">
     <ul class="breadcrumb">
-        <li><a href="http://31.128.43.100/index.php?route=common/home"><i class="fa fa-home"></i></a></li>
-        <li><a href="http://31.128.43.100/index.php?route=account/account">Личный кабинет</a></li>
+        <li><a href="{% url 'account' %}"><i class="fa fa-home"></i></a></li>
+        <li><a href="{% url 'account' %}">Личный кабинет</a></li>
     </ul>
-</div>
 </div>
 <div id="account-account" class="container">
 
@@ -18,7 +16,7 @@
         <!-- Вставляем сайдбар -->
         {% include 'main/account_sidebar.html' %}
 
-        <div id="content" class="col-sm-9">
+        <div id="content" class="col-sm-9" style="border: none;">
             <h2>Личный кабинет</h2>
             <ul class="list-unstyled">
                 <li><a href="{% url 'account_edit' %}">Редактировать контактную информацию</a>

@@ -3,7 +3,6 @@
 
 
 {% block content %}
-<div class="content-top-breadcum">
     <div class="container">
         <ul class="breadcrumb">
             <li><a href="{% url 'home' %}"><i class="fa fa-home"></i></a></li>
@@ -11,7 +10,6 @@
             <li><a href="{% url 'account_order_history' %}">История заказов</a></li>
         </ul>
     </div>
-</div>
 <div id="account-order" class="container">
 
     <div class="row">
@@ -137,7 +135,7 @@
         
                 <div class="card-footer">
                     <div class="d-flex justify-content-between">
-                        <a href="{% url 'account' %}" class="btn btn-outline-secondary">
+                        <a href="{% url 'account' %}" class="btn btn-outline-secondary tiffany_blue_btn">
                             <i class="bi bi-arrow-left me-1"></i> Назад в кабинет
                         </a>
                         {% if orders %}

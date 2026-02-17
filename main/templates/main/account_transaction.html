@@ -1,7 +1,6 @@
 {% extends 'main/base.html' %}
 {% load static %}
 
-
 {% block content %}
 <div class="content-top-breadcum">
     <div class="container">
@@ -12,71 +11,109 @@
         </ul>
     </div>
 </div>
+
 <div id="account-transaction" class="container">
-
     <div class="row">
-
+        <!-- Левая колонка (сайдбар) -->
         <aside id="column-left" class="col-sm-3 hidden-xs">
             <div class="box">
-                <div class="box-heading">Личный кабинет</div>
+                <div class="box-heading tiffany_blue">Личный кабинет</div>
                 <div class="list-group">
-        
-                    <a href="{% url 'account' %}" class="list-group-item">Личный
-                        кабинет </a>
-        
-                    <a href="{% url 'account_edit' %}" class="list-group-item">Изменить
-                        профиль</a> <a href="{% url 'account_change_password' %}"
-                        class="list-group-item">Пароль</a>
-        
-                    <a href="{% url 'account_change_address' %}" class="list-group-item">Список адресов</a>
-                    <a href="{% url 'account_change_bookmarks' %}" class="list-group-item">Закладки </a>
-                    <a href="{% url 'account_order_history' %}" class="list-group-item">История покупок </a>
-                    <a href="{% url 'account_recurring' %}" class="list-group-item">Регулярные платежи </a>
-                    <a href="{% url 'account_bonus_points' %}" class="list-group-item">Бонусные баллы </a>
-                    <a href="{% url 'account_return' %}" class="list-group-item">Возвраты </a>
-                    <a href="{% url 'account_transaction' %} " class="list-group-item">Транзакции </a>
-                    <a href="{% url 'account_newsletter' %}" class="list-group-item">Новостная рассылка </a>
-        
-                    <form method="post" action="{% url 'logout' %}">
+                    <a href="{% url 'account' %}"
+                        class="list-group-item {% if request.path == '/account/' %}active{% endif %}">
+                        <i class="bi bi-person me-2"></i> Личный кабинет
+                    </a>
+
+                    <a href="{% url 'account_edit' %}"
+                        class="list-group-item {% if request.path == '/account/edit/' %}active{% endif %}">
+                        <i class="bi bi-pencil me-2"></i> Изменить профиль
+                    </a>
+
+                    <a href="{% url 'account_change_password' %}"
+                        class="list-group-item {% if request.path == '/account/change_password/' %}active{% endif %}">
+                        <i class="bi bi-key me-2"></i> Пароль
+                    </a>
+
+                    <a href="{% url 'account_change_address' %}"
+                        class="list-group-item {% if request.path == '/account/change_address/' %}active{% endif %}">
+                        <i class="bi bi-geo-alt me-2"></i> Список адресов
+                    </a>
+
+                    <a href="{% url 'account_change_bookmarks' %}"
+                        class="list-group-item {% if request.path == '/account/change_bookmarks/' %}active{% endif %}">
+                        <i class="bi bi-bookmark me-2"></i> Закладки
+                    </a>
+
+                    <a href="{% url 'account_order_history' %}"
+                        class="list-group-item {% if request.path == '/account/order_history/' %}active{% endif %}">
+                        <i class="bi bi-bag me-2"></i> История покупок
+                    </a>
+
+                    <a href="{% url 'account_recurring' %}"
+                        class="list-group-item {% if request.path == '/account/recurring/' %}active{% endif %}">
+                        <i class="bi bi-arrow-repeat me-2"></i> Регулярные платежи
+                    </a>
+
+                    <a href="{% url 'account_bonus_points' %}"
+                        class="list-group-item {% if request.path == '/account/bonus_points/' %}active{% endif %}">
+                        <i class="bi bi-star me-2"></i> Бонусные баллы
+                    </a>
+
+                    <a href="{% url 'account_return' %}"
+                        class="list-group-item {% if request.path == '/account/return/' %}active{% endif %}">
+                        <i class="bi bi-arrow-return-left me-2"></i> Возвраты
+                    </a>
+
+                    <a href="{% url 'account_transaction' %}"
+                        class="list-group-item {% if request.path == '/account/transaction/' %}active{% endif %}">
+                        <i class="bi bi-credit-card me-2"></i> Транзакции
+                    </a>
+
+                    <a href="{% url 'account_newsletter' %}"
+                        class="list-group-item {% if request.path == '/account/newsletter/' %}active{% endif %}">
+                        <i class="bi bi-envelope me-2"></i> Новостная рассылка
+                    </a>
+
+                    <!-- Выход -->
+                    <form method="post" action="{% url 'logout' %}" class="logout-form">
                         {% csrf_token %}
-                        <button class="list-group-item" type="submit" style="background: transparent;">Выйти</button>
+                        <button type="submit" class="list-group-item logout-button">
+                            <i class="bi bi-box-arrow-right me-2"></i> Выйти
+                        </button>
                     </form>
-        
                 </div>
             </div>
-        
-            <div class="swiper-viewport">
+
+            <!-- Баннер -->
+            <div class="swiper-viewport mt-4">
                 <div id="banner" class="swiper-container single-banner">
                     <div class="swiper-wrapper">
                         <div class="swiper-slide">
                             <a href="#">
-                                <img src="{% static 'img/product_oe-removebg-preview.png' %}" alt="Get 15% OFF on Bedside Desk"
-                                    class="img-responsive">
+                                <img src="{% static 'img/product_oe-removebg-preview.png' %}"
+                                    alt="Get 15% OFF on Bedside Desk" class="img-responsive">
                                 <div class="left-banner">
                                     <div class="left-title">Get 15% OFF on Bedside Desk</div>
                                 </div>
                             </a>
-        
                         </div>
                     </div>
-                    <!-- If we need pagination -->
+                    <!-- Пагинация -->
                     <div class="swiper-pagination"></div>
                 </div>
             </div>
-            <script type="text/javascript">
-                $('#banner0').swiper({
-                    autoplay: 4000,
-                    pagination: '.swiper-pagination',  // If we need pagination
-                    autoplayDisableOnInteraction: false
-                });
-            </script>
-        
         </aside>
+
+        <!-- Основной контент -->
         <div id="content" class="col-sm-9">
-            <h1>Транзакции</h1>
-            <p>Ваш текущий баланс: <b>$0.00</b>.</p>
+            <h1 class="page-title-black">Транзакции</h1>
+
+            <div class="balance-info">
+                <p>Ваш текущий баланс: <b class="balance-amount">$0.00</b></p>
+            </div>
+
             <div class="table-responsive">
-                <table class="table table-bordered table-hover">
+                <table class="table table-custom">
                     <thead>
                         <tr>
                             <td class="text-left">Дата добавления</td>
@@ -85,23 +122,358 @@
                         </tr>
                     </thead>
                     <tbody>
-
                         <tr>
                             <td class="text-center" colspan="5">У вас нет транзакций!</td>
                         </tr>
                     </tbody>
-
                 </table>
             </div>
-            <div class="row">
-                <div class="col-sm-6 text-left"></div>
-                <div class="col-sm-6 text-right">Показано с 0 по 0 из 0 (всего страниц: 0)</div>
+
+            <div class="pagination-info">
+                <div class="row">
+                    <div class="col-sm-6 text-left"></div>
+                    <div class="col-sm-6 text-right">Показано с 0 по 0 из 0 (всего страниц: 0)</div>
+                </div>
             </div>
+
             <div class="buttons clearfix">
-                <div class="pull-right"><a href="{% url 'account' %}"
-                        class="btn btn-primary">Продолжить</a></div>
+                <div class="pull-right">
+                    <a href="{% url 'account' %}" class="btn btn-primary btn-custom">Продолжить</a>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    /* Общие стили для черного текста */
+    body,
+    p,
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    span,
+    div,
+    a,
+    td,
+    th,
+    li {
+        color: #000000 !important;
+    }
+
+    /* Стили для breadcrumb */
+    .breadcrumb {
+        background-color: transparent;
+        padding: 8px 0;
+        margin-bottom: 20px;
+    }
+
+    .breadcrumb a,
+    .breadcrumb li {
+        color: #000000 !important;
+    }
+
+    .breadcrumb li:last-child {
+        color: #000000 !important;
+        font-weight: 500;
+    }
+
+    .breadcrumb li+li:before {
+        color: #000000 !important;
+    }
+
+    /* Стили для сайдбара */
+    .box {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        overflow: hidden;
+        background-color: #ffffff;
+    }
+
+    .box-heading {
+        background-color: #f8f9fa;
+        padding: 12px 15px;
+        border-bottom: 1px solid #e0e0e0;
+        font-weight: 600;
+        color: #000000 !important;
+        text-align: center;
+        margin: 0;
+    }
+
+    /* Класс tiffany_blue для заголовка */
+    .tiffany_blue {
+        background-color: #A4E5E0 !important;
+        color: #000000 !important;
+        border-bottom: 1px solid #8acbc6 !important;
+    }
+
+    .list-group {
+        border: none;
+        margin: 0;
+    }
+
+    .list-group-item {
+        border: none;
+        border-radius: 0;
+        padding: 12px 15px 12px 18px !important;
+        color: #000000 !important;
+        transition: all 0.3s ease;
+        border-left: 3px solid transparent;
+        background-color: transparent;
+        width: 100%;
+        text-align: left;
+        font-size: 14px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+        box-sizing: border-box;
+    }
+
+    .list-group-item:hover {
+        background-color: #A4E5E0 !important;
+        color: #000000 !important;
+        border-left-color: #A4E5E0 !important;
+    }
+
+    .list-group-item.active {
+        background-color: #A4E5E0 !important;
+        color: #000000 !important;
+        border-left-color: #A4E5E0 !important;
+    }
+
+    /* Стили для иконок Bootstrap Icons */
+    .list-group-item i {
+        margin-right: 10px;
+        font-size: 16px;
+        width: 20px;
+        text-align: center;
+        color: #000000 !important;
+    }
+
+    /* Стили для формы выхода */
+    .logout-form {
+        margin: 0;
+        padding: 0;
+        display: block;
+        width: 100%;
+    }
+
+    .logout-button {
+        border: none;
+        border-left: 3px solid transparent !important;
+        font-family: inherit;
+        outline: none;
+        width: 100%;
+        padding: 12px 15px 12px 18px !important;
+        margin: 0;
+        background: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+    }
+
+    .logout-button:hover {
+        background-color: #A4E5E0 !important;
+        color: #000000 !important;
+        border-left-color: #A4E5E0 !important;
+    }
+
+    /* Стили для основного контента */
+    .page-title-black {
+        color: #000000 !important;
+        font-size: 24px;
+        font-weight: 600;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #A4E5E0;
+    }
+
+    .balance-info {
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        border: 1px solid #e0e0e0;
+    }
+
+    .balance-info p {
+        margin: 0;
+        font-size: 16px;
+        color: #000000 !important;
+    }
+
+    .balance-amount {
+        color: #000000 !important;
+        font-size: 18px;
+        margin-left: 5px;
+    }
+
+    /* Стили для таблицы */
+    .table-custom {
+        width: 100%;
+        margin-bottom: 20px;
+        border-collapse: collapse;
+        background-color: #ffffff;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .table-custom thead {
+        background-color: #f8f9fa;
+    }
+
+    .table-custom thead td {
+        padding: 12px 15px;
+        font-weight: 600;
+        color: #000000 !important;
+        border-bottom: 2px solid #A4E5E0;
+    }
+
+    .table-custom tbody td {
+        padding: 12px 15px;
+        color: #000000 !important;
+        border-top: 1px solid #e0e0e0;
+    }
+
+    .table-custom tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+
+    .table-custom .text-center[colspan="5"] {
+        padding: 30px;
+        font-style: italic;
+        color: #000000 !important;
+    }
+
+    /* Стили для пагинации */
+    .pagination-info {
+        margin-bottom: 20px;
+    }
+
+    .pagination-info .text-right {
+        color: #000000 !important;
+    }
+
+    /* Стили для кнопки */
+    .btn-custom {
+        background-color: #A4E5E0 !important;
+        color: #000000 !important;
+        border: 1px solid #8acbc6 !important;
+        padding: 10px 25px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .btn-custom:hover {
+        background-color: #8acbc6 !important;
+        color: #000000 !important;
+        border-color: #6bb5b0 !important;
+    }
+
+    /* Стили для баннеров */
+    .swiper-viewport {
+        overflow: hidden;
+        position: relative;
+        margin-top: 20px;
+    }
+
+    .single-banner {
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .left-banner {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+        padding: 15px;
+    }
+
+    .left-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: #ffffff !important;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Стили для Swiper */
+    .swiper-pagination-bullet {
+        width: 8px;
+        height: 8px;
+        background: rgba(255, 255, 255, 0.5);
+        opacity: 1;
+    }
+
+    .swiper-pagination-bullet-active {
+        background: #fff;
+    }
+
+    /* Мобильная версия */
+    @media (max-width: 767px) {
+        .hidden-xs {
+            display: none !important;
+        }
+
+        .page-title-black {
+            font-size: 20px;
+        }
+
+        .table-custom {
+            font-size: 13px;
+        }
+
+        .table-custom thead td,
+        .table-custom tbody td {
+            padding: 8px 10px;
+        }
+    }
+
+    /* Убираем белый фон у кнопки выхода */
+    .logout-button {
+        background-color: transparent !important;
+    }
+
+    /* Убираем лишние фоны */
+    .list-group-item,
+    .box,
+    .table-custom,
+    .balance-info {
+        background-color: #ffffff;
+    }
+</style>
+
+<!-- Подключаем Bootstrap Icons (если еще не подключены) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+<!-- Подключаем Swiper CSS и JS (если еще не подключены) -->
+<link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css">
+<script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+
+<script type="text/javascript">
+    // Инициализация Swiper для баннера
+    document.addEventListener('DOMContentLoaded', function () {
+        if (document.getElementById('banner')) {
+            new Swiper('#banner', {
+                autoplay: {
+                    delay: 4000,
+                    disableOnInteraction: false,
+                },
+                pagination: {
+                    el: '.swiper-pagination',
+                    clickable: true,
+                },
+                loop: true,
+            });
+        }
+    });
+</script>
 {% endblock %}

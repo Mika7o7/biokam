@@ -3,13 +3,11 @@
 
 
 {% block content %}
-<div class="content-top-breadcum"></div>
 <div class="container">
     <ul class="breadcrumb">
         <li><a href="{% url 'account' %}"><i class="fa fa-home"></i></a></li>
         <li><a href="{% url 'account' %}">Личный кабинет</a></li>
     </ul>
-</div>
 </div>
 <div id="account-edit" class="container">
 
@@ -51,7 +49,7 @@
                 </div>
                 <br>
                 <div class="mt-4">
-                    <button type="submit" class="btn btn-primary" id="save-profile-btn">
+                    <button type="submit" class="btn btn-primary tiffany_blue_btn" id="save-profile-btn">
                         Сохранить изменения
                     </button>
                     <a href="{% url 'account' %}" class="btn btn-outline-secondary ms-2">
