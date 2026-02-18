@@ -3,14 +3,12 @@
 
 
 {% block content %}
-<div class="content-top-breadcum">
     <div class="container">
         <ul class="breadcrumb">
             <li><a href="{% url 'home' %}"><i class="fa fa-home"></i></a></li>
             <li><a href="{% url 'cart_detail' %}">Корзина</a></li>
         </ul>
     </div>
-</div>
 <div id="checkout-cart" class="container">
 
 
@@ -201,7 +199,7 @@
             
             <!-- Кнопка сохранения -->
             <div class="mt-2 pt-3" style="margin-top: 2rem;">
-                <button type="button" class="btn btn-primary" id="save-contact-info">
+                <button type="button" class="btn btn-primary tiffany_blue_btn" id="save-contact-info">
                     <i class="bi bi-check-lg me-1"></i> Сохранить информацию для будущих заказов
                 </button>
             </div>
@@ -256,9 +254,9 @@
 
                 <div class="buttons clearfix">
                     <div class="pull-left">
-                        <a href="#" class="btn btn-default">Продолжить покупки</a>
+                        <a href="{% url 'category_detail' slug='bady' %}" class="btn btn-default">Продолжить покупки</a>
                     </div>
-                    <button type="button" class="pull-right btn btn-primary" id="pay-button">
+                    <button type="button" class="pull-right btn btn-primary tiffany_blue_btn" id="pay-button">
                         Оплатить заказ
                     </button>
                 </div>

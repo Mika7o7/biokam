@@ -3,15 +3,10 @@
 
 
 {% block content %}
-<div class="content-top-breadcum">
     <div class="container">
         <ul class="breadcrumb">
-            <li><a href="{% url 'home' %}"><i class="fa fa-home"></i></a></li>
-            <li><a href="http://31.128.43.100/index.php?route=product/category&amp;path=20">{{ category.name }}</a></li>
-            <li><a href="http://31.128.43.100/index.php?route=product/category&amp;path=20_61">{{ product.name }}</a></li>
         </ul>
     </div>
-</div>
 
 <div id="product-product" class="container">
     <div class="row">
@@ -77,13 +72,13 @@
                                     <button type="button" class="form-control pull-left btn-number btnminus" disabled="disabled"
                                         data-type="minus" data-field="quantity"></button>
                                     <input id="input-quantity" type="text" name="quantity" value="1" size="2"
-                                        class="form-control input-number pull-left">
+                                        class="form-control input-number pull-left baby_blue">
                                     <input type="hidden" name="product_id" value="{{ product.id }}">
                                     <button type="button" class="form-control pull-left btn-number btnplus" data-type="plus"
                                         data-field="quantity"></button>
                                 </div>
                                 
-                                <button type="button" id="button-cart" data-loading-text="Загрузка..." class="btn btn-primary btn-lg btn-block"
+                                <button type="button" id="button-cart" data-loading-text="Загрузка..." class="btn btn-primary btn-lg btn-block tiffany_blue_btn"
                                     onclick="addToCart({{ product.id }}, $('#input-quantity').val());">
                                     Купить
                                 </button>

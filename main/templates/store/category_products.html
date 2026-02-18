@@ -385,8 +385,8 @@ autoplayDisableOnInteraction: false
             </div>
             <div class="row cat_prod">
                 {% for product in products %}
-                <div class="product-layout product-grid col-lg-3 col-md-4 col-sm-4 col-xs-6 tiffany_blue">
-                    <div class="product-block product-thumb tiffany_blue">
+                <div class="product-layout product-grid col-lg-3 col-md-4 col-sm-4 col-xs-6" style="padding: 10px;">
+                    <div class="product-block product-thumb tiffany_blue" style="padding: 0;">
                         <div class="product-block-inner tiffany_blue">
                             <div class="image">
                                 <a href="{% url 'product_detail' product.id %}">
@@ -406,7 +406,7 @@ autoplayDisableOnInteraction: false
                             </div>
                 
                             <div class="product-details">
-                                <div class="caption">
+                                <div class="caption" style="padding: 5px 20px;">
                                     <!-- Категория (можно убрать, если не нужно) -->
                                     <span class="product-cat">{{ product.category.name|default:"Без категории" }}</span>
                 
@@ -426,8 +426,8 @@ autoplayDisableOnInteraction: false
                                         {{ product.price }} ₽
                                     </p>
                 
-                                    <div class="action">
-                                        <button type="button" class="cart_button" title="Купить">
+                                    <div class="action" style="padding: 5px 20px;">
+                                        <button type="button" class="cart_button " title="Купить">
                                         <a href="{% url 'product_detail' product.id %}">Купить</a>
                                         </button>
                                     </div>
