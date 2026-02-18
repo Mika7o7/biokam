@@ -587,8 +587,6 @@ def checkout(request):
                 coupon=coupon,
                 discount_amount=discount_amount,
                 status='new',
-                first_name=first_name,
-                last_name=last_name
             )
             
             # Сохраняем данные в профиль пользователя
