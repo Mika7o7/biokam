@@ -586,7 +586,7 @@ def checkout(request):
                 phone=phone,
                 coupon=coupon,
                 discount_amount=discount_amount,
-                status='new',
+                status='pending_payment',  # Статус - ожидает оплаты
             )
             
             # Сохраняем данные в профиль пользователя
@@ -596,7 +596,7 @@ def checkout(request):
             request.user.phone = phone
             request.user.save()
 
-            # Добавляем товары в заказ
+            # НЕ УДАЛЯЕМ КОРЗИНУ! Просто копируем товары в заказ
             for item in cart.items.all():
                 OrderItem.objects.create(
                     order=order,
@@ -604,15 +604,17 @@ def checkout(request):
                     quantity=item.quantity,
                     price=item.product.price
                 )
-
-            # Очищаем корзину
-            cart.items.all().delete()
+            
+            # Сохраняем ID заказа и товары в сессию для отслеживания
+            request.session['pending_order_id'] = order.id
+            request.session['order_items_count'] = cart.items.count()
 
             return JsonResponse({
                 'success': True,
                 'order_id': order.id,
-                'message': f'Заказ №{order.id} создан успешно!',
-                'total_price': float(total_price)
+                'message': f'Заказ №{order.id} создан, ожидает оплаты',
+                'total_price': float(total_price),
+                'requires_payment': True  # Флаг для фронтенда
             })
 
     # Рендер страницы
@@ -644,6 +646,7 @@ def checkout(request):
         })
     
     return render(request, 'store/cart_detail.html', context)
+
 
 @csrf_exempt
 def verify_order_code(request):
@@ -696,7 +699,7 @@ def verify_order_code(request):
         from .utils import get_cart
         cart = get_cart(request)
         
-        # Создаем заказ сразу
+        # Создаем заказ сразу со статусом ожидания оплаты
         order = Order.objects.create(
             user=user,
             total_price=pending_order['total_price'],
@@ -704,7 +707,7 @@ def verify_order_code(request):
             phone=pending_order['phone'],
             coupon=None,
             discount_amount=pending_order['discount_amount'],
-            status='new',
+            status='pending_payment',  # Статус - ожидает оплаты
         )
         
         # Добавляем товары в заказ из корзины
@@ -716,8 +719,11 @@ def verify_order_code(request):
                 price=item.product.price
             )
         
-        # Очищаем корзину
-        cart.items.all().delete()
+        # НЕ УДАЛЯЕМ КОРЗИНУ - она останется до оплаты
+        # cart.items.all().delete()  # Эту строку закомментировали
+        
+        # Сохраняем ID заказа в сессию
+        request.session['pending_order_id'] = order.id
         
         # ОТПРАВЛЯЕМ ДАННЫЕ НА ПОЧТУ
         try:
@@ -731,8 +737,9 @@ def verify_order_code(request):
                 f'Ваши данные для входа:\n'
                 f'Email: {user.email}\n'
                 f'Пароль: {password}\n\n'
-                f'Ваш заказ №{order.id} создан и принят в обработку.\n'
+                f'Ваш заказ №{order.id} создан и ожидает оплаты.\n'
                 f'Сумма заказа: {order.total_price} ₽\n\n'
+                f'После оплаты товары будут удалены из корзины.\n\n'
                 f'Спасибо за покупку!\n'
                 f'С уважением, администрация сайта.',
                 settings.DEFAULT_FROM_EMAIL,
@@ -740,7 +747,6 @@ def verify_order_code(request):
                 fail_silently=False,
             )
         except Exception as e:
-            # Если не удалось отправить email, просто логируем ошибку
             print(f"Ошибка отправки email: {e}")
         
         # Очищаем данные из сессии
@@ -755,10 +761,11 @@ def verify_order_code(request):
         
         return JsonResponse({
             'success': True,
-            'message': 'Регистрация успешна',
+            'message': 'Регистрация успешна, заказ ожидает оплаты',
             'order_id': order.id,
             'total_price': float(order.total_price),
-            'user_id': user.id
+            'user_id': user.id,
+            'requires_payment': True  # Флаг для фронтенда
         })
         
     except Exception as e:
@@ -986,10 +993,11 @@ def yookassa_webhook(request):
         signature = request.headers.get('HTTP_CONTENT_SIGNATURE', '')
         
         # ВАЖНО: Проверяем подпись
-        # Получите секретный ключ из настроек ЮKassa
         secret_key = settings.YOOKASSA_SECRET_KEY
         
         # Проверяем подпись
+        import hmac
+        import hashlib
         hash = hmac.new(
             secret_key.encode('utf-8'),
             body.encode('utf-8'),
@@ -1020,8 +1028,17 @@ def yookassa_webhook(request):
                     order.status = 'paid'
                     order.save()
                     
-                    # Можно отправить email пользователю
-                    # send_order_paid_email(order)
+                    # ТОЛЬКО ПОСЛЕ УСПЕШНОЙ ОПЛАТЫ удаляем товары из корзины пользователя
+                    if order.user:
+                        from .utils import get_cart
+                        cart = get_cart_for_user(order.user)
+                        if cart:
+                            # Очищаем корзину только после оплаты
+                            cart.items.all().delete()
+                            print(f"Корзина пользователя {order.user.email} очищена после оплаты заказа {order_id}")
+                    
+                    # Отправить email пользователю об успешной оплате
+                    send_order_paid_email(order)
                     
                 except Order.DoesNotExist:
                     print(f"Заказ {order_id} не найден")
@@ -1037,6 +1054,10 @@ def yookassa_webhook(request):
                     order = Order.objects.get(id=order_id)
                     order.status = 'canceled'
                     order.save()
+                    
+                    # Можно отправить email об отмене
+                    # send_order_canceled_email(order)
+                    
                 except Order.DoesNotExist:
                     print(f"Заказ {order_id} не найден")
         
@@ -1045,7 +1066,10 @@ def yookassa_webhook(request):
         
     except Exception as e:
         print(f"Ошибка в вебхуке: {e}")
+        import traceback
+        traceback.print_exc()
         return HttpResponse(status=500)
+
     
 
 

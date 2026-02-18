@@ -264,7 +264,26 @@
     </div>
 
     {% block extra_js %}{% endblock %}
+    
+    <!-- Скрипт для глазка -->
+    <script>
+        function togglePassword(id) {
+            const field = document.getElementById(id);
+            const wrapper = field.parentElement;
+            const openEye = wrapper.querySelector('.eye-open');
+            const closedEye = wrapper.querySelector('.eye-closed');
 
+            if (field.type === "password") {
+                field.type = "text";
+                openEye.style.display = 'none';
+                closedEye.style.display = 'block';
+            } else {
+                field.type = "password";
+                openEye.style.display = 'block';
+                closedEye.style.display = 'none';
+            }
+        }
+    </script>
 </body>
 
 </html>

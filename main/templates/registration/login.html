@@ -15,13 +15,33 @@
   {% csrf_token %}
 
   <div class="form-group">
-    <label for="id_email">Email</label>
-    {{ form.username }} <!-- Изменить в форме на email вместо username -->
+    <label for="id_username">Email</label>
+    <input type="email" name="username" id="id_username" class="form-control" placeholder="example@mail.com"
+      value="{{ form.username.value|default:'' }}" required>
+    {% if form.username.errors %}
+    <div class="text-danger">{{ form.username.errors.0 }}</div>
+    {% endif %}
   </div>
 
-  <div class="form-group">
+  <div class="form-group password-group">
     <label for="id_password">Пароль</label>
-    {{ form.password }}
+    <div class="password-wrapper">
+      <input type="password" name="password" id="id_password" class="form-control" placeholder="Введите пароль"
+        required>
+      <span class="toggle-password" onclick="togglePassword('id_password')">
+        <svg class="eye-icon eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+          <circle cx="12" cy="12" r="3" />
+        </svg>
+        <svg class="eye-icon eye-closed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          style="display:none;">
+          <path d="M2 2l20 20" />
+          <path d="M6.712 6.72C3.664 8.126 2 12 2 12s4-8 11-8c2.05 0 3.842.48 5.288 1.28" />
+          <path d="M9.01 9.02a3 3 0 0 0 4.982 4.982" />
+          <path d="M17.288 17.28C14.836 18.68 12 17 12 17s-4-8-11-8" />
+        </svg>
+      </span>
+    </div>
   </div>
 
   <button type="submit" class="btn-auth">Войти</button>
@@ -32,4 +52,150 @@
     <a href="{% url 'register' %}">Регистрация</a>
   </div>
 </form>
+
+<!-- Скрипт для глазка -->
+<script>
+  function togglePassword(id) {
+    const field = document.getElementById(id);
+    const wrapper = field.closest('.password-wrapper');
+    const openEye = wrapper.querySelector('.eye-open');
+    const closedEye = wrapper.querySelector('.eye-closed');
+
+    if (field.type === "password") {
+      field.type = "text";
+      openEye.style.display = 'none';
+      closedEye.style.display = 'block';
+    } else {
+      field.type = "password";
+      openEye.style.display = 'block';
+      closedEye.style.display = 'none';
+    }
+  }
+</script>
+
+<style>
+  .form-group {
+    margin-bottom: 20px;
+  }
+
+  .form-control {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 6px;
+    border: 1px solid #444;
+    background: #222;
+    color: white;
+    font-size: 16px;
+    box-sizing: border-box;
+  }
+
+  .form-control:focus {
+    border-color: #4dabf7;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(77, 171, 247, 0.25);
+  }
+
+  .btn-auth {
+    background: #4dabf7;
+    color: white;
+    padding: 14px 24px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    width: 100%;
+    transition: background 0.3s;
+  }
+
+  .btn-auth:hover {
+    background: #339af0;
+  }
+
+  .text-danger {
+    font-size: 13px;
+    margin-top: 6px;
+    color: #ff6b6b;
+  }
+
+  .form-text.text-muted {
+    font-size: 13px;
+    color: #aaa;
+    margin-top: 6px;
+  }
+
+  .password-group {
+    position: relative;
+  }
+
+  .password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .password-wrapper input {
+    padding-right: 45px !important;
+    width: 100%;
+  }
+
+  .toggle-password {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    width: 24px;
+    height: 24px;
+    color: #aaa;
+    transition: color 0.2s;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .toggle-password:hover {
+    color: #4dabf7;
+  }
+
+  .eye-icon {
+    width: 24px;
+    height: 24px;
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+
+  .eye-closed {
+    display: none;
+  }
+
+  .form-footer {
+    text-align: center;
+    margin-top: 20px;
+    color: #aaa;
+  }
+
+  .form-footer a {
+    color: #4dabf7;
+    text-decoration: none;
+  }
+
+  .form-footer a:hover {
+    text-decoration: underline;
+  }
+
+  .alert {
+    padding: 12px 16px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+  }
+
+  .alert-danger {
+    background: rgba(255, 107, 107, 0.2);
+    border: 1px solid #ff6b6b;
+    color: #ff6b6b;
+  }
+</style>
 {% endblock %}
