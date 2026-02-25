@@ -281,8 +281,8 @@
 			<div class="content-layer content-layer__centeralign content-layer__transform">
 				<h2 class="content-layer__header">Признанные иновации</h2>
 				<p class="content-layer__affirmation">ООО «БИОКАМ» является инноватором в производстве премиальных Биокомплексов
-					из редкого океанического сырья Камчатского краяю. Мы проводим тщательные лабораторные исследования и анализы
-					на базе ФГБУ ЦАС «КАМЧАТСКИЙ» уже более 25 лет, представляя интересы министерства сельского хозяйства
+					из редкого океанического сырья Камчатского края. Мы проводим тщательные лабораторные исследования и анализы
+					на базе ЦАС «КАМЧАТСКИЙ» уже более 25 лет, представляя интересы министерства сельского хозяйства
 					Российской Федерации.</p>
 			</div>
 			<div class="ambient">
@@ -886,8 +886,9 @@
 						<li>Профилактика и сопутствующая терапия органов ЖКТ: панкреатит, холецистит, болезнь Крона,
 							неспецифичный язвенный колит, кишечный полипоз.</li>
 						<!-- скрытые пункты Ocean Biotic -->
-						
-						<li class="hidden-item">Регулирует процесс восстановления дефицита ферментов в организме и обеспечивает их необходимое
+		
+						<li class="hidden-item">Регулирует процесс восстановления дефицита ферментов в организме и обеспечивает
+							их необходимое
 							количество.</li>
 						<li class="hidden-item">Подавляет патогенные микроорганизмы, включая Хеликобактер.</li>
 						<li class="hidden-item">Участвует в синтезе «протеина желтка» (вителлогенин) — главного компонента
@@ -918,12 +919,13 @@
 		
 			<!-- Одна общая кнопка -->
 			<div class="content-layer" style="padding-top: calc(var(--index) * 2); text-align: center;">
-				<button class="global-show-more-btn" type="button">Показать больше</button>
+				<button class="global-show-more-btn" type="button" data-target="ocian_biotic">Показать больше</button>
 			</div>
 		
 			<!-- Заказать сейчас -->
 			<div class="content-layer" style="padding-top: calc(var(--index) * 2); text-align: center;">
-				<a class="content-layer__button" style="text-decoration-line: none;" href="{% url 'category_detail' slug='bady' %}">Заказать сейчас</a>
+				<a class="content-layer__button" style="text-decoration-line: none;"
+					href="{% url 'category_detail' slug='bady' %}">Заказать сейчас</a>
 			</div>
 		
 			<!-- ambient -->
@@ -945,11 +947,11 @@
 				<div class="firefly"></div>
 			</div>
 		</section>
-
+		
 		<section class="content-scene" style="padding-top: calc(var(--index) * 8); --color: #53bac4; --shadow: #008a70;">
 		
 			<!-- Описание -->
-			<div class="content-layer content-layer__grid"
+			<div id="phormidium" class="content-layer content-layer__grid"
 				style="grid-template-areas: 'content-layer__image content-layer__description'">
 				<a href="{% url 'category_detail' slug='bady' %}">
 					<div class="content-layer__image">
@@ -1007,8 +1009,10 @@
 		
 			<!-- Кнопка -->
 			<div class="content-layer" style="padding-top: calc(var(--index) * 2); text-align: center;">
-				<button class="global-show-more-btn" style="background-color: #008a70; border-color: #04c7a3;" type="button">Показать больше</button>
+				<button class="global-show-more-btn" style="background-color: #008a70; border-color: #04c7a3;" type="button"
+					data-target="phormidium">Показать больше</button>
 			</div>
+		
 		
 		
 			<!-- Заказать -->
@@ -1036,10 +1040,10 @@
 			</div>
 		
 		</section>
-
+		
 		<section class="content-scene" style="padding-top: calc(var(--index) * 8); --color: #04995a; --shadow: #027d3b;">
 		
-			<div class="content-layer content-layer__grid"
+			<div id="nutrients" class="content-layer content-layer__grid"
 				style="grid-template-areas: 'content-layer__image content-layer__description'">
 				<a href="{% url 'category_detail' slug='bady' %}">
 					<div class="content-layer__image">
@@ -1062,11 +1066,11 @@
 		
 			<div class="content-layer content-layer__grid composition-block hidden-block"
 				style="grid-template-areas: 'content-layer__description content-layer__image'; margin-top: 32px;">
-
+		
 				<a href="{% url 'category_detail' slug='bady' %}">
-				<div class="content-layer__image">
-					<img src="{% static 'img/pill_nc.jpg' %}">
-				</div>
+					<div class="content-layer__image">
+						<img src="{% static 'img/pill_nc.jpg' %}">
+					</div>
 				</a>
 				<div class="content-layer__list">
 					<h3 class="content-layer__header">Состав</h3>
@@ -1082,7 +1086,8 @@
 		
 		
 			<div class="content-layer" style="padding-top: calc(var(--index) * 2); text-align: center;">
-				<button class="global-show-more-btn" style="background-color: #027d3b; border-color: #0ab65a;" type="button">Показать больше</button>
+				<button class="global-show-more-btn" style="background-color: #027d3b; border-color: #0ab65a;" type="button"
+					data-target="nutrients">Показать больше</button>
 			</div>
 		
 			<div class="content-layer" style="padding-top: calc(var(--index) * 2); text-align: center;">
@@ -1109,27 +1114,39 @@
 			</div>
 		
 		</section>
-
+		
 		<section class="content-scene" style="padding-top: calc(var(--index) * 12);">
 			<div class="content-layer content-layer__centeralign content-layer__transform">
 				<h2 class="content-layer__header">Консультация бесплатно</h2>
-				<p class="content-layer__affirmation">Обратитесь к нашим специалистам, чтобы подборать биокомплексы подходящие конкретно вам и извлечь максимальную пользу для вашего здоровья. Консультация совершенно бесплатна и ни к чему вас не обязывает.</p>
+				<p class="content-layer__affirmation">Обратитесь к нашим специалистам, чтобы подобрать биокомплексы подходящие
+					конкретно вам и извлечь максимальную пользу для вашего здоровья. Консультация совершенно бесплатна и ни к
+					чему вас не обязывает.</p>
 			</div>
 			<div class="ambient">
-				<div class="firefly"></div><div class="firefly"></div><div class="firefly"></div>
-				<div class="firefly"></div><div class="firefly"></div><div class="firefly"></div>
-				<div class="firefly"></div><div class="firefly"></div><div class="firefly"></div>
-				<div class="firefly"></div><div class="firefly"></div><div class="firefly"></div>
-				<div class="firefly"></div><div class="firefly"></div><div class="firefly"></div>
+				<div class="firefly"></div>
+				<div class="firefly"></div>
+				<div class="firefly"></div>
+				<div class="firefly"></div>
+				<div class="firefly"></div>
+				<div class="firefly"></div>
+				<div class="firefly"></div>
+				<div class="firefly"></div>
+				<div class="firefly"></div>
+				<div class="firefly"></div>
+				<div class="firefly"></div>
+				<div class="firefly"></div>
+				<div class="firefly"></div>
+				<div class="firefly"></div>
+				<div class="firefly"></div>
 			</div>
 		</section>
-
+		
 		<section class="content-scene" style="padding-top: calc(var(--index) * 6 + 50px); --color: #d6a448; --shadow: #8e5527;">
 		
 			<!-- Описание -->
 			<div id="immuno" class="content-layer content-layer__grid"
 				style="grid-template-areas: 'content-layer__image content-layer__description'">
-				
+		
 				<a href="{% url 'category_detail' slug='bady' %}">
 					<div class="content-layer__image">
 						<img src="{% static 'img/product_im.jpg' %}">
@@ -1185,7 +1202,8 @@
 		
 			<!-- Кнопка -->
 			<div class="content-layer" style="padding-top: calc(var(--index) * 2); text-align: center;">
-				<button class="global-show-more-btn" style="background-color: #8e5527; border-color: #d68039; --color: #d68039;" type="button">Показать больше</button>
+				<button class="global-show-more-btn" style="background-color: #8e5527; border-color: #d68039; --color: #d68039;"
+					type="button" data-target="immuno">Показать больше</button>
 			</div>
 		
 			<!-- Заказать -->
@@ -1213,19 +1231,19 @@
 			</div>
 		
 		</section>
-
+		
 		<section class="content-scene" style="padding-top: calc(var(--index) * 8); --color: #bc6c2a; --shadow: #823c21;">
 		
 			<!-- Описание -->
-			<div class="content-layer content-layer__grid"
+			<div id="omega3" class="content-layer content-layer__grid"
 				style="grid-template-areas: 'content-layer__image content-layer__description'">
-
+		
 				<a href="{% url 'category_detail' slug='bady' %}">
 					<div class="content-layer__image">
 						<img src="{% static 'img/product_dpa.jpg' %}">
 					</div>
 				</a>
-
+		
 				<div class="content-layer__list">
 					<h3 class="content-layer__header">Omega-3</h3>
 		
@@ -1268,7 +1286,8 @@
 		
 			<!-- Кнопка -->
 			<div class="content-layer" style="padding-top: calc(var(--index) * 2); text-align: center;">
-				<button class="global-show-more-btn" style="background-color: #823c21; border-color: #c75e34; --color: #c75e34;" type="button">Показать больше</button>
+				<button class="global-show-more-btn" style="background-color: #823c21; border-color: #c75e34; --color: #c75e34;"
+					type="button" data-target="omega3">Показать больше</button>
 			</div>
 		
 			<!-- Заказать -->
@@ -1276,7 +1295,7 @@
 				<a class="content-layer__button" style="text-decoration-line: none;"
 					href="{% url 'category_detail' slug='bady' %}">Заказать сейчас</a>
 			</div>
-
+		
 		
 			<div class="ambient">
 				<div class="firefly"></div>
@@ -1297,8 +1316,7 @@
 			</div>
 		
 		</section>
-
-
+		
 		<section class="content-scene" style="padding-top: calc(var(--index) * 8); --color: #bc6c2a; --shadow: #823c21;">
 		
 			<!-- Описание -->
@@ -1316,18 +1334,18 @@
 		
 					<ul class="content-layer__paragraph expandable-list">
 						<li>Экстренная помощь для приведения в
-						норму артериального давления и восстановление работы
-						сердечно-сосудистой системы. Используется при предынфарктном
-						и постинфарктном состояниях</li>
+							норму артериального давления и восстановление работы
+							сердечно-сосудистой системы. Используется при предынфарктном
+							и постинфарктном состояниях</li>
 		
 						<li class="hidden-item">оказывает противоопухолевое действие;</li>
 						<li class="hidden-item">обладает иммуностимулирующим и радиопротекторным
-						действием, в том числе при лучевой терапии, ускоряет процесс
-						регенерации тканей;</li>
+							действием, в том числе при лучевой терапии, ускоряет процесс
+							регенерации тканей;</li>
 						<li class="hidden-item">нормализует работу печени, эффективен при гепатитах,
-						циррозе печени;</li>
+							циррозе печени;</li>
 						<li class="hidden-item">восстанавливает эластичность сосудов, снижает уровень
-						холестерина в крови;</li>
+							холестерина в крови;</li>
 					</ul>
 				</div>
 			</div>
@@ -1354,7 +1372,7 @@
 			<!-- Кнопка -->
 			<div class="content-layer" style="padding-top: calc(var(--index) * 2); text-align: center;">
 				<button class="global-show-more-btn" style="background-color: #823c21; border-color: #c75e34; --color: #c75e34;"
-					type="button">Показать больше</button>
+					type="button" data-target="echino">Показать больше</button>
 			</div>
 		
 			<!-- Заказать -->
@@ -1383,6 +1401,47 @@
 			</div>
 		
 		</section>
+		
+		<!-- JavaScript для работы кнопок "Показать больше" -->
+		<script>
+			document.addEventListener('DOMContentLoaded', function () {
+				// Находим все кнопки с классом global-show-more-btn
+				const showMoreButtons = document.querySelectorAll('.global-show-more-btn');
+
+				showMoreButtons.forEach(button => {
+					button.addEventListener('click', function () {
+						// Получаем ID целевого блока из атрибута data-target
+						const targetId = this.getAttribute('data-target');
+
+						if (targetId) {
+							// Находим родительскую секцию
+							const section = this.closest('.content-scene');
+
+							if (section) {
+								// Находим в этой секции все скрытые элементы
+								const hiddenItems = section.querySelectorAll('.hidden-item');
+								const hiddenBlocks = section.querySelectorAll('.hidden-block');
+
+								// Показываем скрытые пункты списка
+								hiddenItems.forEach(item => {
+									item.classList.remove('hidden-item');
+									item.style.display = 'list-item';
+								});
+
+								// Показываем скрытые блоки (состав)
+								hiddenBlocks.forEach(block => {
+									block.classList.remove('hidden-block');
+									block.style.display = 'grid';
+								});
+
+								// Скрываем кнопку после нажатия
+								this.style.display = 'none';
+							}
+						}
+					});
+				});
+			});
+		</script>
 
 
 		<section class="content-scene" style="padding-top: calc(var(--index) * 14);">
